@@ -1,9 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 # Create your models here.
 #Usuario
-class Usuario(AbstractUser):
+class Usuario(models.Model):
     id_user= models.AutoField(primary_key=True)
+    nomb_user = models.CharField(max_length=100)
+    apell_user = models.CharField(max_length=100)
+    email_user = models.EmailField()
+    contra_user = models.CharField(max_length=20)
     cel_user = models.CharField(max_length=10)
     
 #Categoria
@@ -86,7 +89,7 @@ class DetalleTrans(models.Model):
         ('Banco Pichincha', 'Banco Pichincha'),
     ]
     id_detaltrans = models.AutoField(primary_key=True)
-    monto_trans = models.DecimalField()
+    monto_trans = models.DecimalField(max_digits=10, decimal_places=2)
     banco_transfe = models.CharField(max_length=20, choices=BANCOS, default='Banco Pichincha')
     codigo_compro = models.CharField(max_length=25)
     comentario = models.TextField()
