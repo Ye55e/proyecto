@@ -77,8 +77,8 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER':'postgres',
+        'NAME': 'Ajditec_bdd',
+        'USER': 'postgres',
         'PASSWORD':'8262025',
         'HOST':'localhost',
         'PORT':'5432',
@@ -104,6 +104,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Suponiendo que tu app se llama 'tienda' o similar
+AUTH_USER_MODEL = 'Ajditec.Usuario'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
