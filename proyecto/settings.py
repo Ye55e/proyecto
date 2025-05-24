@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,12 +77,12 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bdd_tecnopc',
-        'USER':'postgres',
-        'PASSWORD':'8262025',
-        'HOST':'localhost',
-        'PORT':'5432',
+        'ENGINE': 'django.db.backends.postgresql',  # Usamos PostgreSQL
+        'NAME': '',       # El nombre de tu base de datos existente
+        'USER': 'postgres',                       # El usuario de PostgreSQL
+        'PASSWORD': '8262025',                # La contraseña del usuario
+        'HOST': 'localhost',                        # Usualmente localhost
+        'PORT': '5432',                             # Puerto de PostgreSQL (por defecto es 5432)
     }
 }
 
@@ -121,6 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS=(os.path.join(BASE_DIR, 'proyecto/static'),)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
