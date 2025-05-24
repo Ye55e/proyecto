@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AJDICTEC- SISTEMA DE GESTION</title>
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <!-- Font Awesome Icon -->
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+
+    <!-- Custom stylesheet -->
+    <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div id="breadcrumb" class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="breadcrumb-header">AJDITEC</h3>
+                    <ul class="breadcrumb-tree">
+                        <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                        <li><a href="{% url 'nuevoCategoria' %}">Categorias</a></li>
+                        <li><a href="{% url 'nuevoProducto' %}">Productos</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="container-fluid">
+        {% block contenido %}
+        <!-- Aquí se presentará el contenido específico de cada página -->
+        {% endblock %}
+</div>

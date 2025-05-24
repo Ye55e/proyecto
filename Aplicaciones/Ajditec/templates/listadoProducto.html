@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AJDICTEC- CATEGORIAS</title>
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <!-- Font Awesome Icon -->
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+
+    <!-- Custom stylesheet -->
+    <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div id="breadcrumb" class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="breadcrumb-header">PRODUCTOS</h3>
+                    <ul class="breadcrumb-tree">
+                        <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                        <li><a href="{% url 'nuevoCategoria' %}">Categorias</a></li>
+                        <li class="active">Productos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<h3 class="text-center mb-4">LISTADO DE ROBOTS</h3>
+<div class="card  shadow">
+    
+    <div class="card-body">
+        
+        <table class="table table-bordered table-striped table-hover" id="tbl_robots">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NOMBRE ROBOT</th>
+                    <th>IMAGEN</th>
+                    <th>EQUIPO</th>
+                    <th>CATEGORIA</th>
+                    <th>ACCIONES</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for rob in robot %}
+                <tr>
+                    <td>{{ rob.id_rob }}</td>
+                    <td>{{ rob.nombre_rob }}</td>
+                    <td>
+                        {% if rob.foto_rob and rob.foto_rob.url %}
+                            <a  href="{{rob.foto_rob.url}}" target="_blank">
+                                <img src="{{rob.foto_rob.url}}" alt=""
+                                height="100px" width="100px">
+                            </a><br>
+                            <a download  href="{{rob.foto_rob.url}}" class="btn btn-success btn-sm me-2">
+                                Descargar
+                            </a>
+                        {% else %}
+                            <p>No hay foto disponible.</p>
+                        {% endif %}
+                    </td>
+                    <td>{{ rob.equipo_rob }}</td>
+                    <td>{{ rob.categoria_rob }}</td>
+                    
+                    <td>
+                        <a href="/editarRobot/{{ rob.id_rob }}" class="btn btn-warning btn-sm me-2">Editar</a> 
+                        <a onclick="return confirm('Esta seguro de eliminar permanentemente')" href="/eliminarRobot/{{ rob.id_rob }}"
+                        class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            let table = new DataTable('#tbl_robots', {
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+                },
+                dom: 'Bfrtip',
+                buttons: ['copy', 'excel', 'csv', 'pdf', 'print'],
+                layout: {
+                    topStart: {
+                        buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5', 'print']
+                    }
+                }
+            });
+        </script>
+    </div>
+</div>
+
+

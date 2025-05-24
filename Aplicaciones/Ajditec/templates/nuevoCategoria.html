@@ -1,0 +1,30 @@
+{% extends "./plantilla.html" %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">REGISTRO DE CATEGORIAS</h3>
+                    <form action="/guardarCategoria/" method="POST" id="frm_nuevo_categoria">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="tipo_cat" class="form-label"><b>TIPO DE CATEGORIA:</b></label>
+                            <input type="text" name="tipo_cat" id="tipo_cat" class="form-control" required>
+                        </div>
+
+                        
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="reset" class="btn btn-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
