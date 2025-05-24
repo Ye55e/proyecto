@@ -1,0 +1,192 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AJDICTEC- Finalizar Compra</title>
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <!-- Font Awesome Icon -->
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+
+    <!-- Custom stylesheet -->
+    <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <!-- MIGA DE PAN -->
+    <div id="breadcrumb" class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="breadcrumb-header">Finalizar Compra</h3>
+                    <ul class="breadcrumb-tree">
+                        <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                        <li class="active">Finalizar Compra</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /MIGA DE PAN -->
+
+    <!-- SECCIÓN PRINCIPAL -->
+    <div class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-7">
+                    <!-- Datos de Facturación -->
+                    <div class="billing-details">
+                        <div class="section-title">
+                            <h3 class="title">Datos de Facturación</h3>
+                        </div>
+                        <form method="post" action="{% url 'pago' %}">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <input class="input" type="text" name="nombre" placeholder="Nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <input class="input" type="text" name="apellidos" placeholder="Apellidos" required>
+                            </div>
+                            <div class="form-group">
+                                <input class="input" type="email" name="email" placeholder="Correo Electrónico" required>
+                            </div>
+                            <div class="form-group">
+                                <input class="input" type="text" name="direccion" placeholder="Dirección" required>
+                            </div>
+                            <div class="form-group">
+                                <input class="input" type="text" name="ciudad" placeholder="Ciudad" required>
+                            </div>
+                            <div class="form-group">
+                                <input class="input" type="text" name="codigo_postal" placeholder="Código Postal" required>
+                            </div>
+                            <div class="form-group">
+                                <input class="input" type="tel" name="telefono" placeholder="Teléfono" required>
+                            </div>
+                            
+                            <!-- Datos de Envío -->
+                            <div class="shiping-details">
+                                <div class="section-title">
+                                    <h3 class="title">Datos de Envío</h3>
+                                </div>
+                                <div class="input-checkbox">
+                                    <input type="checkbox" id="envio-diferente" name="envio_diferente">
+                                    <label for="envio-diferente">
+                                        <span></span>
+                                        ¿Enviar a una dirección diferente?
+                                    </label>
+                                    <div class="caption" id="campos-envio" style="display: none;">
+                                        <div class="form-group">
+                                            <input class="input" type="text" name="envio_nombre" placeholder="Nombre">
+                                        </div>
+                                        <div class="form-group">
+                                            <input class="input" type="text" name="envio_apellidos" placeholder="Apellidos">
+                                        </div>
+                                        <div class="form-group">
+                                            <input class="input" type="text" name="envio_direccion" placeholder="Dirección">
+                                        </div>
+                                        <div class="form-group">
+                                            <input class="input" type="text" name="envio_ciudad" placeholder="Ciudad">
+                                        </div>
+                                        <div class="form-group">
+                                            <input class="input" type="text" name="envio_codigo_postal" placeholder="Código Postal">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="order-notes">
+                                <textarea class="input" name="notas" placeholder="Notas adicionales sobre tu pedido"></textarea>
+                            </div>
+                    </div>
+                </div>
+
+                <!-- Resumen del Pedido -->
+                <div class="col-md-5 order-details">
+                    <div class="section-title text-center">
+                        <h3 class="title">Tu Pedido</h3>
+                    </div>
+                    <div class="order-summary">
+                        <div class="order-col">
+                            <div><strong>PRODUCTO</strong></div>
+                            <div><strong>TOTAL</strong></div>
+                        </div>
+                        <div class="order-products">
+                            {% for item in cart_items %}
+                            <div class="order-col">
+                                <div>{{ item.quantity }}x {{ item.product.name }}</div>
+                                <div>${{ item.total_price }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="order-col">
+                            <div>Envío</div>
+                            <div><strong>GRATIS</strong></div>
+                        </div>
+                        <div class="order-col">
+                            <div><strong>TOTAL</strong></div>
+                            <div><strong class="order-total">${{ cart_total }}</strong></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Método de Pago (solo transferencia) -->
+                    <div class="payment-method">
+                        <div class="input-radio">
+                            <input type="radio" name="pago" id="pago-1" value="transferencia" checked>
+                            <label for="pago-1">
+                                <span></span>
+                                Transferencia Bancaria
+                            </label>
+                            <div class="caption">
+                                <p>Realiza el pago directamente a nuestra cuenta bancaria. Los detalles de la transferencia se enviarán a tu correo electrónico.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-checkbox">
+                        <input type="checkbox" id="terminos" name="terminos" required>
+                        <label for="terminos">
+                            <span></span>
+                            He leído y acepto los <a href="#">términos y condiciones</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="primary-btn order-submit">Realizar Pedido</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery Plugins -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script>
+        // Mostrar/ocultar campos de envío
+        document.getElementById('envio-diferente').addEventListener('change', function() {
+            const shippingFields = document.getElementById('campos-envio');
+            if (this.checked) {
+                shippingFields.style.display = 'block';
+                // Hacer requeridos los campos de envío
+                document.querySelectorAll('#campos-envio input').forEach(input => {
+                    input.required = true;
+                });
+            } else {
+                shippingFields.style.display = 'none';
+                // Quitar el requerido de los campos de envío
+                document.querySelectorAll('#campos-envio input').forEach(input => {
+                    input.required = false;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
