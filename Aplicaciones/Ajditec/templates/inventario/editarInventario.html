@@ -1,0 +1,36 @@
+{% extends 'inicio.html' %}
+{% block title %}Editar Inventario{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Editar Inventario</h2>
+
+    <form method="POST" action="{% url 'editarInventario' inventario.id_inv %}" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="producto" class="form-label">Producto</label>
+            <select class="form-select" id="producto" name="producto" required disabled>
+                {% for producto in productos %}
+                    <option value="{{ producto.id_prod }}" {% if producto.id_prod == inventario.producto.id_prod %}selected{% endif %}>
+                        {{ producto.nom_prod }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="precunit_prod" class="form-label">Precio Unitario</label>
+            <input type="number" step="0.01" class="form-control" id="precunit_prod" name="precunit_prod" value="{{ inventario.precunit_prod }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="stock_actual" class="form-label">Stock Actual</label>
+            <input type="number" class="form-control" id="stock_actual" name="stock_actual" value="{{ inventario.stock_actual }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-success">Actualizar Inventario</button>
+        <a href="{% url 'listarInventario' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

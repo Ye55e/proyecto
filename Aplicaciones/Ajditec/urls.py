@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('pago/', views.pago_view, name='pago'),
     path('carrito/', views.carrito_view, name='carrito'),
+
     
     #Productos
     path('nuevoProducto/', views.nuevoProducto, name='nuevoProducto'),
@@ -17,6 +18,7 @@ urlpatterns = [
     path('editarCategoria/<id_categoria>',views.editarCategoria, name='editarCategoria'),
     path('procesarEdicionCategoria/',views.procesarEdicionCategoria, name='procesarEdicionCategoria'),
     path('ver-bd/', views.mostrar_base_datos),
+
 
 ]
 

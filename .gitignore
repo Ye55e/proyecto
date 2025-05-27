@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Variables de entorno y archivos ocultos
+.env
+*.DS_Store

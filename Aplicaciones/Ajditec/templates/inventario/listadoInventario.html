@@ -1,0 +1,40 @@
+{% extends 'inicio.html' %}
+{% block title %}Listado de Inventario{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Inventario Registrado</h2>
+    
+    <a href="{% url 'nuevoInventario' %}" class="btn btn-primary mb-3">+ Nuevo Inventario</a>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Precio Unitario</th>
+                <th>Stock Actual</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in inventarios %}
+            <tr>
+                <td>{{ inv.id_inv }}</td>
+                <td>{{ inv.producto.nom_prod }}</td>
+                <td>${{ inv.precunit_prod }}</td>
+                <td>{{ inv.stock_actual }}</td>
+                <td>
+                    <a href="{% url 'editarInventario' inv.id_inv %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'eliminarInventario' inv.id_inv %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este inventario?')">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No hay inventario registrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

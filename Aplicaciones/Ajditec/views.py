@@ -63,3 +63,4 @@ from django.db import connection
 
 def mostrar_base_datos(request):
     return HttpResponse(f"Base de datos en uso: {connection.settings_dict['NAME']}")
+
