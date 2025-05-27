@@ -1,0 +1,90 @@
+{% extends "plantilla.html" %}
+
+{% block contenido %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">EDITAR PRODUCTO</h3>
+                    <form action="/procesarEdicionProducto/" method="POST" id="frm_editar_producto" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Campo oculto con el ID del producto -->
+                        <input type="hidden" name="id_prod" value="{{ producto.id_prod }}">
+
+                        <div class="mb-3">
+                            <label for="nomb_prod" class="form-label"><b>NOMBRE DEL PRODUCTO:</b></label>
+                            <input type="text" name="nomb_prod" id="nomb_prod" class="form-control" required value="{{ producto.nomb_prod }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descrip_prod" class="form-label"><b>DESCRIPCION:</b></label>
+                            <textarea name="descrip_prod" id="descrip_prod" class="form-control" rows="3" required>{{ producto.descrip_prod }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="foto_prod" class="form-label"><b>IMAGEN PRODUCTO</b></label>
+                            <input type="file" name="foto_prod" id="foto_prod" class="form-control">
+
+                            {% if producto.img_prod %}
+                            <div class="mt-2">
+                                <p>Imagen actual:</p>
+                                <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}" style="max-width: 150px; height: auto;">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="estado" class="form-label"><b>ESTADO:</b></label>
+                            <select name="estado" id="estado" class="form-control" required>
+                                <option value="">Seleccione una opción</option>
+                                <option value="Agotado" {% if producto.esta_prod == "Agotado" %}selected{% endif %}>Agotado</option>
+                                <option value="Disponible" {% if producto.esta_prod == "Disponible" %}selected{% endif %}>Disponible</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_cat" class="form-label"><b>CATEGORIA:</b></label>
+                            <select name="id_cat" id="id_cat" class="form-select" required>
+                                <option value="" disabled>Seleccione una categoria</option>
+                                {% for cat in id_cat %}
+                                    <option value="{{ cat.id_cat }}" {% if producto.id_cat.id_cat == cat.id_cat %}selected{% endif %}>
+                                        {{ cat.id_cat }} - {{ cat.tipo_cat }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="submit" class="btn btn-primary">Actualizar</button>
+                            <a href="/listadoProducto/" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#foto_prod").fileinput({
+            language: 'es',
+            allowedFileExtensions: ["png", "jpg", "jpeg"],
+            showCaption: false,
+            dropZoneEnabled: true,
+            browseLabel: "Seleccionar archivo",
+            removeLabel: "Eliminar",
+            uploadLabel: "Subir",
+            dropZoneTitle: "Arrastra y suelta la imagen aquí",
+            maxFileSize: 2048,
+            maxFilesNum: 1,
+            initialPreviewAsData: true,
+            overwriteInitial: true,
+            @* Si quieres mostrar la imagen actual en la preview (requiere ajustes extra con fileinput), puedes agregarlo aquí *@
+        });
+    });
+</script>
+{% endblock %}
