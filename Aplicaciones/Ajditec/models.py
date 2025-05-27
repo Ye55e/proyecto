@@ -11,7 +11,7 @@ class Usuario(AbstractUser):
     cel_user = models.CharField(max_length=10, verbose_name="Celular")
     
     class Meta:
-        db_table = 'Usuario'
+        db_table = 'usuario'
     
 #Categoria
 class Categoria(models.Model):
@@ -19,7 +19,7 @@ class Categoria(models.Model):
     tipo_cat = models.CharField(max_length=100)
     
     class Meta:
-        db_table = 'Categoria'
+        db_table = 'categoria'
     
 #Producto 
 class Producto(models.Model):
@@ -38,7 +38,7 @@ class Producto(models.Model):
     categorias = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='productos' )
     
     class Meta:
-        db_table = 'Producto'
+        db_table = 'producto'
 
 #Inventario
 class Inventario(models.Model):
@@ -50,7 +50,7 @@ class Inventario(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='inventario',)
     
     class Meta:
-        db_table = 'Inventario'
+        db_table = 'inventario'
     
     def actualizar_stock(self, cantidad, tipo):
         if tipo == 'Entrada':
@@ -70,7 +70,7 @@ class Carrito(models.Model):
     productos = models.ManyToManyField(Producto)
     
     class Meta:
-        db_table = 'Carrito'
+        db_table = 'carrito'
     
     def total_carrito(self):
         total = sum([detalle.subtotal for detalle in self.detallecarrito_set.all()])
@@ -92,7 +92,7 @@ class DetalleCarrito(models.Model):
             return 0  # Si no existe inventario, el subtotal es 0d
         
     class Meta:
-        db_table = 'DetalleCarrito'
+        db_table = 'detalle_Carrito'
 
 
 #Orden 
@@ -116,7 +116,7 @@ class Orden(models.Model):
         return sum([detalle.subtotal for detalle in self.detalles.all()])
     
     class Meta:
-        db_table = 'Orden'
+        db_table = 'orden'
     
 #DetalleOrden
 class DetalleOrden (models.Model):
@@ -134,7 +134,7 @@ class DetalleOrden (models.Model):
         return 0
     
     class Meta:
-        db_table = 'DetalleOrden'
+        db_table = 'detalle_orden'
 
 
 
@@ -152,7 +152,7 @@ class RegistroPago (models.Model):
     estado_reg = models.CharField(max_length=20, choices=ESTADO, default='Confirmado')
     
     class Meta:
-        db_table = 'RegistroPago'
+        db_table = 'registro_pago'
     
 #DetalleTransferencia
 class DetalleTrans(models.Model):
@@ -169,7 +169,7 @@ class DetalleTrans(models.Model):
     registro_pago = models.ForeignKey(RegistroPago, on_delete=models.CASCADE, related_name='regispagos')
     
     class Meta:
-        db_table = 'DetalleTrans'
+        db_table = 'detalle_trans'
     
 # Movimiento de Inventario
 class MovimientoInventario(models.Model):
@@ -186,5 +186,5 @@ class MovimientoInventario(models.Model):
     observacion = models.TextField(blank=True, null=True)
     
     class Meta:
-        db_table = 'MovimientoInventario'
+        db_table = 'movimiento_inventario'
     

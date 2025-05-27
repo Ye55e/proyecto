@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Ajditec_bdd',
+        'NAME': 'Ajditec_bdd1',
         'USER': 'postgres',
         'PASSWORD': '8262025',
         'HOST': 'localhost',
