@@ -23,12 +23,12 @@
         </div>
 
         <div class="mb-3">
-            <label for="foto_prod" class="form-label"><b>IMAGEN:</b></label>
+            <label for="img_prod" class="form-label"><b>IMAGEN:</b></label>
             {% if producto.img_prod %}
                 <p>Imagen actual:</p>
                 <img src="{{ producto.img_prod.url }}" alt="Imagen del producto" class="img-thumbnail" width="150">
             {% endif %}
-            <input type="file" name="foto_prod" id="foto_prod" class="form-control">
+            <input type="file" name="img_prod" id="img_prod" class="form-control">
         </div>
 
         <div class="mb-3">

@@ -1,0 +1,30 @@
+{% extends "./plantilla.html" %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <form enctype="multipart/form-data" action="/procesarEdicionCategoria/" id="frm_editar_categoria" 
+    method="post" class="p-4 border rounded bg-light">
+        <h3 class="mb-3 text-center">ACTUALIZAR CATEGORIA:</h3>
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label"><b>ID:</b></label>
+            <input type="hidden" name="id_cat" value="{{ categoria.id_cat }}">
+            <input type="text" class="form-control" value="{{ categoria.id_cat }}" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="tipo_cat" class="form-label"><b>TIPO DE CATEGORIA:</b></label>
+            <input type="text" name="tipo_cat" id="tipo_cat" class="form-control"  required value="{{ categoria.tipo_cat }}">
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success me-2">Guardar</button>
+            <a href="/listadoProductos/" class="btn btn-danger">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+
+
