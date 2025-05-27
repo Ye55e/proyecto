@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Producto, Categoria 
+from .models import Producto, Categoria, Usuario
 
 # Create your views here.
 def inicio(request):
@@ -17,6 +17,62 @@ def carrito_view(request):
 
 def nuevoCategoria(request):
     return render(request, 'nuevoCategoria.html')
+
+
+#Usuarios
+def nuevoUsuario(request):
+    usuario = Usuario.objects.all()
+    return render (request, 'nuevoUsuario.html',{
+        'usuario':usuario
+    })
+
+def listadoUsuario(request):
+    usuarioBdd = Usuario.objects.all()
+    return render(request, 'listadoUsuario.html', 
+                  {'usuario':usuarioBdd})
+
+def guardarUsuario(request):
+    username = request.POST['nomb_usu'],
+    first_name = request.POST['primer_nom'],
+    last_name= request.POST['primer_apell'],
+    email= request.POST['email_usu'],
+    cel_user= request.POST['telf_usu'],
+    password= request.POST['contra_usu'],
+
+    nuevoUsuario = Usuario.objects.create(
+        username = username,
+        first_name= first_name,
+        last_name = last_name,
+        email = email,
+        cel_user = cel_user,
+        password = password
+    )
+
+    messages.success(request,"Se ha guardado el usuario")
+    return redirect ('/inicio')
+
+def eliminarUsuario(request, id_user):
+    usuarioELiminar = get_object_or_404(Usuario, id_user=id)
+    usuarioELiminar.delete()
+    messages.success(request,"Usuario Eliminado con exito")
+    return redirect('listadoUsuario')
+
+def editarUsuario(request, id_user):
+    usuarioEditar = Usuario.objects.get(id = id_user)
+    return render(request,'editarUsuario.html', {'usuario':usuarioEditar })
+
+def procesarEdicionUsuario(request):
+    usuario=Usuario.objects.get(id = request.POST['id_usuario'])
+    usuario.username=request.POST['nomb_usu']
+    usuario.first_name=request.POST['primer_nom']
+    usuario.last_name=request.POST['primer_apell']
+    usuario.email=request.POST['email_usu']
+    usuario.cel_user=request.POST['telf_usu']
+    usuario.password=request.POST['contra_usu']
+
+    usuario.save()
+    messages.success(request,"Usuario actualizado con exito")
+    return redirect('/listadoUsuario')
 
 #Categoria 
 def nuevoCategoria(request):
