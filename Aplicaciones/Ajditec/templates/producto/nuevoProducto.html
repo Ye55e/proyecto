@@ -1,4 +1,4 @@
-{% extends "./plantilla.html" %}
+{% extends "plantilla.html" %}
 
 {% block contenido %}
 <div class="container mt-5">
@@ -7,7 +7,7 @@
             <div class="card shadow">
                 <div class="card-body">
                     <h3 class="text-center mb-4">REGISTRO DE PRODUCTOS</h3>
-                    <form action="/guardarProducto/" method="POST" id="frm_nuevo_producto">
+                    <form action="/guardarProducto/" method="POST" id="frm_nuevo_producto" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         <div class="mb-3">
@@ -20,8 +20,8 @@
                             <textarea name="descrip_prod" id="descrip_prod" class="form-control" rows="3" required></textarea>
                         </div>
 
-                        <div>
-                            <label><b>IMAGEN PRODUCTO</b></label>
+                        <div class="mb-3">
+                            <label for="foto_prod" class="form-label"><b>IMAGEN PRODUCTO</b></label>
                             <input type="file" name="foto_prod" id="foto_prod" class="form-control">
                         </div>
 
@@ -39,12 +39,11 @@
                             <select name="id_cat" id="id_cat" class="form-select" required>
                                 <option value="" disabled selected>Seleccione una categoria</option>
                                 {% for cat in categoria %}
-                                    <option value="{{ cat.id_cat }}">{{ cat.id_cat }}</option>
+                                    <option value="{{ cat.id_cat }}">{{ cat.tipo_cat }}</option>
                                 {% endfor %}
                             </select>
                         </div>
 
-                        
                         <div class="d-flex justify-content-center gap-2">
                             <button type="submit" class="btn btn-primary">Guardar</button>
                             <button type="reset" class="btn btn-secondary">Cancelar</button>
@@ -55,5 +54,23 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
+<script>
+    $(document).ready(function () {
+        $("#foto_prod").fileinput({
+            language: 'es',
+            allowedFileExtensions: ["png", "jpg", "jpeg"],
+            showCaption: false,
+            dropZoneEnabled: true,
+            browseLabel: "Seleccionar archivo",
+            removeLabel: "Eliminar",
+            uploadLabel: "Subir",
+            dropZoneTitle: "Arrastra y suelta la imagen aquí",
+            maxFileSize: 2048,
+            maxFilesNum: 1,
+            initialPreviewAsData: true,
+            overwriteInitial: true,
+        });
+    });
+</script>
+{% endblock %}

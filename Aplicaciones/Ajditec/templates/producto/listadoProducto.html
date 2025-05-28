@@ -1,0 +1,66 @@
+{% extends "plantilla.html" %}
+
+{% block contenido %}
+<br>
+<br>
+<h3 class="text-center mb-4">LISTADO DE PRODUCTOS</h3>
+<div class="card shadow">
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-hover" id="tbl_producto">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>PRODUCTO</th>
+                    <th>DESCRIPCIÓN</th>
+                    <th>IMAGEN</th>
+                    <th>ESTADO</th>
+                    <th>CATEGORÍA</th>
+                    <th>FECHA CREACIÓN</th>
+                    <th>FECHA ACTUALIZACIÓN</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in producto %}
+                <tr>
+                    <td>{{ prod.id_prod }}</td>
+                    <td>{{ prod.nomb_prod }}</td>
+                    <td>{{ prod.descrip_prod|truncatewords:15 }}</td>
+                    <td>
+                        {% if prod.img_prod %}
+                        <img src="{{ prod.img_prod.url }}" alt="{{ prod.nomb_prod }}" style="width: 80px; height: auto;">
+                        {% else %}
+                        Sin imagen
+                        {% endif %}
+                    </td>
+                    <td>{{ prod.esta_prod }}</td>
+                    <td>{{ prod.id_cat.tipo_cat }}</td>
+                    <td>{{ prod.fechcreac_prod }}</td>
+                    <td>{{ prod.fechactu_prod }}</td>
+                    <td>
+                        <a href="/editarProducto/{{ prod.id_prod }}" class="btn btn-warning btn-sm me-2">Editar</a>
+                        <a onclick="return confirm('¿Está seguro de eliminar este producto?')" href="/eliminarProducto/{{ prod.id_prod }}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <script>
+            let table = new DataTable('#tbl_producto', {
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+                },
+                dom: 'Bfrtip',
+                buttons: ['copy', 'excel', 'csv', 'pdf', 'print'],
+                layout: {
+                    topStart: {
+                        buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5', 'print']
+                    }
+                }
+            });
+        </script>
+    </div>
+</div>
+{% endblock %}
+
