@@ -16,27 +16,25 @@ def carrito_view(request):
     return render(request, 'carrito.html')
 
 
-
-
 #Usuarios
 def nuevoUsuario(request):
     usuario = Usuario.objects.all()
-    return render (request, 'nuevoUsuario.html',{
+    return render (request, 'usuarios/nuevoUsuario.html',{
         'usuario':usuario
     })
 
 def listadoUsuario(request):
     usuarioBdd = Usuario.objects.all()
-    return render(request, 'listadoUsuario.html', 
+    return render(request, 'usuarios/listadoUsuario.html', 
                   {'usuario':usuarioBdd})
 
 def guardarUsuario(request):
-    username = request.POST['nomb_usu'],
-    first_name = request.POST['primer_nom'],
-    last_name= request.POST['primer_apell'],
-    email= request.POST['email_usu'],
-    cel_user= request.POST['telf_usu'],
-    password= request.POST['contra_usu'],
+    username = request.POST['nomb_usu']
+    first_name = request.POST['primer_nom']
+    last_name= request.POST['primer_apell']
+    email= request.POST['email_usu']
+    cel_user= request.POST['telf_usu']
+    password= request.POST['contra_usu']
 
     nuevoUsuario = Usuario.objects.create(
         username = username,
@@ -50,15 +48,15 @@ def guardarUsuario(request):
     messages.success(request,"Se ha guardado el usuario")
     return redirect ('/inicio')
 
-def eliminarUsuario(request, id_user):
-    usuarioELiminar = get_object_or_404(Usuario, id_user=id)
+def eliminarUsuario(request, id):
+    usuarioELiminar = get_object_or_404(Usuario, id=id)
     usuarioELiminar.delete()
     messages.success(request,"Usuario Eliminado con exito")
-    return redirect('listadoUsuario')
+    return redirect('/listadoUsuario')
 
-def editarUsuario(request, id_user):
-    usuarioEditar = Usuario.objects.get(id = id_user)
-    return render(request,'editarUsuario.html', {'usuario':usuarioEditar })
+def editarUsuario(request, id):
+    usuarioEditar = Usuario.objects.get(id = id)
+    return render(request,'usuarios/editarUsuario.html', {'usuario':usuarioEditar })
 
 def procesarEdicionUsuario(request):
     usuario=Usuario.objects.get(id = request.POST['id_usuario'])
@@ -71,7 +69,7 @@ def procesarEdicionUsuario(request):
 
     usuario.save()
     messages.success(request,"Usuario actualizado con exito")
-    return redirect('/listadoUsuario')
+    return redirect('usuarios/listadoUsuario')
 
 #Categoria 
 def nuevoCategoria(request):
