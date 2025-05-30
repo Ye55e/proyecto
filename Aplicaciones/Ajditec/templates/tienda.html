@@ -1,0 +1,22 @@
+<form method="get" action="{% url 'inicio' %}">
+    <select name="categoria">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+            <option value="{{ cat.id_cat }}" {% if cat.id_cat|stringformat:"s" == categoria_seleccionada %}selected{% endif %}>{{ cat.tipo_cat }}</option>
+        {% endfor %}
+    </select>
+
+    <input type="text" name="query" placeholder="Buscar producto..." value="{{ query }}">
+    <button type="submit">Buscar</button>
+</form>
+
+<hr>
+
+<h2>Catálogo de productos</h2>
+<ul>
+    {% for producto in productos %}
+        <li>{{ producto.nombre_prod }}</li>
+    {% empty %}
+        <li>No se encontraron productos</li>
+    {% endfor %}
+</ul>

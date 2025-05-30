@@ -25,15 +25,10 @@ class Categoria(models.Model):
 
 # Producto
 class Producto(models.Model):
-    ESTADOS = [
-        ('Agotado', 'Agotado'),
-        ('Disponible', 'Disponible'),
-    ]
     id_prod = models.AutoField(primary_key=True)
     nomb_prod = models.CharField(max_length=200)
     descrip_prod = models.TextField()
     img_prod = models.ImageField(upload_to='productos/')
-    esta_prod = models.CharField(max_length=20, choices=ESTADOS, default='Agotado')
     borrado_prod = models.BooleanField(default=False)
     fechcreac_prod = models.DateField(auto_now_add=True)
     fechactu_prod = models.DateField(auto_now=True)
@@ -46,14 +41,42 @@ class Producto(models.Model):
 # Inventario
 class Inventario(models.Model):
     id_inve = models.AutoField(primary_key=True)
-    precunit_prod = models.DecimalField(max_digits=10, decimal_places=2)
-    stock_actual = models.IntegerField(default=0)
-    fechacrea_inve = models.DateField(auto_now_add=True)
-    fechactu_inve = models.DateField(auto_now=True)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='inventario', db_column='id_prod')
+    producto = models.OneToOneField(
+        Producto,
+        on_delete=models.CASCADE,
+        related_name='inventario',
+        db_column='id_prod',
+        verbose_name="Producto"
+    )
+    precunit_prod = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Precio Unitario"
+    )
+    stock_actual = models.IntegerField(
+        default=0,
+        verbose_name="Stock Actual"
+    )
+    fechacrea_inve = models.DateField(
+        auto_now_add=True,
+        verbose_name="Fecha Creación"
+    )
+    fechactu_inve = models.DateField(
+        auto_now=True,
+        verbose_name="Fecha Actualización"
+    )
 
     class Meta:
         db_table = 'inventario'
+        verbose_name = 'Inventario'
+        verbose_name_plural = 'Inventarios'
+
+    def actualizar_estado_producto(self):
+        if self.stock_actual < 2:
+            self.producto.esta_prod = 'Agotado'
+        else:
+            self.producto.esta_prod = 'Disponible'
+        self.producto.save()
 
     def actualizar_stock(self, cantidad, tipo):
         if tipo == 'Entrada':
@@ -63,6 +86,8 @@ class Inventario(models.Model):
         else:
             raise ValueError("Stock insuficiente para realizar la operación.")
         self.save()
+        self.actualizar_estado_producto()
+
 
 
 # Carrito

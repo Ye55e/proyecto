@@ -1,21 +1,20 @@
 {% extends "plantilla.html" %}
-
 {% block contenido %}
-<div class="container mt-5">
-    <div class="row justify-content-center align-items-center">
-        <div class="col-md-6">
+
+<div class="container mt-4">
+    <h3 class="text-center mb-4">GESTIÓN DE CATEGORÍAS</h3>
+    <div class="row">
+        <!-- Columna izquierda: Formulario -->
+        <div class="col-md-5">
             <div class="card shadow">
                 <div class="card-body">
-                    <h3 class="text-center mb-4">REGISTRO DE CATEGORIAS</h3>
+                    <h5 class="text-center mb-3">REGISTRO </h5>
                     <form action="/guardarCategoria/" method="POST" id="frm_nuevo_categoria">
                         {% csrf_token %}
-
                         <div class="mb-3">
-                            <label for="tipo_cat" class="form-label"><b>TIPO DE CATEGORIA:</b></label>
+                            <label for="tipo_cat" class="form-label"><b>TIPO DE CATEGORÍA:</b></label>
                             <input type="text" name="tipo_cat" id="tipo_cat" class="form-control" required>
                         </div>
-
-                        
                         <div class="d-flex justify-content-center gap-2">
                             <button type="submit" class="btn btn-primary">Guardar</button>
                             <button type="reset" class="btn btn-secondary">Cancelar</button>
@@ -24,7 +23,63 @@
                 </div>
             </div>
         </div>
+
+        <!-- Columna derecha: Tabla -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">LISTADO </h5>
+                    <table class="table table-bordered table-striped table-hover" id="tbl_categoria">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>TIPO CATEGORÍA</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in categoria %}
+                            <tr>
+                                <td>{{ cat.id_cat }}</td>
+                                <td>{{ cat.tipo_cat }}</td>
+                                <td>
+                                    <a href="/editarCategoria/{{ cat.id_cat }}" class="btn btn-warning btn-sm me-2">Editar</a>
+                                    <a onclick="return confirm('¿Está seguro de eliminar permanentemente?')" href="/eliminarCategoria/{{ cat.id_cat }}" class="btn btn-danger btn-sm">Eliminar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Script DataTable -->
+<script>
+  $(document).ready(function() {
+    $('#tbl_categoria').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'excelHtml5',  text: 'Excel',  className: 'btn btn-success' },
+        { extend: 'pdfHtml5',    text: 'PDF',    className: 'btn btn-danger'  },
+        { extend: 'print',       text: 'Imprimir', className: 'btn btn-primary' }
+      ]
+    });
+  });
+</script>
+
+<!-- Espaciado entre botones -->
+<style>
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+</style>
+
 {% endblock %}
+
 

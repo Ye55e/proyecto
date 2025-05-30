@@ -1,44 +1,56 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AJDICTEC- SISTEMA DE GESTION</title>
-    <!-- CSS de iziToast -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
+  <meta charset="utf-8">
+  <title>AJDICTEC – SISTEMA DE GESTIÓN</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Google font -->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+  <!-- iziToast CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
 
-    <!-- Bootstrap -->
-    <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
 
-    <!-- Font Awesome Icon -->
-    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
-    <!-- DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    
-    <!-- DataTables Buttons JS -->
-    <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 
-    <!-- Custom stylesheet -->
-    <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
 
-    <!-- Importación de DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <!--File input-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css" integrity="sha512-yDVMONIXJPPAoULZ92Ygngsn8ZUGB4ejm6fCc6q9ZvdH8blFAOgg75XZSEaAJ5m4E/yPI1BAi5fF2axMHVuZ5w==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" integrity="sha512-0wQvB58Ha5coWmcgtg4f11CTSSxfrfLClUp9Vy0qhzYzCZDSnoB4Vhu5JXJFs7rU24LE6JsH+6hpP7vQ22lk5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js" integrity="sha512-8Mq7UmHbxOPZLsm12EcPaWhOVrSRWDLiCm/fCVXVEGGHCkLKmSyxN0GFtrBFfhHyBrwXPlGqKn+1E7KbnGhBNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- DataTables + Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <!-- Buttons Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
+
+  <!-- FileInput CSS (opcional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css" integrity="sha512-yDVMONI..." crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <!-- Tu CSS -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  {# Scripts globales: jQuery antes que todo lo demás #}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+  {# DataTables + Bootstrap 5 JS #}
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+  {# DataTables Buttons + Bootstrap 5 JS #}
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+
+  {# Dependencias de exportación #}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+
+  {# FileInput JS (opcional) #}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" integrity="sha512-0wQvB58..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js" integrity="sha512-8Mq7UmH..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 <div id="breadcrumb" class="section">
@@ -50,54 +62,33 @@
                         <li><a href="{% url 'inicio' %}">Inicio</a></li>
                         <li><a href="{% url 'nuevoCategoria' %}">Categorias</a></li>
                         <li><a href="{% url 'nuevoProducto' %}">Productos</a></li>
+                        <li><a href="{% url 'nuevoInventario' %}">Inventario</a></li>
                     </ul>
                 </div>
             </div>
         </div>
 </div>
-<div class="container-fluid">
-        {% block contenido %}
-        <!-- Aquí se presentará el contenido específico de cada página -->
-        {% endblock %}
-    <!-- Notificaciones iziToast -->
+
+
+  <div class="container-fluid">
+    {% block contenido %}{% endblock %}
+
     {% if messages %}
-    <script>
+      <script>
         const messages = [
-            {% for message in messages %}
-                {
-                    "tags": "{{ message.tags }}",
-                    "message": "{{ message }}",
-                },
-            {% endfor %}
+          {% for message in messages %}
+            { tags: "{{ message.tags }}", message: "{{ message }}" },
+          {% endfor %}
         ];
-    
         messages.forEach(msg => {
-            if (msg.tags === "success") {
-                iziToast.success({
-                    title: 'Éxito',
-                    message: msg.message,
-                    position: 'topRight'
-                });
-            } else if (msg.tags === "error") {
-                iziToast.error({
-                    title: 'Error',
-                    message: msg.message,
-                    position: 'topRight'
-                });
-            } else if (msg.tags === "warning") {
-                iziToast.warning({
-                    title: 'Advertencia',
-                    message: msg.message,
-                    position: 'topRight'
-                });
-            } else {
-                iziToast.info({
-                    title: 'Información',
-                    message: msg.message,
-                    position: 'topRight'
-                });
-            }
+          iziToast[msg.tags]({ title: msg.tags.toUpperCase(), message: msg.message, position: 'topRight' });
         });
-    </script>
-    {% endif %} 
-</div>
+      </script>
+    {% endif %}
+  </div>
+
+  {# Bloque para scripts específicos de cada página #}
+  {% block scripts %}{% endblock %}
+</body>
+</html>
+

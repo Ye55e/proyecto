@@ -13,7 +13,6 @@
                     <th>PRODUCTO</th>
                     <th>DESCRIPCIÓN</th>
                     <th>IMAGEN</th>
-                    <th>ESTADO</th>
                     <th>CATEGORÍA</th>
                     <th>FECHA CREACIÓN</th>
                     <th>FECHA ACTUALIZACIÓN</th>
@@ -33,7 +32,6 @@
                         Sin imagen
                         {% endif %}
                     </td>
-                    <td>{{ prod.esta_prod }}</td>
                     <td>{{ prod.id_cat.tipo_cat }}</td>
                     <td>{{ prod.fechcreac_prod }}</td>
                     <td>{{ prod.fechactu_prod }}</td>
@@ -46,20 +44,29 @@
             </tbody>
         </table>
 
-        <script>
-            let table = new DataTable('#tbl_producto', {
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
-                },
-                dom: 'Bfrtip',
-                buttons: ['copy', 'excel', 'csv', 'pdf', 'print'],
-                layout: {
-                    topStart: {
-                        buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5', 'print']
-                    }
-                }
-            });
-        </script>
+  <script>
+  $(document).ready(function() {
+    $('#tbl_producto').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'excelHtml5',  text: 'Excel',     className: 'btn btn-success me-2' },
+        { extend: 'csvHtml5',    text: 'CSV',       className: 'btn btn-info me-2'    },
+        { extend: 'pdfHtml5',    text: 'PDF',       className: 'btn btn-danger me-2'  },
+        { extend: 'print',       text: 'Imprimir',  className: 'btn btn-primary' }
+      ]
+    });
+  });
+</script>
+<!-- Espaciado entre botones -->
+<style>
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+</style>
+
     </div>
 </div>
 {% endblock %}

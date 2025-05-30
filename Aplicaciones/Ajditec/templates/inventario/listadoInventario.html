@@ -1,40 +1,67 @@
-{% extends 'inicio.html' %}
-{% block title %}Listado de Inventario{% endblock %}
+{% extends "plantilla.html" %}
 
-{% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Inventario Registrado</h2>
-    
-    <a href="{% url 'nuevoInventario' %}" class="btn btn-primary mb-3">+ Nuevo Inventario</a>
-
-    <table class="table table-bordered table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Producto</th>
-                <th>Precio Unitario</th>
-                <th>Stock Actual</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for inv in inventarios %}
-            <tr>
-                <td>{{ inv.id_inv }}</td>
-                <td>{{ inv.producto.nom_prod }}</td>
-                <td>${{ inv.precunit_prod }}</td>
-                <td>{{ inv.stock_actual }}</td>
-                <td>
-                    <a href="{% url 'editarInventario' inv.id_inv %}" class="btn btn-warning btn-sm">Editar</a>
-                    <a href="{% url 'eliminarInventario' inv.id_inv %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este inventario?')">Eliminar</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">No hay inventario registrado.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+{% block contenido %}
+<br><br>
+<h3 class="text-center mb-4">INVENTARIO AJ DITEC DISTRIBUIDORA</h3>
+<div class="card shadow">
+  <div class="card-body">
+   
+    <table id="tbl_inventario" class="table table-striped table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Producto</th>
+          <th>Precio Unitario</th>
+          <th>Stock Actual</th>
+          <th>Fecha Creación</th>
+          <th>Fecha Actualización</th>
+           <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in inventarios %}
+        <tr>
+          <td>{{ inv.id_inve }}</td>
+          <td>{{ inv.producto.nomb_prod }}</td>
+          <td>${{ inv.precunit_prod }}</td>
+          <td>{{ inv.stock_actual }}</td>
+          <td>{{ inv.fechacrea_inve|date:"d/m/Y" }}</td>
+          <td>{{ inv.fechactu_inve|date:"d/m/Y" }}</td>
+          <td>
+                        <a href="#" class="btn btn-warning btn-sm me-2">Editar</a>
+                        <a onclick="return confirm('¿Está seguro de eliminar este producto?')" href="#" class="btn btn-danger btn-sm">Eliminar</a>
+         </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No hay inventario registrado.</td></tr>
+        {% endfor %}
+      </tbody>
     </table>
+  </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function() {
+    $('#tbl_inventario').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'excelHtml5',  text: 'Excel',  className: 'btn btn-success' },
+        { extend: 'csvHtml5',    text: 'CSV',    className: 'btn btn-info'    },
+        { extend: 'pdfHtml5',    text: 'PDF',    className: 'btn btn-danger'  },
+        { extend: 'print',       text: 'Imprimir', className: 'btn btn-primary' }
+      ]
+    });
+  });
+</script>
+<!-- Espaciado entre botones -->
+<style>
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+</style>
 {% endblock %}

@@ -36,14 +36,6 @@
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            <label for="estado" class="form-label"><b>ESTADO:</b></label>
-                            <select name="estado" id="estado" class="form-control" required>
-                                <option value="">Seleccione una opción</option>
-                                <option value="Agotado" {% if producto.esta_prod == "Agotado" %}selected{% endif %}>Agotado</option>
-                                <option value="Disponible" {% if producto.esta_prod == "Disponible" %}selected{% endif %}>Disponible</option>
-                            </select>
-                        </div>
 
                         <div class="mb-3">
                             <label for="id_cat" class="form-label"><b>CATEGORIA:</b></label>
