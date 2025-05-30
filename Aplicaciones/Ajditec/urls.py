@@ -6,7 +6,13 @@ urlpatterns = [
     path('pago/', views.pago_view, name='pago'),
    
 
-    
+    #Usuarios
+    path('nuevoUsuario/', views.nuevoUsuario, name='nuevoUsuario'),
+    path('listadoUsuario/',views.listadoUsuario, name='listadoUsuario'),
+    path('guardarUsuario/',views.guardarUsuario, name='guardarUsuario'),
+    path('eliminarUsuario/<id>', views.eliminarUsuario, name='eliminarUsuario'),
+    path('editarUsuario/<id>',views.editarUsuario, name='editarUsuario'),
+    path('procesarEdicionUsuario/',views.procesarEdicionUsuario, name='procesarEdicionUsuario'),
     #Productos
     path('nuevoProducto/', views.nuevoProducto, name='nuevoProducto'),
     path('listadoProducto/',views.listadoProducto, name='listadoProducto'),

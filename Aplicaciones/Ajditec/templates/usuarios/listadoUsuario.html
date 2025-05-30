@@ -1,0 +1,57 @@
+{% extends "plantilla.html" %}
+
+{% block contenido %}
+<br>
+<br>
+<h3 class="text-center mb-4">LISTADO DE USUARIOS</h3>
+<div class="card shadow">
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-hover" id="tbl_usuarios">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NOMBRE DE USUARIO</th>
+                    <th>PRIMER NOMBRE</th>
+                    <th>PRIMER APELLIDO</th>
+                    <th>EMAIL</th>
+                    <th>CELULAR</th>
+                    <th>CONTRASEÑA</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usu in usuario %}
+                <tr>
+                    <td>{{ usu.id }}</td>
+                    <td>{{ usu.username }}</td>
+                    <td>{{ usu.first_name }}</td>
+                    <td>{{ usu.last_name }}</td>
+                    <td>{{ usu.email }}</td>
+                    <td>{{ usu.cel_user }}</td>
+                    <td>{{ usu.password }}</td>
+                    <td>
+                        <a href="/editarUsuario/{{ usu.id }}" class="btn btn-warning btn-sm me-2">Editar</a>
+                        <a onclick="return confirm('¿Está seguro de eliminar permanentemente este usuario?')" href="/eliminarUsuario/{{ usu.id }}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <script>
+            let table = new DataTable('#tbl_usuarios', {
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+                },
+                dom: 'Bfrtip',
+                buttons: ['copy', 'excel', 'csv', 'pdf', 'print'],
+                layout: {
+                    topStart: {
+                        buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5', 'print']
+                    }
+                }
+            });
+        </script>
+    </div>
+</div>
+{% endblock %}

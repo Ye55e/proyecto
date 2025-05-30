@@ -1,0 +1,48 @@
+{% extends "plantilla.html" %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <form action="/procesarEdicionUsuario/" method="POST" id="frm_editar_usuario" class="p-4 border rounded bg-light">
+        <h3 class="mb-3 text-center">ACTUALIZAR USUARIO</h3>
+        {% csrf_token %}
+
+        <input type="hidden" name="id_usuario" value="{{ usuario.id }}">
+
+        <div class="mb-3">
+            <label for="primer_nom" class="form-label"><b>PRIMER NOMBRE:</b></label>
+            <input type="text" name="primer_nom" id="primer_nom" class="form-control" required value="{{ usuario.first_name }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="primer_apell" class="form-label"><b>PRIMER APELLIDO:</b></label>
+            <input type="text" name="primer_apell" id="primer_apell" class="form-control" required value="{{ usuario.last_name }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="nomb_usu" class="form-label"><b>NOMBRE DE USUARIO:</b></label>
+            <input type="text" name="nomb_usu" id="nomb_usu" class="form-control" required value="{{ usuario.username }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="telf_usu" class="form-label"><b>CELULAR:</b></label>
+            <input type="text" name="telf_usu" id="telf_usu" class="form-control" required value="{{ usuario.cel_user }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="email_usu" class="form-label"><b>CORREO ELECTRÓNICO:</b></label>
+            <input type="email_usu" name="email_usu" id="email_usu" class="form-control" required value="{{ usuario.email }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="contra_usu" class="form-label"><b>CONTRASEÑA:</b></label>
+            <input type="password" name="contra_usu" id="contra_usu" class="form-control" required value="{{ usuario.password }}">
+        </div>
+        
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success me-2">Guardar</button>
+            <a href="/listadoUsuarios/" class="btn btn-danger">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

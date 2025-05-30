@@ -1,0 +1,55 @@
+{% extends "plantilla.html" %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">REGISTRO DE USUARIOS</h3>
+                    <form action="/guardarUsuario/" method="POST" id="frm_nuevo_usuario">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="primer_nom" class="form-label"><b>PRIMER NOMBRE:</b></label>
+                            <input type="text" name="primer_nom" id="primer_nom" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="primer_apell" class="form-label"><b>PRIMER APELLIDO:</b></label>
+                            <input type="text" name="primer_apell" id="primer_apell" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nomb_usu" class="form-label"><b>NOMBRE DE USUARIO:</b></label>
+                            <input type="text" name="nomb_usu" id="nomb_usu" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="telf_usu" class="form-label"><b>#CELULAR:</b></label>
+                            <input type="text" name="telf_usu" id="telf_usu" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email_usu" class="form-label"><b>CORREO ELECTRONICO:</b></label>
+                            <input type="email" name="email_usu" id="email_usu" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="contra_usu" class="form-label"><b>CONTRASEÑA:</b></label>
+                            <input type="password" name="contra_usu" id="contra_usu" class="form-control" required>
+                        </div>
+
+                        
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="reset" class="btn btn-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
