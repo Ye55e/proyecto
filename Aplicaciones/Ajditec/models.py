@@ -95,6 +95,8 @@ class Carrito(models.Model):
     id_carr = models.AutoField(primary_key=True)
     fechacreac_carr = models.DateTimeField(auto_now_add=True)
     usuarios = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='carritos', db_column='id_user')
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+
 
     class Meta:
         db_table = 'carrito'

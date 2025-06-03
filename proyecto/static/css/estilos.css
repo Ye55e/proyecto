@@ -19,4 +19,55 @@
 }
 
 
+.cuenta-contenedor {
+  position: relative;
+  display: inline-block;
+}
 
+.cuenta-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  min-width: 180px;
+  z-index: 999;
+}
+
+.cuenta-menu a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: #333;
+}
+
+.cuenta-menu a:hover {
+  background-color: #f2f2f2;
+}
+
+.cuenta-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: white;
+  text-decoration: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.cuenta-texto {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}

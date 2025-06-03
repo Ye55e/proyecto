@@ -48,7 +48,8 @@
 							<i class="fa fa-phone"></i> +593 9 6902 5956
 						</a>
 						</li>
-						<li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
+						<li><a href="mailto:ajditec.ventas@gmail.com"><i class="fa fa-envelope-o"></i> ajditec.ventas@gmail.com</a></li>
+
 						<li>
 						<a href="https://www.google.com/maps/search/?api=1&query=QGW2+5HR,+Av.+10+de+Agosto,+Quito+170129" target="_blank">
 							<i class="fa fa-map-marker"></i> QGW2+5HR, Av. 10 de Agosto, Quito 170129
@@ -100,16 +101,29 @@
 						<div class="col-md-3 clearfix">
 							<div class="header-ctn">
 								
-								<div>
-								<a href="#">
+						<!-- CUENTA -->
+						<div class="cuenta-contenedor">
+								{% if request.user.is_authenticated %}
+								<div class="cuenta-login" id="btnCuenta">
+									<i class="fa fa-user"></i>
+									<div class="cuenta-texto">
+									<span>{{ request.user.get_full_name|default:request.user.username }}</span>
+									<i class="fa fa-caret-down"></i>
+									</div>
+								</div>
+								<div class="cuenta-menu" id="menuCuenta">
+									<a href="{% url 'catalogo' %}"><i class="fa fa-id-card"></i> Mi cuenta</a>
+									<a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+								</div>
+								{% else %}
+								<a href="{% url 'login' %}" class="cuenta-login">
 									<i class="fa fa-user"></i>
 									<span>Mi Cuenta</span>
 								</a>
-								</div>
-								
-
+								{% endif %}
+							</div>
 								<!-- CUENTA -->
-							<!-- Cart -->
+							<!-- CARRITO -->
 							<div class="dropdown">
 							<a href="{% url 'carrito' %}" class="dropdown-toggle" aria-expanded="true">
 								<i class="fa fa-shopping-cart"></i>
@@ -124,7 +138,7 @@
 							</a>
 						</div>
 
-							<!-- /Cart -->
+							<!-- /CARRITO -->
 
 
 
@@ -281,7 +295,6 @@
 										<button class="quick-view">
 											<i class="fa fa-eye"></i>
 											<span class="tooltipp">Vista rápida</span>
-										</button>
 										<button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}">
 											<i class="fa fa-shopping-cart"></i>
 											<span class="tooltipp">Añadir al carrito</span>
@@ -368,131 +381,7 @@
 					</div>
 					<!-- /section title -->
 
-					<!-- Products tab & slick -->
-					<div class="col-md-12">
-						<div class="row">
-							<div class="products-tabs">
-								<!-- tab -->
-								<div id="tab2" class="tab-pane fade in active">
-									<div class="products-slick" data-nav="#slick-nav-2">
-										<!-- product -->
-										<div class="product">
-											<div class="product-img">
-												<img src="./img/product06.png" alt="">
-												<div class="product-label">
-													<span class="sale">-30%</span>
-													<span class="new">NEW</span>
-												</div>
-											</div>
-											<div class="product-body">
-												<p class="product-category">Category</p>
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-												<div class="product-rating">
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-												</div>
-												<div class="product-btns">
-													<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-													<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-													<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-												</div>
-											</div>
-											<div class="add-to-cart">
-												<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-											</div>
-										</div>
-										<!-- /product -->
-
-										
-										<!-- product -->
-										<div class="product">
-											<div class="product-img">
-												<img src="./img/product08.png" alt="">
-												<div class="product-label">
-													<span class="sale">-30%</span>
-												</div>
-											</div>
-											<div class="product-body">
-												<p class="product-category">Category</p>
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-												<div class="product-rating">
-												</div>
-												<div class="product-btns">
-													<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-													<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-													<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-												</div>
-											</div>
-											<div class="add-to-cart">
-												<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-											</div>
-										</div>
-										<!-- /product -->
-
-										<!-- product -->
-										<div class="product">
-											<div class="product-img">
-												<img src="./img/product09.png" alt="">
-											</div>
-											<div class="product-body">
-												<p class="product-category">Category</p>
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-												<div class="product-rating">
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-												</div>
-												<div class="product-btns">
-													<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-													<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-													<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-												</div>
-											</div>
-											<div class="add-to-cart">
-												<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-											</div>
-										</div>
-										<!-- /product -->
-
-										<!-- product -->
-										<div class="product">
-											<div class="product-img">
-												<img src="./img/product01.png" alt="">
-											</div>
-											<div class="product-body">
-												<p class="product-category">Category</p>
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-												<div class="product-rating">
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-												</div>
-												<div class="product-btns">
-													<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-													<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-													<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-												</div>
-											</div>
-											<div class="add-to-cart">
-												<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-											</div>
-										</div>
-										<!-- /product -->
-									</div>
-									<div id="slick-nav-2" class="products-slick-nav"></div>
-								</div>
-								<!-- /tab -->
+					
 							</div>
 						</div>
 					</div>
@@ -515,7 +404,7 @@
 							<p>Suscríbete a nuestras <strong>NOVEDADES</strong></p>
 							<form>
 								<input class="input" type="email" placeholder="Ingresa tu correo electrónico">
-								<button class="newsletter-btn"><i class="fa fa-envelope"></i> Subscribete</button>
+								<button class="newsletter-btn"><i class="fa fa-envelope"></i> Suscribete</button>
 							</form>
 							<ul class="newsletter-follow">
 								<li>
@@ -703,7 +592,54 @@
 					return cookieValue;
 				}
 				</script>
+				<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const toggle = document.getElementById("btnCuenta");
+    const menu = document.getElementById("menuCuenta");
 
+    if (toggle) {
+      toggle.addEventListener("click", function(e) {
+        e.stopPropagation();
+        menu.style.display = (menu.style.display === "block") ? "none" : "block";
+      });
+
+      document.addEventListener("click", function() {
+        menu.style.display = "none";
+      });
+    }
+  });
+</script>
+<meta name="csrf-token" content="{{ csrf_token }}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    const csrftoken = $('meta[name="csrf-token"]').attr('content');
+
+    $('.add-to-cart-btn').click(function(e) {
+        e.preventDefault();
+
+        const productId = $(this).data('product-id');
+        const url = `/add-to-cart/${productId}/`;
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            headers: {'X-CSRFToken': csrftoken},
+            success: function(response) {
+                if (response.success) {
+                    alert(response.message);
+                    // Aquí puedes actualizar un contador en la UI si tienes
+                } else {
+                    alert('Error al agregar el producto.');
+                }
+            },
+            error: function() {
+                alert('Error en la comunicación con el servidor.');
+            }
+        });
+    });
+});
+</script>
 
     </body>
 </html>

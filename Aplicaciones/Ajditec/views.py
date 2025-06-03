@@ -3,9 +3,6 @@ from django.contrib import messages
 
 from .models import Producto, Categoria, Inventario,Usuario
 
-
-# Create your views here.
-# views.py
 def carrito(request):
     return render(request, 'carrito.html')
 
@@ -287,3 +284,144 @@ def listadoInventario(request):
         'inventarios': inventarios
     })
 
+# LOGIN
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from .forms import FormRegistroCliente, FormLogin
+from .models import Usuario
+
+def registrar_cliente(request):
+    if request.method == 'POST':
+        form = FormRegistroCliente(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            if Usuario.objects.filter(email=email).exists():
+                form.add_error('email', 'Ya existe un usuario con ese correo.')
+            else:
+                user = form.save(commit=False)
+                user.tipo_usuario = 'cliente'
+                user.set_password(form.cleaned_data['password1'])  # Asegúrate de usar set_password si tienes password
+                user.save()
+                messages.success(request, 'Registro exitoso. Ahora puede iniciar sesión.')
+                return redirect('login')
+    else:
+        form = FormRegistroCliente()
+    return render(request, 'registro.html', {'form': form})
+
+
+def login_usuario(request):
+    if request.method == 'POST':
+        form = FormLogin(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            if user.tipo_usuario == 'admin':
+                return redirect('admin_dashboard')
+            elif user.tipo_usuario == 'cliente':
+                return redirect('catalogo')
+            else:
+                messages.error(request, 'Tipo de usuario no válido.')
+                return redirect('login_usuario')
+        else:
+            messages.error(request, 'Usuario o contraseña incorrectos.')
+    else:
+        form = FormLogin()
+
+    return render(request, 'login.html', {'form': form})
+@login_required
+def logout_usuario(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+def admin_dashboard(request):
+    if request.user.tipo_usuario != 'admin':
+        return redirect('catalogo')  # o mostrar un error
+    return render(request, 'plantilla.html')
+
+@login_required
+def catalogo(request):
+    if request.user.tipo_usuario != 'cliente':
+        return redirect('admin_dashboard')  # o mostrar un error
+    return render(request, 'inicio.html')
+
+
+#AÑADIR AL CARRITO
+from django.http import JsonResponse
+def add_to_cart(request, id_prod):
+    if request.method == 'POST':
+        producto = get_object_or_404(Producto, id_prod=id_prod)
+        carrito = request.session.get('carrito', {})
+
+        if str(id_prod) in carrito:
+            carrito[str(id_prod)] += 1
+        else:
+            carrito[str(id_prod)] = 1
+
+        request.session['carrito'] = carrito
+
+        return JsonResponse({'success': True, 'message': f'Producto "{producto.nomb_prod}" agregado al carrito.'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+
+def carrito(request):
+    cart = request.session.get('carrito', {})  # <-- clave debe coincidir con la que usas en add_to_cart
+    cart_items = []
+
+    for id_prod_str, quantity in cart.items():
+        try:
+            id_prod = int(id_prod_str)
+            producto = Producto.objects.get(pk=id_prod)
+            inventario = producto.inventario
+            total_price = inventario.precunit_prod * quantity
+
+            cart_items.append({
+                'product': producto,
+                'quantity': quantity,
+                'total_price': total_price,
+            })
+        except Producto.DoesNotExist:
+            continue
+
+    cart_total = sum(item['total_price'] for item in cart_items)
+
+    return render(request, 'carrito.html', {
+        'cart_items': cart_items,
+        'cart_total': cart_total,
+    })
+
+#ELIMINAR CARRITO
+
+def eliminar_del_carrito(request, id_prod):
+    if request.method == 'POST':
+        carrito = request.session.get('carrito', {})
+        prod_key = str(id_prod)
+        if prod_key in carrito:
+            del carrito[prod_key]
+            request.session['carrito'] = carrito
+        return redirect('carrito')
+    else:
+        # Opcional: si alguien hace GET, redirige igual
+        return redirect('carrito')
+def actualizar_cantidad_carrito(request, id_prod):
+    if request.method == 'POST':
+        cantidad_nueva = int(request.POST.get('quantity', 1))
+        producto = get_object_or_404(Producto, pk=id_prod)
+        inventario = get_object_or_404(Inventario, producto=producto)
+
+        if cantidad_nueva < 1:
+            return JsonResponse({'success': False, 'message': 'La cantidad debe ser al menos 1.'})
+
+        if cantidad_nueva > inventario.stock_actual:
+            return JsonResponse({'success': False, 'message': f'No hay suficiente stock para "{producto.nomb_prod}". Stock disponible: {inventario.stock_actual}'})
+
+        carrito = request.session.get('carrito', {})
+        carrito[str(id_prod)] = cantidad_nueva
+        request.session['carrito'] = carrito
+
+        return JsonResponse({'success': True, 'message': f'Cantidad actualizada para "{producto.nomb_prod}".'})
+
+    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)

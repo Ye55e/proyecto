@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  .registro-container {
+    max-width: 480px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+
+  .registro-container h2 {
+    margin-bottom: 25px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+  }
+
+  .registro-container form button {
+    width: 100%;
+    padding: 12px;
+    font-weight: 600;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+
+  .registro-container form button:hover {
+    background-color: #0056b3;
+  }
+
+  .registro-container form p {
+    margin-bottom: 18px;
+  }
+
+  /* Estilo para errores que sí se muestran */
+  .errorlist {
+    color: #d93025;
+    margin-top: 4px;
+    font-size: 0.9rem;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  /* Para mensajes de error y éxito de Django messages */
+  .messages {
+    max-width: 480px;
+    margin: 20px auto;
+  }
+
+  .messages .error {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #f5c2c7;
+  }
+
+  .messages .success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #badbcc;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registro-container">
+  <h2>Registro de Cliente</h2>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}
+        {{ field }}
+        {% comment %}
+          Mostrar errores solo si el campo no es nombre, contraseña ni confirmación.
+          Cambia los nombres aquí a los que uses en tu formulario.
+        {% endcomment %}
+        {% if field.name not in "nombre password password_confirm" %}
+          {{ field.errors }}
+        {% endif %}
+      </p>
+    {% endfor %}
+
+    <button type="submit">Registrarse</button>
+  </form>
+</div>
+{% endblock %}

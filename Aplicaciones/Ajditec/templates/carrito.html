@@ -6,9 +6,9 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <h3 class="title">Tu Carrito de compras</h3>
+                <h3 class="title">Detalle Carrito de Compras</h3>
             </div>
-            
+
             <div class="col-md-8">
                 <div class="cart-table">
                     <table class="table">
@@ -21,93 +21,180 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for item in cart_items %}
-                            <tr>
-                                <td>
-                                    <div class="product-widget">
-                                        <div class="product-img">
-                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
-                                        </div>
-                                        <div class="product-body">
-                                            <h3 class="product-name">{{ item.product.name }}</h3>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>${{ item.product.price }}</td>
-                                <td>
-                                    <form method="post" action="{% url 'update_cart' item.product.id %}">
-                                        {% csrf_token %}
-                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="input">
-                                        <button type="submit" class="btn btn-sm"><i class="fa fa-refresh"></i> Actualizar</button>
-                                    </form>
-                                </td>
-                                <td>${{ item.total_price }}</td>
-                                <td>
-                                    <form method="post" action="{% url 'remove_from_cart' item.product.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn"><i class="fa fa-close"></i></button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5">Tu carrito está vacío</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
+                       <tbody>
+    {% for item in cart_items %}
+    <tr>
+        <td>
+            <div class="product-widget">
+                <div class="product-img">
+                    <img src="{{ item.product.img_prod.url }}" alt="{{ item.product.nomb_prod }}">
+                </div>
+                <div class="product-body">
+                    <h3 class="product-name">{{ item.product.nomb_prod }}</h3>
+                </div>
+            </div>
+        </td>
+        <td>${{ item.product.inventario.precunit_prod }}</td>
+        <td>
+            <input 
+                type="number" 
+                name="quantity" 
+                value="{{ item.quantity }}" 
+                min="1" 
+                max="{{ item.product.inventario.stock_actual }}" 
+                class="input quantity-input" 
+                data-id="{{ item.product.id_prod }}"
+            >
+        </td>
+        <td>${{ item.total_price }}</td>
+        <td>
+           <form method="post" action="{% url 'eliminar_del_carrito' item.product.id_prod %}">
+    {% csrf_token %}
+    <button type="submit" class="btn"><i class="fa fa-close"></i></button>
+</form>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">Tu carrito está vacío</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
                     </table>
                 </div>
             </div>
-            
-            <div class="col-md-4">
-                <div class="cart-summary">
-                    <h3>Resumen del Carrito</h3>
-                    <div class="order-col">
-                        <div><strong>PRODUCTOS</strong></div>
-                        <div><strong>TOTAL</strong></div>
-                    </div>
-                    <div class="order-products">
-                        {% for item in cart_items %}
-                        <div class="order-col">
-                            <div>{{ item.quantity }}x {{ item.product.name }}</div>
-                            <div>${{ item.total_price }}</div>
-                        </div>
-                        {% endfor %}
-                    </div>
+
+   <div class="col-md-4 mt-5">  <!-- <-- Añadido mt-5 -->
+    <div class="card shadow-sm p-4 rounded" style="border: 1px solid #ddd;">
+        <h4 class="mb-4 text-center">Resumen del Pedido</h4>
+
+        <div class="mb-3">
+            {% for item in cart_items %}
+            <div class="d-flex justify-content-between">
+                <span>{{ item.quantity }} x {{ item.product.nomb_prod }}</span>
+                <span>$ {{ item.total_price|floatformat:2 }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between mb-2">
+            <strong>Subtotal:</strong>
+            <strong>$ {{ cart_total|floatformat:2 }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+            <strong>Impuestos:</strong>
+            <strong>$ 0.00</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+            <strong>Total:</strong>
+            <strong class="text-success">$ {{ cart_total|floatformat:2 }}</strong>
+        </div>
+
+        <div class="text-center">
+            <a href="{% url 'pago' %}" class="btn btn-primary btn-block">Finalizar Compra</a>
+        </div>
+    </div>
+</div>
+ </div>
+    <!-- Sección de Transferencias Bancarias -->
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="card p-4">
+                    <h4 class="mb-4">Datos para Transferencias Bancarias</h4>
+                    <p class="text-muted">La entrega con pago mediante transferencia bancaria podrá tardar entre 24 a 48 horas y está sujeta a disponibilidad de Stock</p>
                     
-                    <div class="order-col">
-                        <div><strong>TOTAL</strong></div>
-                        <div><strong class="order-total">${{ cart_total }}</strong></div>
-                    </div>
-                    <div class="text-center">
-                        <a href="{% url 'pago' %}" class="primary-btn order-submit">Finalizar Compra</a>
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="bank-info">
+                                <h5>BANCO PICHINCHA</h5>
+                                <p>Tipo: Cuenta Corriente</p>
+                                <p>N°: 3024807404</p>
+                                <p>RUC: 179110331001</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="bank-info">
+                                <h5>PRODUBANCO</h5>
+                                <p>Tipo: Cuenta Corriente</p>
+                                <p>N°: 02005073746</p>
+                                <p>RUC: 179110331001</p>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Fin Sección Transferencias Bancarias -->
     </div>
 </div>
- <!-- jQuery Plugins -->
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script>
-        // Mostrar/ocultar campos de envío
-        document.getElementById('envio-diferente').addEventListener('change', function() {
-            const shippingFields = document.getElementById('campos-envio');
-            if (this.checked) {
-                shippingFields.style.display = 'block';
-                // Hacer requeridos los campos de envío
-                document.querySelectorAll('#campos-envio input').forEach(input => {
-                    input.required = true;
-                });
-            } else {
-                shippingFields.style.display = 'none';
-                // Quitar el requerido de los campos de envío
-                document.querySelectorAll('#campos-envio input').forEach(input => {
-                    input.required = false;
-                });
+
+<!-- jQuery Plugins -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script>
+    // Mostrar/ocultar campos de envío
+    document.getElementById('envio-diferente').addEventListener('change', function() {
+        const shippingFields = document.getElementById('campos-envio');
+        if (this.checked) {
+            shippingFields.style.display = 'block';
+            document.querySelectorAll('#campos-envio input').forEach(input => {
+                input.required = true;
+            });
+        } else {
+            shippingFields.style.display = 'none';
+            document.querySelectorAll('#campos-envio input').forEach(input => {
+                input.required = false;
+            });
+        }
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.quantity-input').on('change', function(){
+        const cantidad = parseInt($(this).val());
+        const idProd = $(this).data('id');
+        const maxStock = parseInt($(this).attr('max'));
+
+        if(cantidad < 1){
+            alert('La cantidad debe ser al menos 1');
+            $(this).val(1);
+            return;
+        }
+        if(cantidad > maxStock){
+            alert(`No hay suficiente stock. Stock disponible: ${maxStock}`);
+            $(this).val(maxStock);
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: `/actualizar-cantidad/${idProd}/`,
+            data: {
+                'quantity': cantidad,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response){
+                if(response.success){
+                    // Recarga para actualizar totales
+                    location.reload();
+                } else {
+                    alert(response.message);
+                    location.reload();
+                }
+            },
+            error: function(){
+                alert('Error al actualizar la cantidad');
             }
         });
-    </script>
+    });
+});
+</script>
+
+
 {% endblock %}

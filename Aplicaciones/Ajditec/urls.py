@@ -36,7 +36,23 @@ urlpatterns = [
 
     #DETALLE_CARRITO
     
+    path('add-to-cart/<int:id_prod>/', views.add_to_cart, name='add_to_cart'),
     path('carrito/', views.carrito, name='carrito'),
+    path('eliminar-del-carrito/<int:id_prod>/', views.eliminar_del_carrito, name='eliminar_del_carrito'),
+    path('actualizar-cantidad/<int:id_prod>/', views.actualizar_cantidad_carrito, name='actualizar_cantidad_carrito'),
+    
+
+
+    
+    #LOGIN
+    path('login/', views.login_usuario, name='login'),
+    path('registro/', views.registrar_cliente, name='registro'),
+    path('logout/', views.logout_usuario, name='logout'),
+    path('plantilla/', views.admin_dashboard, name='admin_dashboard'),
+    path('inicio/', views.catalogo, name='catalogo'),
+
+    
+    
     
 
   

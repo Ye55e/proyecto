@@ -140,7 +140,10 @@ textarea.input {
 }
 
 .input-number input[type="number"] {
-  -moz-appearance: textfield;
+  -webkit-appearance: textfield; /* Chrome, Safari */
+  -moz-appearance: textfield;    /* Firefox */
+  appearance: textfield;         /* Estándar */
+  
   height: 40px;
   width: 100%;
   border: 1px solid #E4E7ED;
@@ -494,9 +497,14 @@ textarea.input {
 \*----------------------------*/
 
 .header-ctn {
-  float: right;
-  padding: 15px 0px;
+  display: flex;
+  align-items: center; /* Alinea verticalmente */
+  justify-content: flex-end;
+  margin-left: auto; /* Todo alineado a la derecha */
+  gap: 10px; /* Espacio entre cuenta y carrito */
+  padding: 10px 20px;
 }
+
 
 .header-ctn>div {
   display: inline-block;
@@ -2190,4 +2198,70 @@ textarea.input {
     float: none;
     margin-top: 10px;
   }
+  
 }
+
+
+
+/*----------------------------*\
+	LOGIN
+\*----------------------------*/
+
+
+
+
+.login-container {
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 30px 25px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .login-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .login-container form p {
+    margin-bottom: 18px;
+  }
+
+  .login-container form input[type="text"],
+  .login-container form input[type="password"],
+  .login-container form input[type="email"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.8px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .login-container form input[type="text"]:focus,
+  .login-container form input[type="password"]:focus,
+  .login-container form input[type="email"]:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+
+  .login-container form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .login-container form button:hover {
+    background-color: #0056b3;
+  }
