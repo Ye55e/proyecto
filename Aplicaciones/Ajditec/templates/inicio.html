@@ -6,6 +6,7 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+		<link rel="stylesheet" href="{% static 'css/style.css' %}">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		 <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
@@ -284,7 +285,7 @@
 											</h4>
 
 											<!-- Estado del producto en texto dentro de un cuadro -->
-										{% if producto.stock < 3 %}
+										 {% if producto.inventario.stock_actual <= 3%}
 											<p class="estado-agotado">AGOTADO</p>
 											{% else %}
 											<p class="estado-disponible">DISPONIBLE</p>
@@ -292,14 +293,18 @@
 
 
 										<div class="product-btns">
-										<button class="quick-view">
+										<!-- Botón de Vista Rápida -->
+										<a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn">
 											<i class="fa fa-eye"></i>
 											<span class="tooltipp">Vista rápida</span>
+										</a>
+										
+
+										<!-- Botón de Añadir al carrito -->
 										<button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}">
 											<i class="fa fa-shopping-cart"></i>
 											<span class="tooltipp">Añadir al carrito</span>
 										</button>
-
 										</div>
 										</div>
 										</div>
@@ -321,50 +326,28 @@
 		<!-- /SECTION -->
 
 		<!-- HOT DEAL SECTION -->
-		<div id="hot-deal" class="section">
-			<!-- container -->
-			<div class="container">
-				<!-- row -->
-				<div class="row">
-					<div class="col-md-12">
-						<div class="hot-deal">
-							<ul class="hot-deal-countdown">
-								<li>
-									<div>
-										<h3>02</h3>
-										<span>Days</span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<h3>10</h3>
-										<span>Hours</span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<h3>34</h3>
-										<span>Mins</span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<h3>60</h3>
-										<span>Secs</span>
-									</div>
-								</li>
-							</ul>
-							<h2 class="text-uppercase">hot deal this week</h2>
-							<p>New Collection Up to 50% OFF</p>
-							<a class="primary-btn cta-btn" href="#">Shop now</a>
-						</div>
-					</div>
-				</div>
-				<!-- /row -->
-			</div>
-			<!-- /container -->
-		</div>
-		<!-- /HOT DEAL SECTION -->
+<div id="hot-deal" class="section">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="hot-deal">
+          <!-- Puedes mantener el contador como decoración -->
+          <ul class="hot-deal-countdown">
+            <li><div><h3>✓</h3><span>Calidad</span></div></li>
+            <li><div><h3>✓</h3><span>Garantía</span></div></li>
+            <li><div><h3>✓</h3><span>Stock</span></div></li>
+          </ul>
+
+          <h2 class="text-uppercase">Repuestos Garantizados</h2>
+          <p>Todo para tu laptop en un solo lugar</p>
+          <a class="primary-btn cta-btn" href="#">Ver catálogo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /HOT DEAL SECTION -->
+
 
 		<!-- SECTION -->
 		<div class="section">
@@ -495,24 +478,9 @@
 				<!-- /container -->
 			</div>
 			<!-- /top footer -->
-
-			<!-- bottom footer -->
-			<div id="bottom-footer" class="section">
-				<div class="container">
-					<!-- row -->
-					<div class="row">
-						<div class="col-md-12 text-center">
-							<ul class="footer-payments">
-								<li><a href="#"><i class="fa fa-cc-visa"></i></a></li>
-								<li><a href="#"><i class="fa fa-credit-card"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-paypal"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-mastercard"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-discover"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-amex"></i></a></li>
-							</ul>
 							<span class="copyright">
 								<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-								Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+								Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made by: Yesseña Canchig y Adriana Carua
 							<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
 							</span>
 						</div>

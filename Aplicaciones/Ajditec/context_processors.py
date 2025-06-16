@@ -6,7 +6,19 @@ def categorias_disponibles(request):
     }
 
 
+from django.utils import timezone
+from datetime import timedelta
+from .models import Carrito
+
 def carrito_total_items(request):
-    carrito = request.session.get('carrito', {})  # Esperado: {'3': 2, '5': 1}
-    total_items = sum(carrito.values())  # Solo sumamos las cantidades
-    return {'carrito_total_items': total_items}
+    if request.user.is_authenticated:
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
+        total = sum(detalle.cantidad for detalle in carrito.detalles.all()) if carrito else 0
+    else:
+        carrito_sesion = request.session.get('carrito', {})
+        total = sum(carrito_sesion.values())
+    return {'carrito_total_items': total}

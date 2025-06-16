@@ -1,0 +1,29 @@
+<div class="checkout-progress d-flex justify-content-center align-items-center mb-5">
+    <div class="step text-center 
+        {% if paso_actual == 'revisar' %}
+            active
+        {% elif paso_actual == 'datos' or paso_actual == 'confirmar' %}
+            completed
+        {% endif %}">
+        <div class="circle">1</div>
+        <span>Revisar pedido</span>
+    </div>
+    <div class="line"></div>
+    <div class="step text-center 
+        {% if paso_actual == 'datos' %}
+            active
+        {% elif paso_actual == 'confirmar' %}
+            completed
+        {% endif %}">
+        <div class="circle">2</div>
+        <span>Datos del pedido</span>
+    </div>
+    <div class="line"></div>
+    <div class="step text-center 
+        {% if paso_actual == 'confirmar' %}
+            active
+        {% endif %}">
+        <div class="circle">3</div>
+        <span>Confirmar pedido</span>
+    </div>
+</div>

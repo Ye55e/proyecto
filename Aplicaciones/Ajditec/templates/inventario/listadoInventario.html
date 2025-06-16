@@ -10,8 +10,9 @@
       <thead class="table-dark">
         <tr>
           <th>ID</th>
+          <th>Cod Producto</th>
           <th>Producto</th>
-          <th>Precio Unitario</th>
+          <th>Precio de Venta</th>
           <th>Stock Actual</th>
           <th>Fecha Creación</th>
           <th>Fecha Actualización</th>
@@ -22,6 +23,7 @@
         {% for inv in inventarios %}
         <tr>
           <td>{{ inv.id_inve }}</td>
+          <td>{{ inv.producto.id_prod }}</td>
           <td>{{ inv.producto.nomb_prod }}</td>
           <td>${{ inv.precunit_prod }}</td>
           <td>{{ inv.stock_actual }}</td>

@@ -19,26 +19,57 @@
     text-align: center;
   }
 
+  /* Campos del formulario */
+  .registro-container form p {
+    margin-bottom: 20px;
+  }
+
+  .registro-container form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .registro-container form input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  /* Botón Registrarse ajustado */
   .registro-container form button {
     width: 100%;
-    padding: 12px;
-    font-weight: 600;
-    background-color: #007bff;
+    padding: 8px 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    background-color: #0b2a7d;
     border: none;
-    border-radius: 6px;
+    border-radius: 16px;
     color: white;
     transition: background-color 0.3s ease;
+    margin-top: 10px;
   }
 
   .registro-container form button:hover {
-    background-color: #0056b3;
+    background-color: #05205e;
   }
 
-  .registro-container form p {
-    margin-bottom: 18px;
+  /* Enlace "¿Ya tiene una cuenta?" */
+  .login-link {
+    display: block;
+    text-align: center;
+    font-size: 1.05rem;
+    color: #0b2a7d;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 16px;
   }
 
-  /* Estilo para errores que sí se muestran */
+  /* Errores */
   .errorlist {
     color: #d93025;
     margin-top: 4px;
@@ -47,7 +78,7 @@
     padding-left: 0;
   }
 
-  /* Para mensajes de error y éxito de Django messages */
+  /* Mensajes de Django */
   .messages {
     max-width: 480px;
     margin: 20px auto;
@@ -72,6 +103,7 @@
   }
 </style>
 {% endblock %}
+
 
 {% block content %}
 <div class="registro-container">
@@ -103,6 +135,8 @@
     {% endfor %}
 
     <button type="submit">Registrarse</button>
+    <a href="{% url 'login' %}" class="login-link">¿Ya tiene una cuenta?</a>
+
   </form>
 </div>
 {% endblock %}

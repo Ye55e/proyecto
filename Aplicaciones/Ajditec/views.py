@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 
-from .models import Producto, Categoria, Inventario,Usuario
+from .models import Producto, Categoria, Inventario,Usuario,DetalleCarrito
 
 def carrito(request):
     return render(request, 'carrito.html')
+def finalPedido(request):
+    return render(request, 'finalPedido.html')
 
 #
 
@@ -33,13 +35,67 @@ def inicio(request):
 from .models import Carrito, DetalleCarrito, Producto
 from django.shortcuts import get_object_or_404
 
+#vista del resumen de pedido en el template del final del pedido
+def final_pedido(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    carrito = Carrito.objects.filter(usuarios=request.user).order_by('-fechacreac_carr').first()
+
+    cart_items = []
+    cart_total = 0
+
+    if carrito:
+        cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
+        for detalle in cart_items_qs:
+            cart_items.append({
+                'product': detalle.producto,
+                'quantity': detalle.cantidad,
+                'total_price': detalle.subtotal,
+            })
+        cart_total = carrito.total_carrito()
+
+    if request.method == 'POST':
+        # Procesar confirmación de pedido
+        pass
+
+    context = {
+        'cart_items': cart_items,
+        'cart_total': cart_total,
+    }
+    return render(request, 'finalPedido.html', context)
 
 
-def pago_view(request):
-    return render(request, 'pago.html')
+def vista_pago(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
 
+    # Obtener el carrito del usuario actual, el más reciente
+    carrito = Carrito.objects.filter(usuarios=request.user).order_by('-fechacreac_carr').first()
 
+    cart_items = []
+    cart_total = 0
 
+    if carrito:
+        cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
+        for detalle in cart_items_qs:
+            cart_items.append({
+                'product': detalle.producto,
+                'quantity': detalle.cantidad,
+                'total_price': detalle.subtotal,
+            })
+        cart_total = carrito.total_carrito()
+
+    if request.method == 'POST':
+        # Aquí procesas el formulario del pago (datos del pedido)
+        # ...
+        pass
+
+    context = {
+        'cart_items': cart_items,
+        'cart_total': cart_total,
+    }
+    return render(request, 'pago.html', context)
 
 #Usuarios
 def nuevoUsuario(request):
@@ -348,43 +404,117 @@ def catalogo(request):
         return redirect('admin_dashboard')  # o mostrar un error
     return render(request, 'inicio.html')
 
-
-#AÑADIR AL CARRITO
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
+
+from django.contrib import messages
+
 def add_to_cart(request, id_prod):
+    producto = get_object_or_404(Producto, pk=id_prod)
+
+    cantidad = 1
     if request.method == 'POST':
-        producto = get_object_or_404(Producto, id_prod=id_prod)
-        carrito = request.session.get('carrito', {})
+        try:
+            cantidad = int(request.POST.get('quantity', 1))
+        except:
+            cantidad = 1
 
-        if str(id_prod) in carrito:
-            carrito[str(id_prod)] += 1
+    try:
+        inventario = producto.inventario
+        stock_actual = inventario.stock_actual
+    except Inventario.DoesNotExist:
+        stock_actual = 0
+
+    # 👇 Reemplazamos is_ajax() correctamente
+    es_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    if cantidad < 1:
+        if not es_ajax:
+            messages.error(request, 'La cantidad debe ser al menos 1.')
+            return redirect('producto_vista_rapida', id_prod=id_prod)
         else:
-            carrito[str(id_prod)] = 1
+            return JsonResponse({'success': False, 'message': 'Cantidad inválida.'}, status=400)
 
-        request.session['carrito'] = carrito
+    if cantidad > stock_actual:
+        msg = f'No hay suficiente stock para "{producto.nomb_prod}". Disponible: {stock_actual}'
+        if not es_ajax:
+            messages.error(request, msg)
+            return redirect('producto_vista_rapida', id_prod=id_prod)
+        else:
+            return JsonResponse({'success': False, 'message': msg}, status=400)
 
-        return JsonResponse({'success': True, 'message': f'Producto "{producto.nomb_prod}" agregado al carrito.'})
+    if request.user.is_authenticated:
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
+        if not carrito:
+            carrito = Carrito.objects.create(usuarios=request.user)
+
+        detalle, creado = DetalleCarrito.objects.get_or_create(
+            carrito=carrito,
+            producto=producto,
+            defaults={'cantidad': cantidad}
+        )
+        if not creado:
+            detalle.cantidad += cantidad
+            detalle.save()
+
+        cart_count = sum(d.cantidad for d in carrito.detalles.all())
+
+        if es_ajax:
+            return JsonResponse({'success': True, 'message': 'Añadido al carrito.', 'cart_count': cart_count})
+        else:
+            messages.success(request, f'Se agregó {cantidad} unidad(es) de "{producto.nomb_prod}" a tu carrito.')
+            return redirect('producto_vista_rapida', id_prod=id_prod)
+
     else:
-        return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+        carrito_sesion = request.session.get('carrito', {})
+        prev = carrito_sesion.get(str(id_prod), 0)
+        carrito_sesion[str(id_prod)] = prev + cantidad
+        request.session['carrito'] = carrito_sesion
+
+        if es_ajax:
+            cart_count = sum(carrito_sesion.values())
+            return JsonResponse({'success': True, 'message': 'Añadido al carrito.', 'cart_count': cart_count})
+        else:
+            messages.success(request, f'Se agregó {cantidad} unidad(es) de "{producto.nomb_prod}" al carrito temporal.')
+            return redirect('producto_vista_rapida', id_prod=id_prod)
 
 def carrito(request):
-    cart = request.session.get('carrito', {})  # <-- clave debe coincidir con la que usas en add_to_cart
-    cart_items = []
+    if request.user.is_authenticated:
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
 
-    for id_prod_str, quantity in cart.items():
-        try:
-            id_prod = int(id_prod_str)
-            producto = Producto.objects.get(pk=id_prod)
-            inventario = producto.inventario
-            total_price = inventario.precunit_prod * quantity
+        if carrito:
+            cart_items = [{
+                'product': detalle.producto,
+                'quantity': detalle.cantidad,
+                'total_price': detalle.subtotal
+            } for detalle in carrito.detalles.all()]
+        else:
+            cart_items = []
 
-            cart_items.append({
-                'product': producto,
-                'quantity': quantity,
-                'total_price': total_price,
-            })
-        except Producto.DoesNotExist:
-            continue
+    else:
+        carrito_sesion = request.session.get('carrito', {})
+        cart_items = []
+        for id_prod_str, quantity in carrito_sesion.items():
+            try:
+                producto = Producto.objects.get(pk=int(id_prod_str))
+                total_price = producto.inventario.precunit_prod * quantity
+                cart_items.append({
+                    'product': producto,
+                    'quantity': quantity,
+                    'total_price': total_price,
+                })
+            except Producto.DoesNotExist:
+                continue
 
     cart_total = sum(item['total_price'] for item in cart_items)
 
@@ -393,35 +523,86 @@ def carrito(request):
         'cart_total': cart_total,
     })
 
-#ELIMINAR CARRITO
-
 def eliminar_del_carrito(request, id_prod):
-    if request.method == 'POST':
-        carrito = request.session.get('carrito', {})
-        prod_key = str(id_prod)
-        if prod_key in carrito:
-            del carrito[prod_key]
-            request.session['carrito'] = carrito
+    if request.method != 'POST':
         return redirect('carrito')
+
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.filter(
+            usuarios=request.user
+        ).order_by('-fechacreac_carr').first()
+        if carrito:
+            detalle = carrito.detalles.filter(producto_id=id_prod).first()
+            if detalle:
+                detalle.delete()
     else:
-        # Opcional: si alguien hace GET, redirige igual
-        return redirect('carrito')
+        carrito_sesion = request.session.get('carrito', {})
+        prod_key = str(id_prod)
+        if prod_key in carrito_sesion:
+            del carrito_sesion[prod_key]
+            request.session['carrito'] = carrito_sesion
+
+    return redirect('carrito')
+
 def actualizar_cantidad_carrito(request, id_prod):
-    if request.method == 'POST':
-        cantidad_nueva = int(request.POST.get('quantity', 1))
-        producto = get_object_or_404(Producto, pk=id_prod)
-        inventario = get_object_or_404(Inventario, producto=producto)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
 
-        if cantidad_nueva < 1:
-            return JsonResponse({'success': False, 'message': 'La cantidad debe ser al menos 1.'})
+    cantidad_nueva = int(request.POST.get('quantity', 1))
+    producto = get_object_or_404(Producto, pk=id_prod)
+    inventario = get_object_or_404(Inventario, producto=producto)
 
-        if cantidad_nueva > inventario.stock_actual:
-            return JsonResponse({'success': False, 'message': f'No hay suficiente stock para "{producto.nomb_prod}". Stock disponible: {inventario.stock_actual}'})
+    if cantidad_nueva < 1:
+        return JsonResponse({'success': False, 'message': 'La cantidad debe ser al menos 1.'})
 
-        carrito = request.session.get('carrito', {})
-        carrito[str(id_prod)] = cantidad_nueva
-        request.session['carrito'] = carrito
+    if cantidad_nueva > inventario.stock_actual:
+        return JsonResponse({'success': False,
+                             'message': f'No hay suficiente stock para "{producto.nomb_prod}". Stock disponible: {inventario.stock_actual}'})
+
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.filter(
+            usuarios=request.user
+        ).order_by('-fechacreac_carr').first()
+        if carrito:
+            detalle = carrito.detalles.filter(producto=producto).first()
+            if detalle:
+                detalle.cantidad = cantidad_nueva
+                detalle.save()
+            else:
+                DetalleCarrito.objects.create(carrito=carrito, producto=producto, cantidad=cantidad_nueva)
+        else:
+            carrito = Carrito.objects.create(usuarios=request.user)
+            DetalleCarrito.objects.create(carrito=carrito, producto=producto, cantidad=cantidad_nueva)
+
+        return JsonResponse({'success': True, 'message': f'Cantidad actualizada para "{producto.nomb_prod}".'})
+    else:
+        carrito_sesion = request.session.get('carrito', {})
+        carrito_sesion[str(id_prod)] = cantidad_nueva
+        request.session['carrito'] = carrito_sesion
 
         return JsonResponse({'success': True, 'message': f'Cantidad actualizada para "{producto.nomb_prod}".'})
 
-    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+#PAGO
+@login_required(login_url='login')  
+def pago(request):
+    return render(request, 'pago.html')
+
+#VISTA RAPIDA
+# views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Producto, Inventario
+
+def producto_vista_rapida(request, id_prod):
+    producto = get_object_or_404(Producto, pk=id_prod)
+    try:
+        inventario = producto.inventario
+        stock = inventario.stock_actual
+        precio = inventario.precunit_prod
+    except Inventario.DoesNotExist:
+        stock = 0
+        precio = None
+    return render(request, 'producto_vista_rapida.html', {
+        'producto': producto,
+        'stock': stock,
+        'precio': precio,
+    })

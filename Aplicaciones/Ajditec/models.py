@@ -96,6 +96,11 @@ class Carrito(models.Model):
     fechacreac_carr = models.DateTimeField(auto_now_add=True)
     usuarios = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='carritos', db_column='id_user')
     session_key = models.CharField(max_length=40, null=True, blank=True)
+    estado_carr = models.CharField(
+    max_length=10,
+    choices=[('activo', 'Activo'), ('pagado', 'Pagado')],
+    default='activo'
+)
 
 
     class Meta:
