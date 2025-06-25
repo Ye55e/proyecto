@@ -148,6 +148,8 @@ class Orden(models.Model):
 
     direc_entre = models.TextField()
     metodo_pago = models.CharField(max_length=100)
+    num_trans = models.CharField(max_length=20, null=True, blank=True)
+    fecha_trans= models.DateField(null=True, blank=True)
     estado_ord = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='Pendiente')
     fechacrea_ord = models.DateField(auto_now_add=True)
     fechactua_ord = models.DateField(auto_now=True)

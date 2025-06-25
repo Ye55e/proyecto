@@ -41,15 +41,25 @@
 
 <div class="container mt-5">
     <div class="row">
+        <!-- Mensajes de error -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <!-- Formulario de Datos del Pedido -->
         <div class="col-md-7">
             <h4 class="fw-bold mb-4">DATOS DEL PEDIDO</h4>
-            <form method="POST" action="{% url 'final_pedido' %}" id="formulario-pago">
+            <form method="POST" action="{% url 'pago' %}" id="formulario-pago">
                 {% csrf_token %}
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label">Nombre del cliente:</label>
-                        <input type="text" class="form-control" placeholder="Nombre" required>
+                        <label class="form-label">Nombre del cliente</label>
+                        <input type="text" class="form-control" placeholder="Nombre" name="nombre" 
+                               value="{{ datos_cliente.nombre|default:"" }}" required>
                     </div>
                 </div>
 
@@ -57,29 +67,33 @@
                     <div class="col">
                         <label class="form-label">Cédula o RUC</label>
                         <input type="text" class="form-control" placeholder="Cédula o RUC" name="cedula" 
+                               value="{{ datos_cliente.cedula|default:"" }}" 
                                pattern="^\d{10,13}$" title="Debe tener entre 10 y 13 dígitos" required>
                     </div>
                     <div class="col">
                         <label class="form-label">Correo Electrónico</label>
                         <input type="email" class="form-control" placeholder="correo@ejemplo.com" 
-                               name="email" value="{{ request.user.email }}" required>
+                               name="email" value="{{ datos_cliente.email|default:request.user.email }}" required>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label">Dirección</label>
-                        <input type="text" class="form-control" placeholder="Dirección" required>
+                        <input type="text" class="form-control" placeholder="Dirección" name="direccion" 
+                               value="{{ datos_cliente.direccion|default:"" }}" required>
                     </div>
                     <div class="col">
                         <label class="form-label">Ciudad</label>
-                        <input type="text" class="form-control" placeholder="Ciudad" required>
+                        <input type="text" class="form-control" placeholder="Ciudad" name="ciudad" 
+                               value="{{ datos_cliente.ciudad|default:"" }}" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
                     <input type="text" class="form-control" placeholder="Teléfono" name="telefono" 
-                        value="{{ request.user.cel_user }}" pattern="^\d{10}$" 
+                        value="{{ datos_cliente.telefono|default:request.user.cel_user }}" pattern="^\d{10}$" 
                         title="Debe tener 10 dígitos" required>
 
                            
@@ -114,6 +128,8 @@
                     <div style="font-weight: bold; font-size: 14px;">$ {{ item.total_price|floatformat:2 }}</div>
                 </div>
                 {% endfor %}
+                
+                
 
                 <hr>
 
