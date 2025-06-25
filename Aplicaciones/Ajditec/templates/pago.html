@@ -1,41 +1,42 @@
 {% extends "./plantilla.html" %}
 {% load static %}
 {% block contenido %}
-<link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+<link rel="stylesheet" href="{% static 'plantilla_cliente/css/estilos.css' %}">
+<link rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}">
 
 {% include "barra_checkout.html" with paso_actual='datos' %}
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        .resumen-pedido-card {
-            font-size: 14px;
-            background: #fff;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-        }
+<style>
+    .resumen-pedido-card {
+        font-size: 14px;
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+    }
 
-        .resumen-pedido-card img {
-            border-radius: 5px;
-        }
+    .resumen-pedido-card img {
+        border-radius: 5px;
+    }
 
-        .form-control {
-            font-size: 14px;
-            padding: 6px 10px;
-        }
+    .form-control {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
 
-        .form-label {
-            font-weight: bold;
-            font-size: 14px;
-        }
+    .form-label {
+        font-weight: bold;
+        font-size: 14px;
+    }
 
-        .btn-sm-custom {
-            font-size: 14px;
-            padding: 6px 16px;
-            border-radius: 6px;
-        }
-    </style>
-</head>
+    .btn-sm-custom {
+        font-size: 14px;
+        padding: 6px 16px;
+        border-radius: 6px;
+    }
+</style>
+
 <body class="bg-light">
 
 <div class="container mt-5">
@@ -43,49 +44,50 @@
         <!-- Formulario de Datos del Pedido -->
         <div class="col-md-7">
             <h4 class="fw-bold mb-4">DATOS DEL PEDIDO</h4>
-            <form>
+            <form method="POST" action="{% url 'final_pedido' %}" id="formulario-pago">
+                {% csrf_token %}
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label">Nombre</label>
-                        <input type="text" class="form-control" placeholder="Nombre">
-                    </div>
-                    <div class="col">
-                        <label class="form-label">Apellidos</label>
-                        <input type="text" class="form-control" placeholder="Apellidos">
+                        <label class="form-label">Nombre del cliente:</label>
+                        <input type="text" class="form-control" placeholder="Nombre" required>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label">Cédula o RUC</label>
-                        <input type="text" class="form-control" placeholder="Cédula o RUC">
+                        <input type="text" class="form-control" placeholder="Cédula o RUC" name="cedula" 
+                               pattern="^\d{10,13}$" title="Debe tener entre 10 y 13 dígitos" required>
                     </div>
                     <div class="col">
                         <label class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-control" placeholder="correo@ejemplo.com">
+                        <input type="email" class="form-control" placeholder="correo@ejemplo.com" 
+                               name="email" value="{{ request.user.email }}" required>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label">Dirección</label>
-                        <input type="text" class="form-control" placeholder="Dirección">
+                        <input type="text" class="form-control" placeholder="Dirección" required>
                     </div>
                     <div class="col">
                         <label class="form-label">Ciudad</label>
-                        <input type="text" class="form-control" placeholder="Ciudad">
+                        <input type="text" class="form-control" placeholder="Ciudad" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" placeholder="Teléfono">
+                    <input type="text" class="form-control" placeholder="Teléfono" name="telefono" 
+                        value="{{ request.user.cel_user }}" pattern="^\d{10}$" 
+                        title="Debe tener 10 dígitos" required>
+
+                           
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a href="{% url 'carrito' %}"class="btn btn-info text-white btn-sm-custom rounded-pill">← Atrás</a>
-                    <a href="{% url 'finalPedido' %}"class="btn btn-primary btn-sm-custom rounded-pill">Siguiente →</a>
-
+                    <a href="{% url 'carrito' %}" class="btn btn-info text-white btn-sm-custom rounded-pill">← Atrás</a>
+                    <button type="submit" class="btn btn-primary btn-sm-custom rounded-pill">Siguiente →</button>
                 </div>
             </form>
         </div>

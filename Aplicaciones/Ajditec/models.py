@@ -129,28 +129,35 @@ class DetalleCarrito(models.Model):
         db_table = 'detalle_carrito'
 
 
-# Orden
+# models.py
+
 class Orden(models.Model):
-    ORDENES = [
+    ESTADO_CHOICES = [
         ('Pendiente', 'Pendiente'),
         ('Entregado', 'Entregado'),
         ('Rechazado', 'Rechazado'),
     ]
+
     id_ord = models.AutoField(primary_key=True)
+    nombre_cliente = models.CharField(max_length=150)
+    cedula_ruc = models.CharField(max_length=13)
+    correo_cliente = models.EmailField()
+    direccion_cliente = models.CharField(max_length=255)
+    ciudad_cliente = models.CharField(max_length=100)
+    telefono_cliente = models.CharField(max_length=10)
+
     direc_entre = models.TextField()
     metodo_pago = models.CharField(max_length=100)
-    estado_ord = models.CharField(max_length=20, choices=ORDENES, default='Pendiente')
+    estado_ord = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='Pendiente')
     fechacrea_ord = models.DateField(auto_now_add=True)
     fechactua_ord = models.DateField(auto_now=True)
-    usuarios = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='ordenes', db_column='id_user')
-    carrito = models.ForeignKey(Carrito, on_delete=models.SET_NULL, null=True, blank=True, related_name='ordenes', db_column='id_carr')
 
-    @property
-    def total_pagar(self):
-        return sum([detalle.subtotal for detalle in self.detalles.all()])
+    usuarios = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='id_user')
+    carrito = models.ForeignKey(Carrito, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_carr')
 
     class Meta:
         db_table = 'orden'
+
 
 
 # DetalleOrden
@@ -197,7 +204,6 @@ class DetalleTrans(models.Model):
     monto_trans = models.DecimalField(max_digits=10, decimal_places=2)
     banco_transfe = models.CharField(max_length=50, choices=BANCOS, default='Banco Pichincha')
     codigo_compro = models.CharField(max_length=25, unique=True)
-    comentario = models.TextField()
     fecha_trans = models.DateField()
     registro_pago = models.ForeignKey(RegistroPago, on_delete=models.CASCADE, related_name='regispagos', db_column='id_regpag')
 

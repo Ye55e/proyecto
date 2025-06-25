@@ -7,7 +7,8 @@ def carrito(request):
     return render(request, 'carrito.html')
 def finalPedido(request):
     return render(request, 'finalPedido.html')
-
+def admin_plantilla(request):
+    return render(request, 'plantilla_admin.html')
 #
 
 def inicio(request):
@@ -34,35 +35,66 @@ def inicio(request):
 
 from .models import Carrito, DetalleCarrito, Producto
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib import messages
 
 #vista del resumen de pedido en el template del final del pedido
 def final_pedido(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    carrito = Carrito.objects.filter(usuarios=request.user).order_by('-fechacreac_carr').first()
+    # Obtener el carrito del usuario
+    carrito_id = request.session.get('carrito_id')
+    print(f"ID del carrito en sesión: {carrito_id}")
+    
+    if not carrito_id:
+        messages.warning(request, "No hay carrito_id en sesión")
+        # Si no hay carrito en sesión, obtener el más reciente
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
+    else:
+        carrito = Carrito.objects.filter(
+            id_carr=carrito_id,
+            usuarios=request.user
+        ).first()
 
-    cart_items = []
-    cart_total = 0
+    if not carrito:
+        messages.error(request, "No se encontró ningún carrito activo. Por favor, agregue productos al carrito primero.")
+        return redirect('carrito')
+    else:
+        print(f"Carrito encontrado: {carrito.id_carr}")
 
-    if carrito:
-        cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
-        for detalle in cart_items_qs:
-            cart_items.append({
-                'product': detalle.producto,
-                'quantity': detalle.cantidad,
-                'total_price': detalle.subtotal,
-            })
-        cart_total = carrito.total_carrito()
+    # Guardar el ID del carrito en la sesión
+    request.session['carrito_id'] = carrito.id_carr
 
-    if request.method == 'POST':
-        # Procesar confirmación de pedido
-        pass
+    # Obtener los detalles del carrito
+    cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
+    print(f"Cantidad de detalles en el carrito: {cart_items_qs.count()}")
+    
+    cart_items = [
+        {
+            'product': detalle.producto,
+            'quantity': detalle.cantidad,
+            'total_price': detalle.subtotal
+        }
+        for detalle in cart_items_qs
+    ]
 
+    # Calcular el total del carrito
+    cart_total = sum(detalle.subtotal for detalle in cart_items_qs)
+    print(f"Total del carrito: {cart_total}")
+
+    # Pasar los productos y el total al template
     context = {
         'cart_items': cart_items,
         'cart_total': cart_total,
+        'carrito': carrito
     }
+
     return render(request, 'finalPedido.html', context)
 
 
@@ -70,32 +102,44 @@ def vista_pago(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    # Obtener el carrito del usuario actual, el más reciente
-    carrito = Carrito.objects.filter(usuarios=request.user).order_by('-fechacreac_carr').first()
+    # Obtener el carrito más reciente del usuario
+    tiempo_limite = timezone.now() - timedelta(hours=48)
+    carrito = Carrito.objects.filter(
+        usuarios=request.user,
+        fechacreac_carr__gte=tiempo_limite
+    ).first()
 
-    cart_items = []
-    cart_total = 0
+    if not carrito:
+        messages.error(request, "No se encontró ningún carrito activo. Por favor, agregue productos al carrito primero.")
+        return redirect('carrito')
 
-    if carrito:
-        cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
-        for detalle in cart_items_qs:
-            cart_items.append({
-                'product': detalle.producto,
-                'quantity': detalle.cantidad,
-                'total_price': detalle.subtotal,
-            })
-        cart_total = carrito.total_carrito()
+    # Guardar el ID del carrito en la sesión para mantener la consistencia
+    request.session['carrito_id'] = carrito.id_carr
+    print(f"Guardando carrito_id en sesión: {carrito.id_carr}")
 
-    if request.method == 'POST':
-        # Aquí procesas el formulario del pago (datos del pedido)
-        # ...
-        pass
+    # Obtener los detalles del carrito
+    cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
+    cart_items = [
+        {
+            'product': detalle.producto,
+            'quantity': detalle.cantidad,
+            'total_price': detalle.subtotal
+        }
+        for detalle in cart_items_qs
+    ]
+
+    # Calcular el total del carrito
+    cart_total = sum(detalle.subtotal for detalle in cart_items_qs)
+
+    print("Productos en carrito (vista_pago):", cart_items)  # Verifica los productos
 
     context = {
         'cart_items': cart_items,
         'cart_total': cart_total,
+        'carrito': carrito  # Pasar el objeto carrito completo
     }
     return render(request, 'pago.html', context)
+
 
 #Usuarios
 def nuevoUsuario(request):

@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
+    path('plantilla_admin/', views.admin_plantilla, name='plantilla_admin'),
     path('pago/', views.vista_pago, name='pago'),
    
 
@@ -45,7 +46,8 @@ urlpatterns = [
     path('producto/<int:id_prod>/vista-rapida/', views.producto_vista_rapida, name='producto_vista_rapida'),
     #FINAL PEDIDO
     path('finalPedido/', views.finalPedido, name='finalPedido'),
-    path('final-pedido/', views.final_pedido, name='finalPedido'),
+    path('final_pedido/', views.final_pedido, name='final_pedido'),
+   
 
 
 
