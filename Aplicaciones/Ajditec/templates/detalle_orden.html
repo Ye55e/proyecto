@@ -1,0 +1,156 @@
+{% extends "./base.html" %}
+{% load static %}
+
+{% block contenido %}
+
+<style>
+    .orden-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .orden-header {
+        background:rgb(249, 249, 250);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px 15px 0 0;
+        margin-bottom: 2rem;
+    }
+    
+    .orden-info {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    
+    .orden-info h5 {
+        color: #333;
+        margin-bottom: 1.5rem;
+    }
+    
+    .orden-info p {
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .orden-info strong {
+        color: #212529;
+    }
+    
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .table {
+        margin-bottom: 2rem;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background: #f8f9fa;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .producto-item {
+        border-bottom: 1px solid #eee;
+        padding: 1rem 0;
+    }
+    
+    .producto-item:last-child {
+        border-bottom: none;
+    }
+    
+    .producto-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .img-thumbnail {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 4px;
+    }
+    
+    .btn-volver {
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-volver:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="orden-container">
+    <div class="orden-header">
+        <h2 class="mb-0">Detalles de la Orden</h2>
+    </div>
+
+    <div class="orden-info">
+        <h5>Información de la Orden</h5>
+        <p><strong>Número de Orden:</strong> S{{ orden.id_ord }}</p>
+        <p><strong>Fecha:</strong> {{ orden.fechacrea_ord }}</p>
+        <p><strong>Estado:</strong>
+            <span class="badge {% if orden.estado_ord == 'Pendiente' %}bg-warning{% elif orden.estado_ord == 'Entregado' %}bg-success{% else %}bg-danger{% endif %}">
+                {{ orden.estado_ord }}
+            </span>
+        </p>
+        <p><strong>Método de Pago:</strong> {{ orden.metodo_pago }}</p>
+        {% if orden.num_trans %}
+            <p><strong>Número de Transferencia:</strong> {{ orden.num_trans }}</p>
+        {% endif %}
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles %}
+                <tr class="producto-item">
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="{{ detalle.producto.img_prod.url }}" 
+                                 alt="{{ detalle.producto.nomb_prod }}" 
+                                 class="img-thumbnail" 
+                                 style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
+                            <div>
+                                <h6 class="mb-0">{{ detalle.producto.nomb_prod }}</h6>
+                                <small class="text-muted">{{ detalle.producto.descrip_prod|truncatewords:10 }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center">{{ detalle.cantidad }}</td>
+                    <td class="text-end">$ {{ detalle.producto.inventario.precunit_prod }}</td>
+                    <td class="text-end">$ {{ detalle.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'listar_ordenes' %}" class="btn btn-secondary btn-volver">Volver a Historial</a>
+    </div>
+</div>
+{% endblock %}
+

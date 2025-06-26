@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('plantilla_admin/', views.admin_plantilla, name='plantilla_admin'),
-    path('pago/', views.pago, name='pago'),
+    path('datosPedido/', views.pago, name='datosPedido'),
    
 
     #Usuarios
@@ -46,6 +46,7 @@ urlpatterns = [
     path('producto/<int:id_prod>/vista-rapida/', views.producto_vista_rapida, name='producto_vista_rapida'),
     #FINAL PEDIDO
     path('finalPedido/', views.finalPedido, name='finalPedido'),
+    path('orden_confirmada/<int:id_ord>/', views.orden_confirmada, name='orden_confirmada'),
     path('procesar_pedido/', views.procesar_pedido, name='procesar_pedido'),
     path('conf_pago/<int:id_ord>/', views.conf_pago, name='conf_pago'),
     path('final_pedido/', views.final_pedido, name='final_pedido'),
@@ -64,6 +65,8 @@ urlpatterns = [
     path('logout/', views.logout_usuario, name='logout'),
     path('plantilla/', views.admin_dashboard, name='admin_dashboard'),
     path('inicio/', views.catalogo, name='catalogo'),
+    path('listar_ordenes/', views.listar_ordenes, name='listar_ordenes'),
+    path('detalle_orden/<int:id_ord>/', views.detalle_orden, name='detalle_orden'),
 
     
     

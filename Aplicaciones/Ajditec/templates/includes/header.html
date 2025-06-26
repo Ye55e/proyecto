@@ -1,0 +1,126 @@
+{% load static %}
+
+<!-- HEADER -->
+<header>
+    <!-- TOP HEADER -->
+    <div id="top-header">
+        <div class="container">
+            <ul class="header-links pull-left">
+                <li>
+                    <a href="https://api.whatsapp.com/send?phone=593969025956&text=¡Hola!%20Quisiera%20más%20información%20sobre%20sus%20productos." target="_blank" rel="noopener">
+                        <i class="fa fa-phone"></i> +593 9 6902 5956
+                    </a>
+                </li>
+                <li>
+                    <a href="mailto:ajditec.ventas@gmail.com">
+                        <i class="fa fa-envelope"></i> ajditec.ventas@gmail.com
+                    </a>
+                </li>
+            </ul>
+            <ul class="header-links pull-right">
+                {% if request.user.is_authenticated %}
+                    <li>
+                        <div class="cuenta-login" id="btnCuenta">
+                            <i class="fa fa-user"></i>
+                            <div class="cuenta-texto">
+                                <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+                                <i class="fa fa-caret-down"></i>
+                            </div>
+                        </div>
+                        <div class="cuenta-menu" id="menuCuenta">
+                            <a href="{% url 'listar_ordenes' %}"><i class="fa fa-history"></i> Historial de Órdenes</a>
+                            <a href="{% url 'catalogo' %}"><i class="fa fa-id-card"></i> Mi cuenta</a>
+                            <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{% url 'login' %}"><i class="fa fa-user"></i> Iniciar sesión</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <!-- /TOP HEADER -->
+
+    <!-- MAIN HEADER -->
+    <div id="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="header-logo">
+                        <a href="{% url 'inicio' %}" class="logo">
+                            <img src="{% static 'plantilla_cliente/img/logo.png' %}" alt="">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="header-search">
+                        <form>
+                            <select class="input-select">
+                                <option value="0">Categorías</option>
+                                <option value="1">Pantallas</option>
+                                <option value="1">Baterías</option>
+                                <option value="1">Cargadores</option>
+                                <option value="1">Accesorios</option>
+                            </select>
+                            <input class="input" placeholder="Buscar aquí...">
+                            <button class="search-btn">Buscar</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-3 clearfix">
+                    <div class="header-ctn">
+                        <div class="cart">
+                            <a href="{% url 'ver_carrito' %}">
+                                <i class="fa fa-shopping-cart"></i>
+                                <span class="qty">0</span>
+                            </a>
+                            <div class="cart-dropdown">
+                                <div class="cart-list">
+                                    <!-- Aquí se mostrarán los productos del carrito -->
+                                </div>
+                                <div class="cart-summary">
+                                    <small>0 Item(s) seleccionados</small>
+                                    <h5>SUBTOTAL: $0.00</h5>
+                                </div>
+                                <div class="cart-btns">
+                                    <a href="{% url 'ver_carrito' %}">Ver carrito</a>
+                                    <a href="{% url 'finalPedido' %}">Comprar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /MAIN HEADER -->
+</header>
+
+<!-- NAVIGATION -->
+<nav id="navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-nav">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+                    <div class="collapse navbar-collapse navbar-right">
+                        <ul class="main-nav nav navbar-nav">
+                            <li class="active"><a href="{% url 'inicio' %}">Inicio</a></li>
+                            <li><a href="{% url 'catalogo' %}">Catálogo</a></li>
+                            <li><a href="{% url 'contacto' %}">Contacto</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

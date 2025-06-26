@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from .models import Producto, Categoria, Inventario,Usuario,DetalleCarrito,Orden,DetalleOrden,RegistroPago
 
 def carrito(request):
     return render(request, 'carrito.html')
 def finalPedido(request):
-    """Muestra el formulario de final de pedido"""
     carrito_id = request.session.get('carrito_id')
     if carrito_id:
         carrito = get_object_or_404(Carrito, id_carr=carrito_id)
@@ -21,6 +20,24 @@ def finalPedido(request):
     else:
         messages.error(request, "No hay carrito activo. Por favor, agregue productos al carrito primero.")
         return redirect('carrito')
+
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
+def listar_ordenes(request):
+    ordenes = Orden.objects.filter(usuarios=request.user).order_by('-fechacrea_ord')
+    return render(request, 'listar_ordenes.html', {
+        'ordenes': ordenes
+    })
+
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
+def detalle_orden(request, id_ord):
+    orden = get_object_or_404(Orden, id_ord=id_ord, usuarios=request.user)
+    detalles = orden.detalles.all()
+    return render(request, 'detalle_orden.html', {
+        'orden': orden,
+        'detalles': detalles
+    })
 
 @login_required(login_url='login')
 def procesar_pedido(request):
@@ -109,7 +126,12 @@ def procesar_pedido(request):
             messages.success(request, f"¡Orden #{orden.id_ord} creada exitosamente!")
             print("Orden procesada exitosamente")
             
-            return redirect('carrito')  # Por ahora redirigimos al carrito
+            # Limpiar el carrito_id de la sesión
+            if 'carrito_id' in request.session:
+                del request.session['carrito_id']
+            
+            # Redirigir a la página de confirmación con la información de la orden
+            return redirect('orden_confirmada', id_ord=orden.id_ord)
             
         except Exception as e:
             # Si hay algún error, mostrar mensaje y redirigir al carrito
@@ -677,8 +699,13 @@ def carrito(request):
                 'quantity': detalle.cantidad,
                 'total_price': detalle.subtotal
             } for detalle in carrito.detalles.all()]
+            # Guardar el ID del carrito en la sesión
+            request.session['carrito_id'] = carrito.id_carr
         else:
             cart_items = []
+            # Si no hay carrito, limpiar el carrito_id de la sesión
+            if 'carrito_id' in request.session:
+                del request.session['carrito_id']
 
     else:
         carrito_sesion = request.session.get('carrito', {})
@@ -700,7 +727,25 @@ def carrito(request):
     return render(request, 'carrito.html', {
         'cart_items': cart_items,
         'cart_total': cart_total,
+        'carrito': carrito if carrito else None,
     })
+
+@login_required(login_url='login')
+def orden_confirmada(request, id_ord):
+    """Muestra la página de confirmación de orden"""
+    try:
+        orden = get_object_or_404(Orden, id_ord=id_ord, usuarios=request.user)
+        detalles_orden = orden.detalles.all()
+        registro_pago = orden.pagos.first()
+        
+        return render(request, 'orden_confirmada.html', {
+            'orden': orden,
+            'detalles_orden': detalles_orden,
+            'registro_pago': registro_pago
+        })
+    except Orden.DoesNotExist:
+        messages.error(request, "No se encontró la orden solicitada")
+        return redirect('carrito')
 
 def eliminar_del_carrito(request, id_prod):
     if request.method != 'POST':
@@ -843,7 +888,7 @@ def pago(request):
         # Verificar si hay datos del cliente en la sesión y prellenar el formulario
         datos_cliente = request.session.get('datos_cliente', {})
         
-        return render(request, 'pago.html', {
+        return render(request, 'datosPedido.html', {
             'cart_items': cart_items,
             'cart_total': carrito.total_carrito(),
             'datos_cliente': datos_cliente,

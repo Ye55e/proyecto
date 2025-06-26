@@ -53,7 +53,7 @@
         <!-- Formulario de Datos del Pedido -->
         <div class="col-md-7">
             <h4 class="fw-bold mb-4">DATOS DEL PEDIDO</h4>
-            <form method="POST" action="{% url 'pago' %}" id="formulario-pago">
+            <form method="POST" action="{% url 'datosPedido' %}" id="formulario-pago">
                 {% csrf_token %}
                 <div class="row mb-3">
                     <div class="col">
@@ -88,16 +88,17 @@
                         <input type="text" class="form-control" placeholder="Ciudad" name="ciudad" 
                                value="{{ datos_cliente.ciudad|default:"" }}" required>
                     </div>
+                    <div class="col">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" placeholder="Teléfono" name="telefono" 
+                            value="{{ datos_cliente.telefono|default:request.user.cel_user }}" pattern="^\d{10}$" 
+                            title="Debe tener 10 dígitos" required>
+    
+                               
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" placeholder="Teléfono" name="telefono" 
-                        value="{{ datos_cliente.telefono|default:request.user.cel_user }}" pattern="^\d{10}$" 
-                        title="Debe tener 10 dígitos" required>
-
-                           
-                </div>
+              
 
                 <div class="d-flex justify-content-between">
                     <a href="{% url 'carrito' %}" class="btn btn-info text-white btn-sm-custom rounded-pill">← Atrás</a>
