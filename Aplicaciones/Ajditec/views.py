@@ -6,6 +6,8 @@ from .models import Producto, Categoria, Inventario,Usuario
 def carrito(request):
     return render(request, 'carrito.html')
 
+def plantilla_admin(request):
+    return render(request, 'plantilla_admin.html')
 #
 
 def inicio(request):
