@@ -1,12 +1,144 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
-from .models import Producto, Categoria, Inventario,Usuario
+from .models import Producto, Categoria, Inventario,Usuario,DetalleCarrito,Orden,DetalleOrden,RegistroPago
 
 def carrito(request):
     return render(request, 'carrito.html')
+def finalPedido(request):
+    """Muestra el formulario de final de pedido"""
+    carrito_id = request.session.get('carrito_id')
+    if carrito_id:
+        carrito = get_object_or_404(Carrito, id_carr=carrito_id)
+        datos_cliente = request.session.get('datos_cliente', {})
+        return render(request, 'finalPedido.html', {
+            'cart_items': carrito.detalles.all(),
+            'cart_total': carrito.total_carrito(),
+            'datos_cliente': datos_cliente,
+            'carrito': carrito
+        })
+    else:
+        messages.error(request, "No hay carrito activo. Por favor, agregue productos al carrito primero.")
+        return redirect('carrito')
 
-def plantilla_admin(request):
+@login_required(login_url='login')
+def procesar_pedido(request):
+    """Procesa el pedido y crea la orden"""
+    if request.method == 'POST':
+        try:
+            
+            # Obtener datos del formulario
+            metodo_entrega = request.POST.get('metodo_entrega')
+            metodo_pago = request.POST.get('metodo_pago')
+            num_transferencia = request.POST.get('num_transferencia')
+            fecha_transferencia = request.POST.get('fecha_transferencia')
+            
+            
+            # Validar campos requeridos
+            if not metodo_entrega or not metodo_pago:
+                messages.error(request, "Por favor, seleccione un método de entrega y pago")
+                return redirect('finalPedido')
+            
+            if metodo_pago == 'transferencia' and not num_transferencia:
+                messages.error(request, "Por favor, ingrese el número de transferencia")
+                return redirect('finalPedido')
+            
+            # Obtener el carrito
+            carrito_id = request.session.get('carrito_id')
+            if not carrito_id:
+                messages.error(request, "No hay carrito activo")
+                return redirect('carrito')
+            
+            carrito = get_object_or_404(Carrito, id_carr=carrito_id)
+            print("Carrito encontrado:", carrito)
+            
+            # Obtener datos del cliente
+            datos_cliente = request.session.get('datos_cliente', {})
+            if not datos_cliente:
+                messages.error(request, "No se encontraron datos del cliente. Por favor, complete el formulario de datos del cliente primero.")
+                return redirect('pago')
+            
+            # Crear la orden
+            orden = Orden.objects.create(
+                nombre_cliente=datos_cliente.get('nombre', ''),
+                cedula_ruc=datos_cliente.get('cedula', ''),
+                correo_cliente=datos_cliente.get('email', ''),
+                direccion_cliente=datos_cliente.get('direccion', ''),
+                ciudad_cliente=datos_cliente.get('ciudad', ''),
+                telefono_cliente=datos_cliente.get('telefono', ''),
+                direc_entre=metodo_entrega,
+                metodo_pago=metodo_pago,
+                num_trans=num_transferencia,
+                fecha_trans=fecha_transferencia,
+                estado_ord='Pendiente',   
+                usuarios=request.user,
+                carrito=carrito
+            )
+            orden.save()  # Aseguramos que la orden se guarde correctamente
+            print("Orden creada con ID:", orden.id_ord)
+            print("Estado de la orden:", orden.estado_ord)
+            print("Método de pago:", orden.metodo_pago)
+            print("Número de transferencia:", orden.num_trans)
+            print("Fecha de transferencia:", orden.fecha_trans)
+            
+            # Crear detalles de la orden
+            detalles_orden = []
+            for detalle in carrito.detalles.all():
+                detalle_orden = DetalleOrden.objects.create(
+                    orden=orden,
+                    producto=detalle.producto,
+                    cantidad=detalle.cantidad
+                )
+                detalles_orden.append(detalle_orden)
+                
+                # Actualizar inventario
+                detalle.producto.inventario.actualizar_stock(detalle.cantidad, 'Salida')
+            
+            # Crear registro de pago
+            registro_pago = RegistroPago.objects.create(
+                orden=orden,
+                total_pago=carrito.total_carrito(),
+                estado_reg='Pendiente'
+            )
+            
+            carrito.estado_carr = 'pagado'
+            carrito.save()
+            
+            # Mensaje de éxito
+            messages.success(request, f"¡Orden #{orden.id_ord} creada exitosamente!")
+            print("Orden procesada exitosamente")
+            
+            return redirect('carrito')  # Por ahora redirigimos al carrito
+            
+        except Exception as e:
+            # Si hay algún error, mostrar mensaje y redirigir al carrito
+            messages.error(request, f"Error al crear la orden: {str(e)}")
+            return redirect('carrito')
+    else:
+        return redirect('finalPedido')
+
+
+def conf_pago(request, id_ord):
+    """Muestra la confirmación de pago"""
+    print("Entrando a conf_pago con orden_id:", id_ord)
+    orden = get_object_or_404(Orden, id_ord=id_ord)
+    detalles = DetalleOrden.objects.filter(orden=orden)
+    registro_pago = RegistroPago.objects.get(orden=orden)
+    print("Orden encontrada:", orden)
+    print("Detalles de la orden:", detalles)
+    print("Registro de pago:", registro_pago)
+    
+    return render(request, 'conf_pago.html', {
+        'orden': orden,
+        'detalles': detalles,
+        'registro_pago': registro_pago,
+        'detalles_orden': detalles,
+        'total': registro_pago.total_pago,
+        'metodo_pago': orden.metodo_pago
+    })
+
+def admin_plantilla(request):
     return render(request, 'plantilla_admin.html')
 #
 
@@ -34,13 +166,114 @@ def inicio(request):
 
 from .models import Carrito, DetalleCarrito, Producto
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib import messages
+
+#vista del resumen de pedido en el template del final del pedido
+def final_pedido(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    # Obtener el carrito del usuario
+    carrito_id = request.session.get('carrito_id')
+    print(f"ID del carrito en sesión: {carrito_id}")
+    
+    if not carrito_id:
+        messages.warning(request, "No hay carrito_id en sesión")
+        # Si no hay carrito en sesión, obtener el más reciente
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
+    else:
+        carrito = Carrito.objects.filter(
+            id_carr=carrito_id,
+            usuarios=request.user
+        ).first()
+
+    if not carrito:
+        messages.error(request, "No se encontró ningún carrito activo. Por favor, agregue productos al carrito primero.")
+        return redirect('carrito')
+    else:
+        print(f"Carrito encontrado: {carrito.id_carr}")
+
+    # Guardar el ID del carrito en la sesión
+    request.session['carrito_id'] = carrito.id_carr
+
+    # Obtener los detalles del carrito
+    cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
+    print(f"Cantidad de detalles en el carrito: {cart_items_qs.count()}")
+    
+    cart_items = [
+        {
+            'product': detalle.producto,
+            'quantity': detalle.cantidad,
+            'total_price': detalle.subtotal
+        }
+        for detalle in cart_items_qs
+    ]
+
+    # Calcular el total del carrito
+    cart_total = sum(detalle.subtotal for detalle in cart_items_qs)
+    print(f"Total del carrito: {cart_total}")
+
+    # Pasar los productos y el total al template
+    context = {
+        'cart_items': cart_items,
+        'cart_total': cart_total,
+        'carrito': carrito
+    }
+
+    return render(request, 'finalPedido.html', context)
 
 
+def vista_pago(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
 
-def pago_view(request):
-    return render(request, 'pago.html')
+    # Obtener el carrito más reciente del usuario
+    tiempo_limite = timezone.now() - timedelta(hours=48)
+    carrito = Carrito.objects.filter(
+        usuarios=request.user,
+        fechacreac_carr__gte=tiempo_limite
+    ).first()
 
+    if not carrito:
+        messages.error(request, "No se encontró ningún carrito activo. Por favor, agregue productos al carrito primero.")
+        return redirect('carrito')
 
+    # Guardar el ID del carrito en la sesión para mantener la consistencia
+    request.session['carrito_id'] = carrito.id_carr
+    print(f"Guardando carrito_id en sesión: {carrito.id_carr}")
+
+    # Obtener los detalles del carrito
+    cart_items_qs = carrito.detalles.all()
+    cart_items = [
+        {
+            'product': detalle.producto,
+            'quantity': detalle.cantidad,
+            'total_price': detalle.subtotal
+        }
+        for detalle in cart_items_qs
+    ]
+
+    # Calcular el total del carrito
+    cart_total = sum(detalle.subtotal for detalle in cart_items_qs)
+
+    print("Productos en carrito (vista_pago):", cart_items)  # Verifica los productos
+
+    # Verificar si hay datos del cliente en la sesión y prellenar el formulario
+    datos_cliente = request.session.get('datos_cliente', {})
+
+    context = {
+        'cart_items': cart_items,
+        'cart_total': cart_total,
+        'carrito': carrito,
+        'datos_cliente': datos_cliente
+    }
+    return render(request, 'pago.html', context)
 
 
 #Usuarios
@@ -350,43 +583,117 @@ def catalogo(request):
         return redirect('admin_dashboard')  # o mostrar un error
     return render(request, 'inicio.html')
 
-
-#AÑADIR AL CARRITO
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
+
+from django.contrib import messages
+
 def add_to_cart(request, id_prod):
+    producto = get_object_or_404(Producto, pk=id_prod)
+
+    cantidad = 1
     if request.method == 'POST':
-        producto = get_object_or_404(Producto, id_prod=id_prod)
-        carrito = request.session.get('carrito', {})
+        try:
+            cantidad = int(request.POST.get('quantity', 1))
+        except:
+            cantidad = 1
 
-        if str(id_prod) in carrito:
-            carrito[str(id_prod)] += 1
+    try:
+        inventario = producto.inventario
+        stock_actual = inventario.stock_actual
+    except Inventario.DoesNotExist:
+        stock_actual = 0
+
+    # 👇 Reemplazamos is_ajax() correctamente
+    es_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    if cantidad < 1:
+        if not es_ajax:
+            messages.error(request, 'La cantidad debe ser al menos 1.')
+            return redirect('producto_vista_rapida', id_prod=id_prod)
         else:
-            carrito[str(id_prod)] = 1
+            return JsonResponse({'success': False, 'message': 'Cantidad inválida.'}, status=400)
 
-        request.session['carrito'] = carrito
+    if cantidad > stock_actual:
+        msg = f'No hay suficiente stock para "{producto.nomb_prod}". Disponible: {stock_actual}'
+        if not es_ajax:
+            messages.error(request, msg)
+            return redirect('producto_vista_rapida', id_prod=id_prod)
+        else:
+            return JsonResponse({'success': False, 'message': msg}, status=400)
 
-        return JsonResponse({'success': True, 'message': f'Producto "{producto.nomb_prod}" agregado al carrito.'})
+    if request.user.is_authenticated:
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
+        if not carrito:
+            carrito = Carrito.objects.create(usuarios=request.user)
+
+        detalle, creado = DetalleCarrito.objects.get_or_create(
+            carrito=carrito,
+            producto=producto,
+            defaults={'cantidad': cantidad}
+        )
+        if not creado:
+            detalle.cantidad += cantidad
+            detalle.save()
+
+        cart_count = sum(d.cantidad for d in carrito.detalles.all())
+
+        if es_ajax:
+            return JsonResponse({'success': True, 'message': 'Añadido al carrito.', 'cart_count': cart_count})
+        else:
+            messages.success(request, f'Se agregó {cantidad} unidad(es) de "{producto.nomb_prod}" a tu carrito.')
+            return redirect('producto_vista_rapida', id_prod=id_prod)
+
     else:
-        return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+        carrito_sesion = request.session.get('carrito', {})
+        prev = carrito_sesion.get(str(id_prod), 0)
+        carrito_sesion[str(id_prod)] = prev + cantidad
+        request.session['carrito'] = carrito_sesion
+
+        if es_ajax:
+            cart_count = sum(carrito_sesion.values())
+            return JsonResponse({'success': True, 'message': 'Añadido al carrito.', 'cart_count': cart_count})
+        else:
+            messages.success(request, f'Se agregó {cantidad} unidad(es) de "{producto.nomb_prod}" al carrito temporal.')
+            return redirect('producto_vista_rapida', id_prod=id_prod)
 
 def carrito(request):
-    cart = request.session.get('carrito', {})  # <-- clave debe coincidir con la que usas en add_to_cart
-    cart_items = []
+    if request.user.is_authenticated:
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
 
-    for id_prod_str, quantity in cart.items():
-        try:
-            id_prod = int(id_prod_str)
-            producto = Producto.objects.get(pk=id_prod)
-            inventario = producto.inventario
-            total_price = inventario.precunit_prod * quantity
+        if carrito:
+            cart_items = [{
+                'product': detalle.producto,
+                'quantity': detalle.cantidad,
+                'total_price': detalle.subtotal
+            } for detalle in carrito.detalles.all()]
+        else:
+            cart_items = []
 
-            cart_items.append({
-                'product': producto,
-                'quantity': quantity,
-                'total_price': total_price,
-            })
-        except Producto.DoesNotExist:
-            continue
+    else:
+        carrito_sesion = request.session.get('carrito', {})
+        cart_items = []
+        for id_prod_str, quantity in carrito_sesion.items():
+            try:
+                producto = Producto.objects.get(pk=int(id_prod_str))
+                total_price = producto.inventario.precunit_prod * quantity
+                cart_items.append({
+                    'product': producto,
+                    'quantity': quantity,
+                    'total_price': total_price,
+                })
+            except Producto.DoesNotExist:
+                continue
 
     cart_total = sum(item['total_price'] for item in cart_items)
 
@@ -395,35 +702,173 @@ def carrito(request):
         'cart_total': cart_total,
     })
 
-#ELIMINAR CARRITO
-
 def eliminar_del_carrito(request, id_prod):
-    if request.method == 'POST':
-        carrito = request.session.get('carrito', {})
-        prod_key = str(id_prod)
-        if prod_key in carrito:
-            del carrito[prod_key]
-            request.session['carrito'] = carrito
+    if request.method != 'POST':
         return redirect('carrito')
+
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.filter(
+            usuarios=request.user
+        ).order_by('-fechacreac_carr').first()
+        if carrito:
+            detalle = carrito.detalles.filter(producto_id=id_prod).first()
+            if detalle:
+                detalle.delete()
     else:
-        # Opcional: si alguien hace GET, redirige igual
-        return redirect('carrito')
+        carrito_sesion = request.session.get('carrito', {})
+        prod_key = str(id_prod)
+        if prod_key in carrito_sesion:
+            del carrito_sesion[prod_key]
+            request.session['carrito'] = carrito_sesion
+
+    return redirect('carrito')
+
 def actualizar_cantidad_carrito(request, id_prod):
-    if request.method == 'POST':
-        cantidad_nueva = int(request.POST.get('quantity', 1))
-        producto = get_object_or_404(Producto, pk=id_prod)
-        inventario = get_object_or_404(Inventario, producto=producto)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
 
-        if cantidad_nueva < 1:
-            return JsonResponse({'success': False, 'message': 'La cantidad debe ser al menos 1.'})
+    cantidad_nueva = int(request.POST.get('quantity', 1))
+    producto = get_object_or_404(Producto, pk=id_prod)
+    inventario = get_object_or_404(Inventario, producto=producto)
 
-        if cantidad_nueva > inventario.stock_actual:
-            return JsonResponse({'success': False, 'message': f'No hay suficiente stock para "{producto.nomb_prod}". Stock disponible: {inventario.stock_actual}'})
+    if cantidad_nueva < 1:
+        return JsonResponse({'success': False, 'message': 'La cantidad debe ser al menos 1.'})
 
-        carrito = request.session.get('carrito', {})
-        carrito[str(id_prod)] = cantidad_nueva
-        request.session['carrito'] = carrito
+    if cantidad_nueva > inventario.stock_actual:
+        return JsonResponse({'success': False,
+                             'message': f'No hay suficiente stock para "{producto.nomb_prod}". Stock disponible: {inventario.stock_actual}'})
+
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.filter(
+            usuarios=request.user
+        ).order_by('-fechacreac_carr').first()
+        if carrito:
+            detalle = carrito.detalles.filter(producto=producto).first()
+            if detalle:
+                detalle.cantidad = cantidad_nueva
+                detalle.save()
+            else:
+                DetalleCarrito.objects.create(carrito=carrito, producto=producto, cantidad=cantidad_nueva)
+        else:
+            carrito = Carrito.objects.create(usuarios=request.user)
+            DetalleCarrito.objects.create(carrito=carrito, producto=producto, cantidad=cantidad_nueva)
+
+        return JsonResponse({'success': True, 'message': f'Cantidad actualizada para "{producto.nomb_prod}".'})
+    else:
+        carrito_sesion = request.session.get('carrito', {})
+        carrito_sesion[str(id_prod)] = cantidad_nueva
+        request.session['carrito'] = carrito_sesion
 
         return JsonResponse({'success': True, 'message': f'Cantidad actualizada para "{producto.nomb_prod}".'})
 
-    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+#PAGO
+@login_required(login_url='login')  
+def pago(request):
+    if request.method == 'POST':
+        try:
+            # Obtener datos del formulario
+            nombre = request.POST.get('nombre', '')
+            cedula = request.POST.get('cedula', '')
+            email = request.POST.get('email', '')
+            direccion = request.POST.get('direccion', '')
+            ciudad = request.POST.get('ciudad', '')
+            telefono = request.POST.get('telefono', '')
+            
+            # Debug: Mostrar datos recibidos
+            print(f"Datos recibidos: {request.POST}")
+            print(f"Nombre: {nombre}, Cédula: {cedula}, Email: {email}")
+            
+            # Validar campos requeridos
+            if not all([nombre, cedula, email, direccion, ciudad, telefono]):
+                messages.error(request, "Por favor, complete todos los campos del formulario")
+                return redirect('pago')
+            
+            # Verificar que el carrito existe
+            carrito_id = request.session.get('carrito_id')
+            if not carrito_id:
+                messages.error(request, "No hay carrito activo")
+                return redirect('carrito')
+            
+            # Guardar datos del cliente en la sesión
+            datos_cliente = {
+                'nombre': nombre,
+                'cedula': cedula,
+                'email': email,
+                'direccion': direccion,
+                'ciudad': ciudad,
+                'telefono': telefono
+            }
+            
+            # Verificar si ya existen datos del cliente en la sesión
+            if 'datos_cliente' in request.session:
+                # Actualizar los datos existentes
+                request.session['datos_cliente'].update(datos_cliente)
+            else:
+                # Crear nuevos datos del cliente
+                request.session['datos_cliente'] = datos_cliente
+            
+            # Debug: Confirmar que los datos se guardaron correctamente
+            print(f"Datos del cliente guardados en sesión: {request.session['datos_cliente']}")
+            
+            # Redirigir a la vista finalPedido con mensaje de éxito
+            messages.success(request, "Datos del cliente guardados exitosamente")
+            
+            # Usar la URL completa para la redirección
+            return redirect('/finalPedido/')
+            
+        except Exception as e:
+            # Debug: Mostrar el error completo
+            print(f"Error en pago: {str(e)}")
+            messages.error(request, f"Error al procesar los datos: {str(e)}")
+            return redirect('pago')
+    
+    # Si es GET, mostrar el formulario
+    carrito_id = request.session.get('carrito_id')
+    if carrito_id:
+        carrito = get_object_or_404(Carrito, id_carr=carrito_id)
+        
+        # Obtener los detalles del carrito
+        detalles = carrito.detalles.select_related('producto', 'producto__inventario').all()
+        
+        # Preparar los items para el template
+        cart_items = [
+            {
+                'product': detalle.producto,
+                'quantity': detalle.cantidad,
+                'total_price': detalle.subtotal
+            }
+            for detalle in detalles
+        ]
+        
+        # Verificar si hay datos del cliente en la sesión y prellenar el formulario
+        datos_cliente = request.session.get('datos_cliente', {})
+        
+        return render(request, 'pago.html', {
+            'cart_items': cart_items,
+            'cart_total': carrito.total_carrito(),
+            'datos_cliente': datos_cliente,
+            'carrito': carrito
+        })
+    else:
+        messages.error(request, "No hay carrito activo. Por favor, agregue productos al carrito primero.")
+        return redirect('carrito')
+
+#VISTA RAPIDA
+# views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Producto, Inventario
+
+def producto_vista_rapida(request, id_prod):
+    producto = get_object_or_404(Producto, pk=id_prod)
+    try:
+        inventario = producto.inventario
+        stock = inventario.stock_actual
+        precio = inventario.precunit_prod
+    except Inventario.DoesNotExist:
+        stock = 0
+        precio = None
+    return render(request, 'producto_vista_rapida.html', {
+        'producto': producto,
+        'stock': stock,
+        'precio': precio,
+    })

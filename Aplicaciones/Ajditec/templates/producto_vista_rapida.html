@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/quickview.css' %}">
+
+<div class="quick-view-page">
+  <div class="quick-view-container">
+    <!-- Imagen -->
+    <div class="quick-view-imagen">
+      {% if producto.img_prod %}
+        <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}">
+      {% else %}
+        <div class="no-image">Sin imagen</div>
+      {% endif %}
+    </div>
+
+    <!-- Información y botones -->
+    <div class="quick-view-info">
+      <h1>{{ producto.nomb_prod }}</h1>
+      <p>{{ producto.descrip_prod }}</p>
+      <p><strong>Stock:</strong> {{ stock }}</p>
+      {% if precio %}
+        <p><strong>Precio:</strong> ${{ precio }}</p>
+      {% else %}
+        <p><strong>Precio:</strong> No disponible</p>
+      {% endif %}
+
+      <form method="post" action="{% url 'add_to_cart' producto.id_prod %}">
+        {% csrf_token %}
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" id="cantidad" name="quantity" value="1" min="1" max="{{ stock }}" {% if stock == 0 %}disabled{% endif %}>
+        <button type="submit" class="btn-add">
+          <i class="fa fa-shopping-cart"></i> Añadir al carrito
+        </button>
+      </form>
+
+      <a href="{% url 'inicio' %}" class="btn-back">
+        <i class="fa fa-arrow-left"></i> Seguir comprando
+      </a>
+
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

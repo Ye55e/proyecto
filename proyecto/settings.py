@@ -110,6 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Suponiendo que tu app se llama 'tienda' o similar
 AUTH_USER_MODEL = 'Ajditec.Usuario'
+LOGIN_REDIRECT_URL = 'pago'
+LOGIN_URL = 'login'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

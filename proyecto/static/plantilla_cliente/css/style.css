@@ -447,7 +447,7 @@ textarea.input {
 \*----------------------------*/
 
 #header {
-  padding-top: 15px;
+  padding-top: 20px;
   padding-bottom: 10px;
   background-color: #0b4b85;
 }
@@ -463,23 +463,28 @@ textarea.input {
 /*----------------------------*\
 	Search
 \*----------------------------*/
-
-.header-search {
-  padding: 15px 0px;
-}
-
 .header-search form {
-  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .header-search form .input-select {
-  margin-right: -4px;
-  border-radius: 40px 0px 0px 40px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  border-radius: 40px 0 0 40px;
+  border-right: none;
+  background: #fff;
 }
 
 .header-search form .input {
-  width: calc(100% - 260px);
-  margin-right: -4px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  border-left: none;
+  flex-grow: 1;
+  border-radius: 0;
+  box-sizing: border-box;
 }
 
 .header-search form .search-btn {
@@ -489,8 +494,10 @@ textarea.input {
   color: #FFF;
   font-weight: 700;
   border: none;
-  border-radius: 0px 40px 40px 0px;
+  border-radius: 0 40px 40px 0;
+  cursor: pointer;
 }
+
 
 /*----------------------------*\
 	Cart
@@ -2265,3 +2272,184 @@ textarea.input {
   .login-container form button:hover {
     background-color: #0056b3;
   }
+/* Vista rápida centrada */
+.quick-view-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh; /* ajusta según prefieras; con 100vh centraría también verticalmente en pantallas grandes */
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* El contenedor blanco centrado */
+.quick-view-container {
+  background: #fff;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+/* Imagen */
+.quick-view-imagen {
+  flex: 1 1 300px;
+  padding: 20px;
+  text-align: center;
+}
+.quick-view-imagen img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.quick-view-imagen .no-image {
+  width: 100%;
+  height: 200px;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+  border-radius: 4px;
+}
+
+/* Información y botones */
+.quick-view-info {
+  flex: 1 1 300px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.quick-view-info h1 {
+  margin-top: 0;
+  font-size: 1.5em;
+}
+.quick-view-info p {
+  margin: 0.5em 0;
+}
+
+/* Formulario añadir */
+#form-add-cart {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+#form-add-cart label {
+  margin-right: 8px;
+}
+#form-add-cart input[type="number"] {
+  width: 60px;
+  margin-right: 12px;
+  padding: 4px;
+}
+.btn-add {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+}
+.btn-add i {
+  margin-right: 6px;
+}
+.btn-add:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+/* Botón seguir comprando */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 15px;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.95em;
+}
+.btn-back i {
+  margin-right: 6px;
+}
+.btn-back:hover {
+  text-decoration: underline;
+}
+
+/* Mensajes */
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0;
+}
+.messages li {
+  margin-bottom: 5px;
+}
+.messages li.success {
+  color: green;
+}
+.messages li.error {
+  color: red;
+}
+.img-magnifier-container {
+  position: relative;
+  /* opcional: ancho fijo o responsivo según tu diseño */
+}
+
+.img-magnifier-glass {
+  position: absolute;
+  border: 3px solid #000;
+  border-radius: 50%;
+  cursor: none;
+  /* tamaño de la “lupita”: ajusta 100px a lo que prefieras */
+  width: 100px;
+  height: 100px;
+  /* opcional sombra: */
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  background-repeat: no-repeat;
+}
+
+
+.checkout-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 33%;
+}
+
+.circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: white;
+}
+
+.active .circle {
+    background-color: #0d6efd;
+}
+
+.completed .circle {
+    background-color: #198754;
+}
+
+.line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #ccc;
+    margin: 0 10px;
+}

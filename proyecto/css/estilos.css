@@ -69,3 +69,8 @@
     background-color: gray;
     cursor: not-allowed;
 }
+.btn-sm-custom {
+            font-size: 14px;
+            padding: 6px 16px;
+            border-radius: 6px;
+        }

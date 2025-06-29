@@ -1,0 +1,318 @@
+.estado-agotado {
+    display: inline-block;
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.estado-disponible {
+    display: inline-block;
+    background-color: green;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+
+.cuenta-contenedor {
+  position: relative;
+  display: inline-block;
+}
+
+.cuenta-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  min-width: 180px;
+  z-index: 999;
+}
+
+.cuenta-menu a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: #333;
+}
+
+.cuenta-menu a:hover {
+  background-color: #f2f2f2;
+}
+
+.cuenta-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: white;
+  text-decoration: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.cuenta-texto {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+/* Estilos de campos */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* Botón igual que la imagen */
+button[type="submit"] {
+  background-color: #0b2a7d;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 12px;
+  border-radius: 20px;
+  color: #fff;
+}
+
+/* Texto debajo del botón */
+.login-link {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #001f6b;
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* Vista rápida centrada */
+.quick-view-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh; /* ajusta según prefieras; con 100vh centraría también verticalmente en pantallas grandes */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* El contenedor blanco centrado */
+.quick-view-container {
+  background: #fff;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+/* Imagen */
+.quick-view-imagen {
+  flex: 1 1 300px;
+  padding: 20px;
+  text-align: center;
+}
+.quick-view-imagen img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.quick-view-imagen .no-image {
+  width: 100%;
+  height: 200px;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+  border-radius: 4px;
+}
+
+/* Información y botones */
+.quick-view-info {
+  flex: 1 1 300px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.quick-view-info h1 {
+  margin-top: 0;
+  font-size: 1.5em;
+}
+.quick-view-info p {
+  margin: 0.5em 0;
+}
+
+/* Formulario añadir */
+#form-add-cart {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+#form-add-cart label {
+  margin-right: 8px;
+}
+#form-add-cart input[type="number"] {
+  width: 60px;
+  margin-right: 12px;
+  padding: 4px;
+}
+.btn-add {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+}
+.btn-add i {
+  margin-right: 6px;
+}
+.btn-add:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+/* Botón seguir comprando */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 15px;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.95em;
+}
+.btn-back i {
+  margin-right: 6px;
+}
+.btn-back:hover {
+  text-decoration: underline;
+}
+
+/* Mensajes */
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0;
+}
+.messages li {
+  margin-bottom: 5px;
+}
+.messages li.success {
+  color: green;
+}
+.messages li.error {
+  color: red;
+}
+.img-magnifier-container {
+  position: relative;
+  /* opcional: ancho fijo o responsivo según tu diseño */
+}
+
+.img-magnifier-glass {
+  position: absolute;
+  border: 3px solid #000;
+  border-radius: 50%;
+  cursor: none;
+  /* tamaño de la “lupita”: ajusta 100px a lo que prefieras */
+  width: 100px;
+  height: 100px;
+  /* opcional sombra: */
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  background-repeat: no-repeat;
+}
+
+
+.checkout-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 33%;
+    position: relative;
+}
+
+.circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.line {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    height: 2px;
+    width: 100%;
+    background-color: #ccc;
+    z-index: -1;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: #ccc;
+    z-index: -1;
+}
+
+.active .circle {
+    background-color: #0d6efd;
+}
+
+.completed .circle {
+    background-color: #198754;
+}
+
+.active span {
+    font-weight: bold;
+}
+
+.completed span {
+    color: #198754;
+}
