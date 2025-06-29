@@ -41,41 +41,38 @@ def detalle_orden(request, id_ord):
 
 @login_required(login_url='login')
 def procesar_pedido(request):
-    """Procesa el pedido y crea la orden"""
+    """Procesa el pedido y crea la orden, sin descontar stock todavía"""
     if request.method == 'POST':
         try:
-            
             # Obtener datos del formulario
             metodo_entrega = request.POST.get('metodo_entrega')
             metodo_pago = request.POST.get('metodo_pago')
             num_transferencia = request.POST.get('num_transferencia')
             fecha_transferencia = request.POST.get('fecha_transferencia')
             
-            
             # Validar campos requeridos
             if not metodo_entrega or not metodo_pago:
-                messages.error(request, "Por favor, seleccione un método de entrega y pago")
+                messages.error(request, "Por favor, seleccione un método de entrega y pago.")
                 return redirect('finalPedido')
             
             if metodo_pago == 'transferencia' and not num_transferencia:
-                messages.error(request, "Por favor, ingrese el número de transferencia")
+                messages.error(request, "Por favor, ingrese el número de transferencia.")
                 return redirect('finalPedido')
-            
+
             # Obtener el carrito
             carrito_id = request.session.get('carrito_id')
             if not carrito_id:
-                messages.error(request, "No hay carrito activo")
+                messages.error(request, "No hay carrito activo.")
                 return redirect('carrito')
             
             carrito = get_object_or_404(Carrito, id_carr=carrito_id)
-            print("Carrito encontrado:", carrito)
             
             # Obtener datos del cliente
             datos_cliente = request.session.get('datos_cliente', {})
             if not datos_cliente:
-                messages.error(request, "No se encontraron datos del cliente. Por favor, complete el formulario de datos del cliente primero.")
+                messages.error(request, "No se encontraron datos del cliente. Complete el formulario primero.")
                 return redirect('pago')
-            
+
             # Crear la orden
             orden = Orden.objects.create(
                 nombre_cliente=datos_cliente.get('nombre', ''),
@@ -92,49 +89,35 @@ def procesar_pedido(request):
                 usuarios=request.user,
                 carrito=carrito
             )
-            orden.save()  # Aseguramos que la orden se guarde correctamente
-            print("Orden creada con ID:", orden.id_ord)
-            print("Estado de la orden:", orden.estado_ord)
-            print("Método de pago:", orden.metodo_pago)
-            print("Número de transferencia:", orden.num_trans)
-            print("Fecha de transferencia:", orden.fecha_trans)
             
             # Crear detalles de la orden
-            detalles_orden = []
             for detalle in carrito.detalles.all():
-                detalle_orden = DetalleOrden.objects.create(
+                DetalleOrden.objects.create(
                     orden=orden,
                     producto=detalle.producto,
                     cantidad=detalle.cantidad
                 )
-                detalles_orden.append(detalle_orden)
-                
-                # Actualizar inventario
-                detalle.producto.inventario.actualizar_stock(detalle.cantidad, 'Salida')
-            
+
             # Crear registro de pago
-            registro_pago = RegistroPago.objects.create(
+            RegistroPago.objects.create(
                 orden=orden,
                 total_pago=carrito.total_carrito(),
                 estado_reg='Pendiente'
             )
-            
+
+            # Marcar el carrito como pagado
             carrito.estado_carr = 'pagado'
             carrito.save()
-            
-            # Mensaje de éxito
-            messages.success(request, f"¡Orden #{orden.id_ord} creada exitosamente!")
-            print("Orden procesada exitosamente")
-            
-            # Limpiar el carrito_id de la sesión
+
+            # Limpiar el carrito de la sesión
             if 'carrito_id' in request.session:
                 del request.session['carrito_id']
-            
-            # Redirigir a la página de confirmación con la información de la orden
+
+            # Mensaje de éxito
+            messages.success(request, f"¡Orden #{orden.id_ord} creada exitosamente! Está pendiente de confirmación.")
             return redirect('orden_confirmada', id_ord=orden.id_ord)
-            
+
         except Exception as e:
-            # Si hay algún error, mostrar mensaje y redirigir al carrito
             messages.error(request, f"Error al crear la orden: {str(e)}")
             return redirect('carrito')
     else:
@@ -362,7 +345,7 @@ def nuevoCategoria(request):
 
 def listadoCategoria(request):
     categoriaBdd = Categoria.objects.all()
-    return render(request, 'categoria/listadoCategoria.html', 
+    return render(request, 'admin/categoria/listadoCategoria.html', 
                   {'categoria':categoriaBdd})
 
 def guardarCategoria(request):
@@ -383,7 +366,7 @@ def eliminarCategoria(request, id_categoria):
 
 def editarCategoria(request, id_categoria):
     categoriaEditar = Categoria.objects.get(id_cat = id_categoria)
-    return render(request,'categoria/editarCategoria.html', {'categoria':categoriaEditar })
+    return render(request,'admin/categoria/editarCategoria.html', {'categoria':categoriaEditar })
 
 def procesarEdicionCategoria(request):
     categoria=Categoria.objects.get(id_cat = request.POST['id_cat'])
@@ -395,13 +378,13 @@ def procesarEdicionCategoria(request):
 #PRODUCTOS
 def nuevoProducto(request):
     categorias = Categoria.objects.all()
-    return render(request, 'producto/nuevoProducto.html', {
+    return render(request, 'admin/producto/nuevoProducto.html', {
         'categoria': categorias
     })
 
 def listadoProducto(request):
     productos = Producto.objects.filter(borrado_prod=False)
-    return render(request, 'producto/listadoProducto.html', {
+    return render(request, 'admin/producto/listadoProducto.html', {
         'producto': productos
     })
 
@@ -434,7 +417,7 @@ def eliminarProducto(request, id_prod):
 def editarProducto(request, id_prod):
     producto_editar = get_object_or_404(Producto, id_prod=id_prod)
     id_cat = Categoria.objects.all()
-    return render(request, 'producto/editarProducto.html', {
+    return render(request, 'admin/producto/editarProducto.html', {
         'producto': producto_editar,
         'id_cat': id_cat
     })
@@ -482,7 +465,7 @@ def tienda(request):
 #INVENTARIO
 def nuevoInventario(request):
     productos = Producto.objects.filter(borrado_prod=False)  # solo productos activos
-    return render(request, 'inventario/nuevoInventario.html', {
+    return render(request, 'admin/inventario/nuevoInventario.html', {
         'productos': productos
     })
 def guardarInventario(request):
@@ -537,7 +520,7 @@ def guardarInventario(request):
     return redirect('nuevoInventario')
 def listadoInventario(request):
     inventarios = Inventario.objects.select_related('producto').all()
-    return render(request, 'inventario/listadoInventario.html', {
+    return render(request, 'admin/inventario/listadoInventario.html', {
         'inventarios': inventarios
     })
 
@@ -916,4 +899,138 @@ def producto_vista_rapida(request, id_prod):
         'producto': producto,
         'stock': stock,
         'precio': precio,
+    })
+
+### DASHBORAD ADMIN ACEPTAR O RECHAZAR ORDEN 
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
+from django.template.loader import render_to_string
+
+from django.core.mail import send_mail
+
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
+def admin_confirmar_pago(request, id_regpag):
+    registro_pago = get_object_or_404(RegistroPago, id_regpag=id_regpag)
+    orden = registro_pago.orden
+
+    if registro_pago.estado_reg == 'Pendiente':
+        # Descontar stock
+        for detalle in orden.detalles.all():
+            detalle.producto.inventario.actualizar_stock(detalle.cantidad, 'Salida')
+
+        registro_pago.estado_reg = 'Confirmado'
+        registro_pago.save()
+        orden.estado_ord = 'Entregado'
+        orden.save()
+
+        # Email TEXTO PLANO
+        detalles_texto = "\n".join(
+            f"- {det.producto.nomb_prod}, Cantidad: {det.cantidad}, Subtotal: ${det.subtotal:.2f}"
+            for det in orden.detalles.all()
+        )
+        mensaje = f"""
+Hola {orden.nombre_cliente},
+
+¡Tu compra ha sido CONFIRMADA!
+
+Orden #{orden.id_ord}
+---------------------------------
+{detalles_texto}
+---------------------------------
+Total pagado: ${registro_pago.total_pago:.2f}
+
+Pronto nos pondremos en contacto para coordinar la entrega.
+
+¡Gracias por tu compra!
+
+AJ Ditec Distribuidora
+        """
+
+        send_mail(
+            subject=f"Compra confirmada - Orden #{orden.id_ord}",
+            message=mensaje,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[orden.correo_cliente],
+            fail_silently=False,
+        )
+
+        messages.success(request, f"Pago confirmado, stock descontado y correo enviado al cliente para la orden #{orden.id_ord}")
+    else:
+        messages.info(request, "Este pago ya fue procesado.")
+
+    return redirect('admin_listar_pagos')
+
+
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
+def admin_rechazar_pago(request, id_regpag):
+    registro_pago = get_object_or_404(RegistroPago, id_regpag=id_regpag)
+    orden = registro_pago.orden
+
+    if registro_pago.estado_reg == 'Pendiente':
+        registro_pago.estado_reg = 'Rechazado'
+        registro_pago.save()
+        orden.estado_ord = 'Rechazado'
+        orden.save()
+
+        whatsapp_link = "https://wa.me/593999999999?text=Hola,%20tengo%20una%20consulta%20sobre%20mi%20pedido."
+
+        detalles_texto = "\n".join(
+            f"- {det.producto.nomb_prod}, Cantidad: {det.cantidad}, Subtotal: ${det.subtotal:.2f}"
+            for det in orden.detalles.all()
+        )
+        mensaje = f"""
+Hola {orden.nombre_cliente},
+
+Lamentablemente tu pedido con Orden #{orden.id_ord} ha sido RECHAZADO.
+
+---------------------------------
+{detalles_texto}
+---------------------------------
+Total: ${registro_pago.total_pago:.2f}
+
+Para más información o solucionar este inconveniente, puedes contactarnos directamente por WhatsApp:
+{whatsapp_link}
+
+Gracias por tu comprensión.
+
+AJ Ditec Distribuidora
+        """
+
+        send_mail(
+            subject=f"Orden #{orden.id_ord} rechazada",
+            message=mensaje,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[orden.correo_cliente],
+            fail_silently=False,
+        )
+
+        messages.warning(request, f"Orden #{orden.id_ord} rechazada y correo enviado al cliente.")
+    else:
+        messages.info(request, "Este pago ya fue procesado.")
+
+    return redirect('admin_listar_pagos')
+
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
+def admin_listar_pagos(request):
+    pagos = RegistroPago.objects.select_related('orden').order_by('-id_regpag')
+
+    print("======= LISTADO COMPLETO ========")
+    for p in pagos:
+        print(f"ID: {p.id_regpag}, Estado: {p.estado_reg}, Orden ID: {p.orden_id}")
+
+    return render(request, 'admin_listar_pagos.html', {
+        'pagos': pagos
+    })
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
+def admin_detalle_pago(request, id_regpag):
+    registro_pago = get_object_or_404(RegistroPago, id_regpag=id_regpag)
+    detalles_orden = DetalleOrden.objects.filter(orden=registro_pago.orden)
+    return render(request, 'admin_detalle_pago.html', {
+        'registro_pago': registro_pago,
+        'orden': registro_pago.orden,
+        'detalles': detalles_orden
     })
