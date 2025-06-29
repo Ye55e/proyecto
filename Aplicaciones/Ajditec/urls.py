@@ -51,6 +51,16 @@ urlpatterns = [
     path('logout/', views.logout_usuario, name='logout'),
     path('plantilla/', views.admin_dashboard, name='admin_dashboard'),
     path('inicio/', views.catalogo, name='catalogo'),
+    #LISTAR ORDENES
+    path('listar_ordenes/', views.listar_ordenes, name='listar_ordenes'),
+    #DETALLE DE ORDEN
+    path('detalle_orden/<int:id_ord>/', views.detalle_orden, name='detalle_orden'),
+    #CONFIRMACION DE LA ORDEN
+    path('admin_listar_pagos/', views.admin_listar_pagos, name='admin_listar_pagos'),
+    path('admin_detalle_pago/<int:id_regpag>/', views.admin_detalle_pago, name='admin_detalle_pago'),
+    path('admin_confirmar_pago/<int:id_regpag>/', views.admin_confirmar_pago, name='admin_confirmar_pago'),
+    path('admin_rechazar_pago/<int:id_regpag>/', views.admin_rechazar_pago, name='admin_rechazar_pago'),
+
 
     
     

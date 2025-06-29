@@ -113,9 +113,10 @@
 									</div>
 								</div>
 								<div class="cuenta-menu" id="menuCuenta">
-									<a href="{% url 'catalogo' %}"><i class="fa fa-id-card"></i> Mi cuenta</a>
-									<a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
-								</div>
+                                    <a href="{% url 'listar_ordenes' %}"><i class="fa fa-history"></i> Historial de Órdenes</a>
+                                    <a href="{% url 'catalogo' %}"><i class="fa fa-id-card"></i> Mi cuenta</a>
+                                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+                                </div>
 								{% else %}
 								<a href="{% url 'login' %}" class="cuenta-login">
 									<i class="fa fa-user"></i>

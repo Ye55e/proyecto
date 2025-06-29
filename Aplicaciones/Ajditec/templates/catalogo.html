@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include 'includes/header.html' %}
+
+<!-- HOT DEAL SECTION -->
+<div id="hot-deal" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="hot-deal">
+                    <ul class="hot-deal-countdown">
+                        <li><div><h3>✓</h3><span>Calidad</span></div></li>
+                        <li><div><h3>✓</h3><span>Garantía</span></div></li>
+                        <li><div><h3>✓</h3><span>Stock</span></div></li>
+                    </ul>
+                    <h2 class="text-uppercase">Repuestos Garantizados</h2>
+                    <p>Todo para tu laptop en un solo lugar</p>
+                    <a class="primary-btn cta-btn" href="#">Ver catálogo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION -->
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="section-title">
+                    <h3 class="title">Productos más vendidos</h3>
+                </div>
+            </div>
+            <!-- Aquí iría el contenido de los productos -->
+        </div>
+    </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div id="newsletter" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="newsletter">
+                    <p>Suscríbete a nuestras <strong>NOVEDADES</strong></p>
+                    <form>
+                        <input class="input" type="email" placeholder="Ingresa tu correo electrónico">
+                        <button class="newsletter-btn"><i class="fa fa-envelope"></i> Suscribete</button>
+                    </form>
+                    <ul class="newsletter-follow">
+                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
+                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="footer">
+    <!-- top footer -->
+    <div class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-xs-6">
+                    <div class="footer">
+                        <h3 class="footer-title">SOBRE NOSOTROS</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.</p>
+                        <ul class="footer-links">
+                            <li><a href="#"><i class="fa fa-map-marker"></i>1734 Stonecoal Road</a></li>
+                            <li><a href="#"><i class="fa fa-phone"></i>+021-95-51-84</a></li>
+                            <li><a href="#"><i class="fa fa-envelope-o"></i>email@email.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <div class="footer">
+                        <h3 class="footer-title">Categorias</h3>
+                        <ul class="footer-links">
+                            <li><a href="#">Hot deals</a></li>
+                            <li><a href="#">Pantalla</a></li>
+                            <li><a href="#">Baterias</a></li>
+                            <li><a href="#">Cargadores</a></li>
+                            <li><a href="#">Accesorios</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="clearfix visible-xs"></div>
+                <div class="col-md-3 col-xs-6">
+                    <div class="footer">
+                        <h3 class="footer-title">Information</h3>
+                        <ul class="footer-links">
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Orders and Returns</a></li>
+                            <li><a href="#">Terms & Conditions</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <div class="footer">
+                        <h3 class="footer-title">Service</h3>
+                        <ul class="footer-links">
+                            <li><a href="#">Mi Cuenta</a></li>
+                            <li><a href="#">Ver Carrito</a></li>
+                            <li><a href="#">Seguimiento del pedido</a></li>
+                            <li><a href="#">Ayuda</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /top footer -->
+
+    <!-- bottom footer -->
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <span class="copyright">
+                        Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made by: Yesseña Canchig y Adriana Carua
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /bottom footer -->
+</footer>
+{% endblock %}

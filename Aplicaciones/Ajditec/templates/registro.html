@@ -1,112 +1,84 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "./base.html" %}
 
 {% block extra_css %}
 <style>
-  .registro-container {
-    max-width: 480px;
-    margin: 40px auto;
-    padding: 30px;
+  .login-container {
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 30px 25px;
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
-  .registro-container h2 {
-    margin-bottom: 25px;
+  .login-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
     font-weight: 700;
-    color: #333;
-    text-align: center;
+    color: #222;
   }
 
-  /* Campos del formulario */
-  .registro-container form p {
-    margin-bottom: 20px;
+  .login-container form p {
+    margin-bottom: 18px;
   }
 
-  .registro-container form label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #333;
-  }
-
-  .registro-container form input {
+  .login-container form input[type="text"],
+  .login-container form input[type="password"],
+  .login-container form input[type="email"] {
     width: 100%;
-    padding: 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
+    padding: 10px 14px;
+    border: 1.8px solid #ccc;
     border-radius: 6px;
-    box-sizing: border-box;
+    font-size: 1.6rem;
+    transition: border-color 0.3s ease;
   }
 
-  /* Botón Registrarse ajustado */
-  .registro-container form button {
+  .login-container form input[type="text"]:focus,
+  .login-container form input[type="password"]:focus,
+  .login-container form input[type="email"]:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+
+  .login-container form button {
     width: 100%;
-    padding: 8px 0;
-    font-size: 1.1rem;
-    font-weight: bold;
-    background-color: #0b2a7d;
+    padding: 12px;
+    background-color: #007bff;
     border: none;
-    border-radius: 16px;
+    border-radius: 8px;
+    font-weight: 600;
     color: white;
-    transition: background-color 0.3s ease;
-    margin-top: 10px;
-  }
-
-  .registro-container form button:hover {
-    background-color: #05205e;
-  }
-
-  /* Enlace "¿Ya tiene una cuenta?" */
-  .login-link {
-    display: block;
-    text-align: center;
-    font-size: 1.05rem;
-    color: #0b2a7d;
-    text-decoration: underline;
+    font-size: 1.1rem;
     cursor: pointer;
-    margin-top: 16px;
+    transition: background-color 0.3s ease;
   }
 
-  /* Errores */
-  .errorlist {
-    color: #d93025;
-    margin-top: 4px;
-    font-size: 0.9rem;
-    list-style: none;
-    padding-left: 0;
+  .login-container form button:hover {
+    background-color: #0056b3;
   }
 
-  /* Mensajes de Django */
-  .messages {
-    max-width: 480px;
-    margin: 20px auto;
+  .login-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.3rem;
   }
 
-  .messages .error {
-    background-color: #f8d7da;
-    color: #842029;
-    padding: 10px 15px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    border: 1px solid #f5c2c7;
+  .login-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
   }
 
-  .messages .success {
-    background-color: #d1e7dd;
-    color: #0f5132;
-    padding: 10px 15px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    border: 1px solid #badbcc;
+  .login-link a:hover {
+    color: #0056b3;
   }
 </style>
 {% endblock %}
 
-
-{% block content %}
-<div class="registro-container">
+{% block contenido %}
+<div class="login-container">
   <h2>Registro de Cliente</h2>
 
   {% if messages %}
@@ -124,18 +96,17 @@
       <p>
         {{ field.label_tag }}
         {{ field }}
-        {% comment %}
-          Mostrar errores solo si el campo no es nombre, contraseña ni confirmación.
-          Cambia los nombres aquí a los que uses en tu formulario.
-        {% endcomment %}
-        {% if field.name not in "nombre password password_confirm" %}
-          {{ field.errors }}
+        {% if field.errors %}
+          <div class="errorlist">{{ field.errors }}</div>
         {% endif %}
       </p>
     {% endfor %}
 
     <button type="submit">Registrarse</button>
-    <a href="{% url 'login' %}" class="login-link">¿Ya tiene una cuenta?</a>
+    <div class="login-link">
+      ¿Ya tiene una cuenta?
+      <a href="{% url 'login' %}">Iniciar Sesión</a>
+    </div>
 
   </form>
 </div>

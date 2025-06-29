@@ -1,0 +1,37 @@
+{% extends "plantilla.html" %}
+{% load static %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h3>Detalle del Pago - Orden #{{ orden.id_ord }}</h3>
+    <hr>
+    <h5>Cliente: {{ orden.nombre_cliente }}</h5>
+    <p><strong>Cédula/RUC:</strong> {{ orden.cedula_ruc }}</p>
+    <p><strong>Correo:</strong> {{ orden.correo_cliente }}</p>
+    <p><strong>Teléfono:</strong> {{ orden.telefono_cliente }}</p>
+    <p><strong>Dirección:</strong> {{ orden.direccion_cliente }}, {{ orden.ciudad_cliente }}</p>
+
+    <h5 class="mt-4">Productos:</h5>
+    <table class="table table-bordered">
+        <thead>
+            <tr><th>Producto</th><th>Cantidad</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>
+        {% for det in detalles %}
+            <tr>
+                <td>{{ det.producto.nomb_prod }}</td>
+                <td>{{ det.cantidad }}</td>
+                <td>$ {{ det.subtotal|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h4 class="mt-3">Total Pago: $ {{ registro_pago.total_pago }}</h4>
+
+    <div class="mt-4">
+        <a href="{% url 'admin_confirmar_pago' registro_pago.id_regpag %}" class="btn btn-success">Confirmar Pago</a>
+        <a href="{% url 'admin_rechazar_pago' registro_pago.id_regpag %}" class="btn btn-danger">Rechazar Pago</a>
+    </div>
+</div>
+{% endblock %}

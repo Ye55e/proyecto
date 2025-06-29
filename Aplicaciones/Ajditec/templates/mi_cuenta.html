@@ -1,0 +1,73 @@
+{% extends "./base.html" %}
+{% load static %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <!-- Resumen de Usuario -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Mi Perfil</h5>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="rounded-circle bg-primary text-white p-3 mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                    <h4 class="mb-1">{{ request.user.get_full_name }}</h4>
+                    <p class="text-muted mb-2">{{ request.user.email }}</p>
+                    <p class="text-muted">{{ request.user.usuario.cel_user }}</p>
+                </div>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'editar_perfil' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit me-2"></i>Editar Perfil
+                    </a>
+                    <a href="{% url 'cambiar_contraseña' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-lock me-2"></i>Cambiar Contraseña
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  
+<!-- Estilos adicionales -->
+<style>
+    .orden-item {
+        border-bottom: 1px solid #eee;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    .orden-item:last-child {
+        border-bottom: none;
+    }
+    .orden-item:hover {
+        background-color: #f8f9fa;
+    }
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .rounded-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .nav-link {
+        padding: 0.5rem 1rem;
+    }
+    .nav-link:hover {
+        color: #007bff;
+    }
+    .nav-link.active {
+        background-color: #007bff;
+        color: white;
+    }
+</style>
+{% endblock %}

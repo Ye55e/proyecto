@@ -12,14 +12,9 @@
         border-radius: 15px;
         padding: 2rem;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
         margin-top: 4rem;
     }
-    .checkmark {
-        font-size: 4rem;
-        color: #28a745;
-        margin-bottom: 1.5rem;
-    }
+   
     .btn-volver {
         background: #007bff;
         color: white;
@@ -32,32 +27,141 @@
         background: #0056b3;
         transform: translateY(-2px);
     }
+    .resumen-pedido-card {
+        font-size: 14px;
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        margin-top: 4rem;
+    }
+    .resumen-pedido-card img {
+        border-radius: 5px;
+    }
+    .resumen-pedido-card .card-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #ddd;
+        padding: 1rem;
+        text-align: center;
+    }
+    .resumen-pedido-card .card-body {
+        padding: 1rem;
+    }
+    .resumen-pedido-card .producto-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    .resumen-pedido-card .producto-item:last-child {
+        border-bottom: none;
+    }
+    .resumen-pedido-card .producto-info {
+        margin-left: 1rem;
+        flex-grow: 1;
+    }
+    .resumen-pedido-card .precio {
+        font-weight: bold;
+        color:rgb(7, 7, 7);
+    }
+    .resumen-pedido-card .total-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+    .resumen-pedido-card .total-section .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .resumen-pedido-card .total-section .total-row:last-child {
+        font-weight: bold;
+        color: #28a745;
+    }
+    .mensaje-resaltado {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solidrgb(16, 18, 155);
+        margin: 1.5rem 0;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    .mensaje-resaltado h5 {
+        color:rgb(18, 35, 187);
+        margin-bottom: 0.5rem;
+    }
+    .mensaje-resaltado p {
+        color: #333;
+        margin-bottom: 0;
+    }
+    .detalle-orden {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
 </style>
 
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="orden-confirmada-card">
-                <div class="checkmark">
-                    ✓
+                <div class="row">
+                    <div class="col-md-7">
+                        <h2 class="mb-4">¡Pedido realizado con éxito!</h2>
+                        <p class="detalle-orden mb-4">Número de orden: {{ orden.id_ord }}</p>
+                        <p class="detalle-orden mb-4">Fecha: {{ orden.fechacrea_ord }}</p>
+                        <p class="detalle-orden mb-4">Método de pago: {{ orden.metodo_pago }}</p>
+                        <p class="detalle-orden mb-4">Estado: {{ orden.estado_ord }}</p>
+                        <p class="detalle-orden mb-4">Total: ${{ orden.carrito.total_carrito }}</p>
+                        
+                        <div class="mensaje-resaltado">
+                            <h5>¡Gracias por su compra!</h5>
+                            <p>Al confirmar su pago recibirá un correo con los detalles de su pedido.</p>
+                        </div>
+                        
+                        <a href="{% url 'inicio' %}" class="btn btn-primary btn-lg btn-volver">
+                            Volver al inicio
+                        </a>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="resumen-pedido-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Resumen del Pedido</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for detalle in detalles_orden %}
+                                <div class="producto-item">
+                                    <img src="{{ detalle.producto.img_prod.url }}" 
+                                         alt="{{ detalle.producto.nomb_prod }}" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div class="producto-info">
+                                        <h6 class="mb-0">{{ detalle.producto.nomb_prod }}</h6>
+                                        <small>{{ detalle.cantidad }} x</small>
+                                    </div>
+                                    <span class="precio">$ {{ detalle.subtotal|floatformat:2 }}</span>
+                                </div>
+                                {% endfor %}
+
+                                <div class="total-section">
+                                    <div class="total-row">
+                                        <span>Subtotal:</span>
+                                        <span>$ {{ orden.carrito.total_carrito|floatformat:2 }}</span>
+                                    </div>
+                                    <div class="total-row">
+                                        <span>Impuestos:</span>
+                                        <span>$ 0.00</span>
+                                    </div>
+                                    <div class="total-row">
+                                        <span>Total:</span>
+                                        <span>$ {{ orden.carrito.total_carrito|floatformat:2 }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h2 class="mb-4">¡Pedido realizado con éxito!</h2>
-                <p class="lead mb-4">Número de orden: {{ orden.id_ord }}</p>
-                <p class="mb-4">Fecha: {{ orden.fechacrea_ord }}</p>
-                <p class="mb-4">Método de pago: {{ orden.metodo_pago }}</p>
-                <p class="mb-4">Estado: {{ orden.estado_ord }}</p>
-                <p class="mb-4">Total: ${{ orden.carrito.total_carrito }}</p>
-                
-                <p class="text-muted mb-4">
-                    Gracias por su compra. Pronto recibirá un correo con los detalles de su pedido.
-                </p>
-                
-                <a href="{% url 'inicio' %}" class="btn btn-primary btn-lg btn-volver">
-                    Volver al inicio
-                </a>
             </div>
         </div>
     </div>
-</div>
-
+</div>               
 {% endblock %}
