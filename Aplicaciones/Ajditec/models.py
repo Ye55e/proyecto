@@ -129,7 +129,6 @@ class DetalleCarrito(models.Model):
         db_table = 'detalle_carrito'
 
 
-# models.py
 
 class Orden(models.Model):
     ESTADO_CHOICES = [

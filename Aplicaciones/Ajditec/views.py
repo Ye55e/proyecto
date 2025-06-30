@@ -339,7 +339,7 @@ def procesarEdicionUsuario(request):
 #Categoria 
 def nuevoCategoria(request):
     categoria = Categoria.objects.all()
-    return render (request, 'categoria/nuevoCategoria.html',{
+    return render (request, 'admin/categoria/nuevoCategoria.html',{
         'categoria':categoria
     })
 
@@ -902,11 +902,10 @@ def producto_vista_rapida(request, id_prod):
     })
 
 ### DASHBORAD ADMIN ACEPTAR O RECHAZAR ORDEN 
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMessage
 from django.conf import settings
-from django.template.loader import render_to_string
-
-from django.core.mail import send_mail
+from io import BytesIO
+from reportlab.pdfgen import canvas
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
@@ -924,42 +923,47 @@ def admin_confirmar_pago(request, id_regpag):
         orden.estado_ord = 'Entregado'
         orden.save()
 
-        # Email TEXTO PLANO
-        detalles_texto = "\n".join(
-            f"- {det.producto.nomb_prod}, Cantidad: {det.cantidad}, Subtotal: ${det.subtotal:.2f}"
-            for det in orden.detalles.all()
-        )
-        mensaje = f"""
-Hola {orden.nombre_cliente},
+        # ✅ GENERAR PDF EN MEMORIA
+        buffer = BytesIO()
+        p = canvas.Canvas(buffer)
+        p.setTitle(f"Comprobante Orden #{orden.id_ord}")
 
-¡Tu compra ha sido CONFIRMADA!
+        p.drawString(100, 800, f"AJ DITEC DISTRIBUIDORA")
+        p.drawString(100, 780, f"Comprobante de Compra - Orden #{orden.id_ord}")
+        p.drawString(100, 760, f"Cliente: {orden.nombre_cliente}")
+        p.drawString(100, 740, f"Email: {orden.correo_cliente}")
+        p.drawString(100, 720, f"Teléfono: {orden.telefono_cliente}")
 
-Orden #{orden.id_ord}
----------------------------------
-{detalles_texto}
----------------------------------
-Total pagado: ${registro_pago.total_pago:.2f}
+        y = 700
+        p.drawString(100, y, "Detalle de la compra:")
+        y -= 20
 
-Pronto nos pondremos en contacto para coordinar la entrega.
+        for det in orden.detalles.all():
+            p.drawString(120, y, f"- {det.producto.nomb_prod} x{det.cantidad} - ${det.subtotal:.2f}")
+            y -= 20
 
-¡Gracias por tu compra!
+        p.drawString(100, y-10, f"Total: ${registro_pago.total_pago:.2f}")
 
-AJ Ditec Distribuidora
-        """
+        p.showPage()
+        p.save()
+        buffer.seek(0)
 
-        send_mail(
+        # ✅ ENVIAR EMAIL CON PDF ADJUNTO
+        email = EmailMessage(
             subject=f"Compra confirmada - Orden #{orden.id_ord}",
-            message=mensaje,
+            body=f"Hola {orden.nombre_cliente},\n\nAdjuntamos el comprobante de tu compra. Gracias por confiar en nosotros.",
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[orden.correo_cliente],
-            fail_silently=False,
+            to=[orden.correo_cliente],
         )
+        email.attach(f"Comprobante_Orden_{orden.id_ord}.pdf", buffer.read(), "application/pdf")
+        email.send()
 
-        messages.success(request, f"Pago confirmado, stock descontado y correo enviado al cliente para la orden #{orden.id_ord}")
+        messages.success(request, f"Pago confirmado, stock descontado y comprobante PDF enviado por email.")
     else:
         messages.info(request, "Este pago ya fue procesado.")
 
     return redirect('admin_listar_pagos')
+
 
 
 @login_required
@@ -974,7 +978,7 @@ def admin_rechazar_pago(request, id_regpag):
         orden.estado_ord = 'Rechazado'
         orden.save()
 
-        whatsapp_link = "https://wa.me/593999999999?text=Hola,%20tengo%20una%20consulta%20sobre%20mi%20pedido."
+        whatsapp_link = "https://wa.me/593 9 6902 5956?text=Hola,%20tengo%20una%20consulta%20sobre%20mi%20pedido."
 
         detalles_texto = "\n".join(
             f"- {det.producto.nomb_prod}, Cantidad: {det.cantidad}, Subtotal: ${det.subtotal:.2f}"
