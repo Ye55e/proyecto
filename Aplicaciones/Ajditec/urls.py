@@ -3,8 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
-    path('pago/', views.pago_view, name='pago'),
+   # path('pago/', views.pago_view, name='pago'),
     path('plantilla_admin/', views.plantilla_admin, name='plantilla_admin'),
+    path('datosPedido/', views.pago, name='datosPedido'),
     
 
     #Usuarios
@@ -55,6 +56,8 @@ urlpatterns = [
     path('listar_ordenes/', views.listar_ordenes, name='listar_ordenes'),
     #DETALLE DE ORDEN
     path('detalle_orden/<int:id_ord>/', views.detalle_orden, name='detalle_orden'),
+    #VISTA RAPIDA
+    path('producto/<int:id_prod>/vista-rapida/', views.producto_vista_rapida, name='producto_vista_rapida'),
     #CONFIRMACION DE LA ORDEN
     path('admin_listar_pagos/', views.admin_listar_pagos, name='admin_listar_pagos'),
     path('admin_detalle_pago/<int:id_regpag>/', views.admin_detalle_pago, name='admin_detalle_pago'),

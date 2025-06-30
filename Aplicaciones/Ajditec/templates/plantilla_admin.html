@@ -1,175 +1,524 @@
 {% load static %}
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CONTROL DEL ADMINISTRADOR</title>
-  <link rel="shortcut icon" type="image/png" href="{% static 'src/assets/images/logos/favicon.png' %}">
-  <link rel="stylesheet" href="{% static 'src/assets/css/styles.min.css' %}">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Panel Administrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 
-  <!-- DataTables -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link rel="icon" href="{% static 'staticadmin/assets/img/kaiadmin/favicon.ico' %}" type="image/x-icon"/>
 
-  <!-- Bootstrap Fileinput -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css" integrity="sha512-yDVMONIXJPPAoULZ92Ygngsn8ZUGB4ejm6fCc6q9ZvdH8blFAOgg75XZSEaAJ5m4E/yPI1BAi5fF2axMHVuZ5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" integrity="sha512-0wQvB58Ha5coWmcgtg4f11CTSSxfrfLClUp9Vy0qhzYzCZDSnoB4Vhu5JXJFs7rU24LE6JsH+6hpP7vQ22lk5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.2/js/locales/es.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="{% static 'staticadmin/assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'staticadmin/assets/css/plugins.min.css' %}">
+    <link rel="stylesheet" href="{% static 'staticadmin/assets/css/kaiadmin.min.css' %}">
+    <link rel="stylesheet" href="{% static 'staticadmin/assets/css/demo.css' %}">
 
-  <!-- DataTables Buttons -->
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-  <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    <!-- FileInput CSS (si usas uploads de archivos) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css" crossorigin="anonymous">
 
-  <!-- Validación, iziToast, Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts y Custom Fonts -->
+    <script src="{% static 'staticadmin/assets/js/plugin/webfont/webfont.min.js' %}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+          urls: ["{% static 'staticadmin/assets/css/fonts.min.css' %}"]
+        },
+        active: function() {
+          sessionStorage.fonts = true;
+        }
+      });
+    </script>
 </head>
-
-<body>
-<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-    data-sidebar-position="fixed" data-header-position="fixed">
-    <!-- Sidebar Start -->
-    <aside class="left-sidebar">
-      <div>
-        <div class="brand-logo d-flex align-items-center justify-content-between">
-          <a href="/inicio.html/" class="text-nowrap logo-img">
-            <img src="{% static 'src/assets/images/logos/dark-logo.svg' %}" width="180" alt="" />
-          </a>
-          <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
-            <i class="ti ti-x fs-8"></i>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="index.html" class="logo">
+              <img src="{% static 'staticadmin/assets/img/kaiadmin/logo_light.svg' %}" alt="navbar brand" class="navbar-brand" height="20" />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
           </div>
+          <!-- End Logo Header -->
         </div>
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-          <ul id="sidebarnav">
-            <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Home</span>
-            </li>
-            <li class="nav-section">
-              <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
-              <h4 class="text-section">Components</h4>
-            </li>
-            <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#baseUsuarios">
-                <i class="fas fa-layer-group"></i><p>Usuarios</p><span class="caret"></span>
-              </a>
-              <div class="collapse" id="baseUsuarios">
-                <ul class="nav nav-collapse">
-                  <li><a href="usuarios/listadoUsuario/"><span class="sub-item">Ver Listado</span></a></li>
-                  <li><a href="usuarios/nuevoUsuario/"><span class="sub-item">Agregar Nuevo</span></a></li>
-                </ul>
-              </div>
-            </li>
-            <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#baseProductos">
-                <i class="fas fa-layer-group"></i><p>Productos</p><span class="caret"></span>
-              </a>
-              <div class="collapse" id="baseProductos">
-                <ul class="nav nav-collapse">
-                  <li><a href="producto/listadoProducto/"><span class="sub-item">Ver Listado</span></a></li>
-                  <li><a href="producto/nuevoProducto/"><span class="sub-item">Agregar Nuevo</span></a></li>
-                </ul>
-              </div>
-            </li>
-            <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#baseInventario">
-                <i class="fas fa-layer-group"></i><p>Inventario</p><span class="caret"></span>
-              </a>
-              <div class="collapse" id="baseInventario">
-                <ul class="nav nav-collapse">
-                  <li><a href="inventario/listadoInventario/"><span class="sub-item">Ver Listado</span></a></li>
-                  <li><a href="inventario/nuevoInventario/"><span class="sub-item">Agregar Nuevo</span></a></li>
-                </ul>
-              </div>
-            </li>
-            <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#baseCategorias">
-                <i class="fas fa-layer-group"></i><p>Categorias</p><span class="caret"></span>
-              </a>
-              <div class="collapse" id="baseCategorias">
-                <ul class="nav nav-collapse">
-                  <li><a href="categoria/listadoCategoria/"><span class="sub-item">Ver Listado</span></a></li>
-                  <li><a href="categoria/nuevoCategoria/"><span class="sub-item">Agregar Nuevo</span></a></li>
-                </ul>
-              </div>
-            </li>
-            <li class="nav-small-cap"><i class="ti ti-dots nav-small-cap-icon fs-4"></i><span class="hide-menu">AUTH</span></li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./authentication-login.html"><i class="ti ti-login"></i><span class="hide-menu">Login</span></a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./authentication-register.html"><i class="ti ti-user-plus"></i><span class="hide-menu">Register</span></a>
-            </li>
-            <li class="nav-small-cap"><i class="ti ti-dots nav-small-cap-icon fs-4"></i><span class="hide-menu">DASHBOARDS</span></li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="/dashboard/"><i class="ti ti-user-plus"></i><span class="hide-menu">Dashboard</span></a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </aside>
-
-    <div class="body-wrapper">
-      <header class="app-header">
-        <nav class="navbar navbar-expand-lg navbar-light">
-          <ul class="navbar-nav">
-            <li class="nav-item d-block d-xl-none"><a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)"><i class="ti ti-menu-2"></i></a></li>
-            <li class="nav-item"><a class="nav-link nav-icon-hover" href="javascript:void(0)"><i class="ti ti-bell-ringing"></i><div class="notification bg-primary rounded-circle"></div></a></li>
-          </ul>
-          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
-            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <a href="https://adminmart.com/product/modernize-free-bootstrap-admin-dashboard/" target="_blank" class="btn btn-primary">Download Free</a>
-              <li class="nav-item dropdown">
-                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"><img src="../assets/images/profile/user-1.jpg" alt="" width="35" height="35" class="rounded-circle"></a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                  <div class="message-body">
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item"><i class="ti ti-user fs-6"></i><p class="mb-0 fs-3">My Profile</p></a>
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item"><i class="ti ti-mail fs-6"></i><p class="mb-0 fs-3">My Account</p></a>
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item"><i class="ti ti-list-check fs-6"></i><p class="mb-0 fs-3">My Task</p></a>
-                    <a href="./authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
-                  </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item active">
+                <a data-bs-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="dashboard">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="../demo1/index.html">
+                        <span class="sub-item">Dashboard 1</span>
+                      </a>
+                    </li>
+                  </ul>
                 </div>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Componentes</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Tienda Virtual</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarCategorias" aria-expanded="false">
+                    <i class="fas fa-list"></i>
+                    <p>Gestión de Categorías</p>
+                    <span class="caret"></span>
+                </a>
+                <div class="collapse" id="sidebarCategorias">
+                    <ul class="nav nav-collapse">
+                        <li>
+                            <a href="/nuevoCategoria">
+                                <i class="fas fa-plus-circle me-2"></i> Registrar Categoría
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarProductos" aria-expanded="false">
+                    <i class="fas fa-box"></i>
+                    <p>Gestión de Productos</p>
+                    <span class="caret"></span>
+                </a>
+                <div class="collapse" id="sidebarProductos">
+                    <ul class="nav nav-collapse">
+                        <li>
+                            <a href="/nuevoProducto">
+                                <i class="fas fa-plus-circle me-2"></i> Nuevo Producto
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/listadoProducto">
+                                <i class="fas fa-list-ul me-2"></i> Listado de Productos
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#inventario" aria-expanded="false">
+                    <i class="fas fa-pen-square"></i>
+                    <p>Gestión de Inventario</p>
+                    <span class="caret"></span>
+                </a>
+                <div class="collapse" id="inventario">
+                    <ul class="nav nav-collapse">
+                        <li>
+                            <a href="/nuevoInventario">
+                                <i class="fas fa-plus-circle me-2"></i> Nuevo Inventario
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/listadoInventario">
+                                <i class="fas fa-list-ul me-2"></i> Listado de Inventario
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#tables">
+                  <i class="fas fa-users"></i>
+                  <p>Gestion de Usuarios</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="tables">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="tables/tables.html">
+                        <span class="sub-item">Basic Table</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="tables/datatables.html">
+                        <span class="sub-item">Datatables</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#ordenes" aria-expanded="false">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <p>Gestión de Órdenes</p>
+                    <span class="caret"></span>
+                </a>
+                <div class="collapse" id="ordenes">
+                    <ul class="nav nav-collapse">
+                        <li>
+                            <a href="/admin_listar_pagos">
+                                <i class="fas fa-list-ul me-2"></i> Listado de Órdenes
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#charts">
+                  <i class="far fa-chart-bar"></i>
+                  <p>Charts</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="charts">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="charts/charts.html">
+                        <span class="sub-item">Chart Js</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="charts/sparkline.html">
+                        <span class="sub-item">Sparkline</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a href="widgets.html">
+                  <i class="fas fa-desktop"></i>
+                  <p>Widgets</p>
+                  <span class="badge badge-success">4</span>
+                </a>
               </li>
             </ul>
           </div>
-        </nav>
-      </header>
-      <div class="container-fluid">
-        {% block contenido %}{% endblock %}
-        <div class="py-6 px-6 text-center"><p class="mb-0 fs-4">Desarrollado por: <b>nnnnnnnn</b> &copy; 2025</p></div>
+        </div>
       </div>
-      {% if messages %}
-        {% for mensajeConfirmacion in messages %}
-          <script>
-            if ("{{ mensajeConfirmacion.tags }}" === "success") {
-              iziToast.success({ title: 'Éxito', message: '{{ mensajeConfirmacion }}', position: 'topRight' });
-            }
-          </script>
-        {% endfor %}
-      {% endif %}
+      <!-- End Sidebar -->
 
-      <style>
-        label.error { color: red; font-weight: bold; }
-        input.error, textarea.error, select.error { border: 1px solid red; }
-        input.is-valid, textarea.is-valid, select.is-valid { border: 1px solid green; }
-      </style>
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="index.html" class="logo">
+                <img src="{% static 'staticadmin/assets/img/kaiadmin/logo_light.svg' %}" alt="navbar brand" class="navbar-brand" height="20" />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+            <div class="container-fluid">
+              <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input type="text" placeholder="Search ..." class="form-control" />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+                  <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" aria-haspopup="true">
+                    <i class="fa fa-search"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-search animated fadeIn">
+                    <form class="navbar-left navbar-form nav-search">
+                      <div class="input-group">
+                        <input type="text" placeholder="Search ..." class="form-control" />
+                      </div>
+                    </form>
+                  </ul>
+                </li>
+                <li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-envelope"></i>
+                  </a>
+                  <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+                    <li>
+                      <div class="dropdown-title d-flex justify-content-between align-items-center">
+                        Messages
+                        <a href="#" class="small">Mark all as read</a>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="message-notif-scroll scrollbar-outer">
+                        <div class="notif-center">
+                          <a href="#">
+                            <div class="notif-img">
+                              <img src="{% static 'staticadmin/assets/img/jm_denis.jpg' %}" alt="Img Profile" />
+                            </div>
+                            <div class="notif-content">
+                              <span class="subject">Jimmy Denis</span>
+                              <span class="block"> How are you ? </span>
+                              <span class="time">5 minutes ago</span>
+                            </div>
+                          </a>
+                          <a href="#">
+                            <div class="notif-img">
+                              <img src="{% static 'staticadmin/assets/img/chadengle.jpg' %}" alt="Img Profile" />
+                            </div>
+                            <div class="notif-content">
+                              <span class="subject">Chad</span>
+                              <span class="block"> Ok, Thanks ! </span>
+                              <span class="time">12 minutes ago</span>
+                            </div>
+                          </a>
+                          <a href="#">
+                            <div class="notif-img">
+                              <img src="{% static 'staticadmin/assets/img/mlane.jpg' %}" alt="Img Profile" />
+                            </div>
+                            <div class="notif-content">
+                              <span class="subject">Jhon Doe</span>
+                              <span class="block">Ready for the meeting today...</span>
+                              <span class="time">12 minutes ago</span>
+                            </div>
+                          </a>
+                          <a href="#">
+                            <div class="notif-img">
+                              <img src="{% static 'staticadmin/assets/img/talha.jpg' %}" alt="Img Profile" />
+                            </div>
+                            <div class="notif-content">
+                              <span class="subject">Talha</span>
+                              <span class="block"> Hi, Apa Kabar ? </span>
+                              <span class="time">17 minutes ago</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i></a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-bell"></i>
+                    <span class="notification">4</span>
+                  </a>
+                  <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                    <li>
+                      <div class="dropdown-title">You have 4 new notification</div>
+                    </li>
+                    <li>
+                      <div class="notif-scroll scrollbar-outer">
+                        <div class="notif-center">
+                          <a href="#">
+                            <div class="notif-icon notif-primary">
+                              <i class="fa fa-user-plus"></i>
+                            </div>
+                            <div class="notif-content">
+                              <span class="block"> New user registered </span>
+                              <span class="time">5 minutes ago</span>
+                            </div>
+                          </a>
+                          <a href="#">
+                            <div class="notif-icon notif-success">
+                              <i class="fa fa-comment"></i>
+                            </div>
+                            <div class="notif-content">
+                              <span class="block">Rahmad commented on Admin</span>
+                              <span class="time">12 minutes ago</span>
+                            </div>
+                          </a>
+                          <a href="#">
+                            <div class="notif-img">
+                              <img src="{% static 'staticadmin/assets/img/profile2.jpg' %}" alt="Img Profile" />
+                            </div>
+                            <div class="notif-content">
+                              <span class="block">Reza send messages to you</span>
+                              <span class="time">12 minutes ago</span>
+                            </div>
+                          </a>
+                          <a href="#">
+                            <div class="notif-icon notif-danger">
+                              <i class="fa fa-heart"></i>
+                            </div>
+                            <div class="notif-content">
+                              <span class="block"> Farrah liked Admin </span>
+                              <span class="time">17 minutes ago</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <a class="see-all" href="javascript:void(0);">See all notifications<i class="fa fa-angle-right"></i></a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="nav-item topbar-user dropdown hidden-caret">
+  <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+    <div class="avatar-sm">
+      <img src="{% static 'staticadmin/assets/img/logoAjdiec.jpg' %}" alt="..." class="avatar-img rounded-circle" />
     </div>
-</div>
+    <span class="profile-username">
+      <span class="op-7">Hola,</span>
+      <span class="fw-bold">{{ request.user.username }}</span>
+    </span>
+  </a>
+  <ul class="dropdown-menu dropdown-user animated fadeIn">
+    <div class="dropdown-user-scroll scrollbar-outer">
+      <li>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href=#>Mi Perfil</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a>
+      </li>
+    </div>
+  </ul>
+</li>             
+ </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
 
-<script src="{% static 'src/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-<script src="{% static 'src/assets/js/sidebarmenu.js' %}"></script>
-<script src="{% static 'src/assets/js/app.min.js' %}"></script>
-<script src="{% static 'src/assets/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
-<script src="{% static 'src/assets/libs/simplebar/dist/simplebar.js' %}"></script>
-<script src="{% static 'src/assets/js/dashboard.js' %}"></script>
+        <!-- Bloque de contenido principal -->
+        <div class="container">
+          <div class="page-inner">
+            {% block contenido %}
+            <!-- Contenido por defecto (puede estar vacío) -->
+            <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+              <div>
+                <h3 class="fw-bold mb-3">Dashboard</h3>
+                <h6 class="op-7 mb-2">Panel de Administración</h6>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                          <i class="fas fa-users"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Visitors</p>
+                          <h4 class="card-title">1,294</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Otras tarjetas pueden ir aquí -->
+            </div>
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core JS Files -->
+    <script src="{% static 'staticadmin/assets/js/core/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/core/popper.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/core/bootstrap.min.js' %}"></script>
+
+    <!-- Plugins JS -->
+    <script src="{% static 'staticadmin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/chart.js/chart.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/chart-circle/circles.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/jsvectormap/jsvectormap.min.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/jsvectormap/world.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/plugin/sweetalert/sweetalert.min.js' %}"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="{% static 'staticadmin/assets/js/kaiadmin.min.js' %}"></script>
+    
+    <!-- Demo JS -->
+    <script src="{% static 'staticadmin/assets/js/setting-demo.js' %}"></script>
+    <script src="{% static 'staticadmin/assets/js/demo.js' %}"></script>
+
+    <script>
+      // Inicialización de gráficos
+      $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
+        type: "line",
+        height: "70",
+        width: "100%",
+        lineWidth: "2",
+        lineColor: "#177dff",
+        fillColor: "rgba(23, 125, 255, 0.14)",
+      });
+    </script>
+    <!-- Core JS Files -->
+     <!-- Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+
+<script src="{% static 'staticadmin/assets/js/core/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'staticadmin/assets/js/core/popper.min.js' %}"></script>
+<script src="{% static 'staticadmin/assets/js/core/bootstrap.min.js' %}"></script>
+<script src="{% static 'staticadmin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
+<script src="{% static 'staticadmin/assets/js/plugin/chart.js/chart.min.js' %}"></script>
+<script src="{% static 'staticadmin/assets/js/plugin/sweetalert/sweetalert.min.js' %}"></script>
+<script src="{% static 'staticadmin/assets/js/kaiadmin.min.js' %}"></script>
+
+<!-- FileInput -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js" crossorigin="anonymous"></script>
+
+<!-- DataTables y Buttons -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+
+{% block scripts %}
+{% endblock %}
+
+
 </body>
 </html>

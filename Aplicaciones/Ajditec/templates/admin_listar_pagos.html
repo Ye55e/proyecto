@@ -1,6 +1,5 @@
-{% extends "plantilla.html" %}
+{% extends "plantilla_admin.html" %}
 {% load static %}
-
 {% block contenido %}
 <br>
 <br>
@@ -49,7 +48,8 @@
         </table>
     </div>
 </div>
-
+    {% endblock %}
+{% block scripts %}
 <script>
   $(document).ready(function() {
     $('#tbl_pagos').DataTable({

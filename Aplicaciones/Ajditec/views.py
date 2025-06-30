@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 
 from .models import Producto, Categoria, Inventario,Usuario,DetalleCarrito,Orden,DetalleOrden,RegistroPago
 
+def plantilla_admin(request):
+    return render(request, 'plantilla_admin.html')
 def carrito(request):
     return render(request, 'carrito.html')
 def finalPedido(request):
@@ -580,7 +582,7 @@ def logout_usuario(request):
 def admin_dashboard(request):
     if request.user.tipo_usuario != 'admin':
         return redirect('catalogo')  # o mostrar un error
-    return render(request, 'plantilla.html')
+    return render(request, 'plantilla_admin.html')
 
 @login_required
 def catalogo(request):
@@ -669,7 +671,10 @@ def add_to_cart(request, id_prod):
             return redirect('producto_vista_rapida', id_prod=id_prod)
 
 def carrito(request):
+    carrito = None  # Inicializamos para evitar errores
+
     if request.user.is_authenticated:
+        # Buscar el carrito activo del usuario
         tiempo_limite = timezone.now() - timedelta(hours=48)
         carrito = Carrito.objects.filter(
             usuarios=request.user,
@@ -682,15 +687,13 @@ def carrito(request):
                 'quantity': detalle.cantidad,
                 'total_price': detalle.subtotal
             } for detalle in carrito.detalles.all()]
-            # Guardar el ID del carrito en la sesión
             request.session['carrito_id'] = carrito.id_carr
         else:
             cart_items = []
-            # Si no hay carrito, limpiar el carrito_id de la sesión
             if 'carrito_id' in request.session:
                 del request.session['carrito_id']
-
     else:
+        # Usuarios no autenticados: carrito en sesión
         carrito_sesion = request.session.get('carrito', {})
         cart_items = []
         for id_prod_str, quantity in carrito_sesion.items():
@@ -710,7 +713,7 @@ def carrito(request):
     return render(request, 'carrito.html', {
         'cart_items': cart_items,
         'cart_total': cart_total,
-        'carrito': carrito if carrito else None,
+        'carrito': carrito,  # Será None si el usuario no tiene carrito en DB
     })
 
 @login_required(login_url='login')

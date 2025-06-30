@@ -28,7 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -131,7 +130,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'proyecto/static'),
-    os.path.join(BASE_DIR, 'proyecto/staticadmin'),
 ]
 
 MEDIA_URL= '/media/'
