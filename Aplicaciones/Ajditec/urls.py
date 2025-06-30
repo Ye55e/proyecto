@@ -3,9 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
-    path('plantilla_admin/', views.admin_plantilla, name='plantilla_admin'),
-    path('datosPedido/', views.pago, name='datosPedido'),
-   
+    path('pago/', views.pago_view, name='pago'),
+    path('plantilla_admin/', views.plantilla_admin, name='plantilla_admin'),
+    
 
     #Usuarios
     path('nuevoUsuario/', views.nuevoUsuario, name='nuevoUsuario'),
@@ -41,15 +41,7 @@ urlpatterns = [
     path('carrito/', views.carrito, name='carrito'),
     path('eliminar-del-carrito/<int:id_prod>/', views.eliminar_del_carrito, name='eliminar_del_carrito'),
     path('actualizar-cantidad/<int:id_prod>/', views.actualizar_cantidad_carrito, name='actualizar_cantidad_carrito'),
-
-    #VISTA PRODUCTO
-    path('producto/<int:id_prod>/vista-rapida/', views.producto_vista_rapida, name='producto_vista_rapida'),
-    #FINAL PEDIDO
-    path('finalPedido/', views.finalPedido, name='finalPedido'),
-    path('orden_confirmada/<int:id_ord>/', views.orden_confirmada, name='orden_confirmada'),
-    path('procesar_pedido/', views.procesar_pedido, name='procesar_pedido'),
-    path('conf_pago/<int:id_ord>/', views.conf_pago, name='conf_pago'),
-    path('final_pedido/', views.final_pedido, name='final_pedido'),
+    
 
 
     
