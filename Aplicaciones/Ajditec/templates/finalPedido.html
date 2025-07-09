@@ -87,14 +87,16 @@
                             <label class="form-label">Número de Transferencia</label>
                             <input type="text" name="num_transferencia" class="form-control" placeholder="Número de transferencia">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Banco</label>
-                            <select name="banco" class="form-select">
-                                <option>Seleccione un banco</option>
-                                <option>Banco Pichincha</option>
-                                <option>Produbanco</option>
-                            </select>
-                        </div>
+                    <div class="col-md-6">
+                    <label for="nom_banco" class="form-label"><b>Banco</b></label>
+                    <select name="nom_banco" id="nom_banco" class="form-select" required>
+                        <option value="" disabled selected>Seleccione un banco</option>
+                        {% for banco in bancos %}
+                            <option value="{{ banco.nombre_banco }}">{{ banco.nombre_banco|upper }} # {{ banco.numero_cuenta }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                     </div>
 
                     <div class="mb-3">

@@ -22,6 +22,10 @@
                             <label for="descrip_prod" class="form-label"><b>DESCRIPCION:</b></label>
                             <textarea name="descrip_prod" id="descrip_prod" class="form-control" rows="3" required>{{ producto.descrip_prod }}</textarea>
                         </div>
+                         <div class="mb-4">
+                    <label for="marca_prod" class="form-label fw-semibold">MARCA:</label>
+                    <textarea name="marca_prod" id="Marca_prod" class="form-control" rows="3" required>{{ producto.marca}}</textarea>
+                </div>
 
                         <div class="mb-3">
                             <label for="foto_prod" class="form-label"><b>IMAGEN PRODUCTO</b></label>
@@ -58,24 +62,32 @@
         </div>
     </div>
 </div>
-
-<script>
-    $(document).ready(function () {
-        $("#foto_prod").fileinput({
-            language: 'es',
-            allowedFileExtensions: ["png", "jpg", "jpeg"],
-            showCaption: false,
-            dropZoneEnabled: true,
-            browseLabel: "Seleccionar archivo",
-            removeLabel: "Eliminar",
-            uploadLabel: "Subir",
-            dropZoneTitle: "Arrastra y suelta la imagen aquí",
-            maxFileSize: 2048,
-            maxFilesNum: 1,
-            initialPreviewAsData: true,
-            overwriteInitial: true,
-            @* Si quieres mostrar la imagen actual en la preview (requiere ajustes extra con fileinput), puedes agregarlo aquí *@
-        });
-    });
-</script>
 {% endblock %}
+{% block scripts %}
+<!-- Configuración específica del FileInput -->
+<!-- Archivo CDN Fileinput para la carga del logo -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css" integrity="sha512-yDVMONIXJPPAoULZ92Ygngsn8ZUGB4ejm6fCc6q9ZvdH8blFAOgg75XZSEaAJ5m4E/yPI1BAi5fF2axMHVuZ5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" integrity="sha512-0wQvB58Ha5coWmcgtg4f11CTSSxfrfLClUp9Vy0qhzYzCZDSnoB4Vhu5JXJFs7rU24LE6JsH+6hpP7vQ22lk5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        // Inicialización del fileinput para el logo
+        $("#foto_prod").fileinput({
+            allowedFileExtensions: ["jpg", "jpeg", "png"],
+            showUpload: false,
+            maxFileSize: 5000,
+            language: 'es', // Cambiar idioma a español
+            browseLabel: 'Seleccionar',
+            removeLabel: 'Eliminar',
+            cancelLabel: 'Cancelar',
+            uploadLabel: 'Subir',
+            msgPlaceholder: 'Seleccionar archivo...',
+            msgSizeTooLarge: 'El archivo "{name}" (<b>{size} KB</b>) excede el tamaño máximo permitido de <b>{maxSize} KB</b>.',
+            msgFilesTooMany: 'El número de archivos seleccionados <b>({n})</b> excede el máximo permitido de <b>{m}</b>.',
+            msgInvalidFileExtension: 'Extensión no válida para el archivo "{name}". Solo se permiten archivos "{extensions}".',
+            dropZoneEnabled: true,
+            dropZoneTitle: 'Arrastra y suelta archivos aquí...',
+           
+        });
+    </script>
+{% endblock %}
+ 

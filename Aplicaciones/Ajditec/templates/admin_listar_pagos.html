@@ -7,11 +7,12 @@
 <div class="card shadow">
     <div class="card-body">
         <table class="table table-bordered table-striped table-hover" id="tbl_pagos">
-            <thead>
+            <thead class="table-dark">
                 <tr>
                     <th>ID ORDEN</th>
                     <th>CLIENTE</th>
                     <th>FECHA DE PAGO</th>
+                    <th>BANCO</th>
                     <th>COD.TRANSACCIÓN</th>
                     <th>TOTAL</th>
                     <th>ESTADO</th>
@@ -24,6 +25,7 @@
                     <td>{{ pago.orden.id_ord }}</td>
                     <td>{{ pago.orden.nombre_cliente }}</td>
                     <td>{{ pago.fech_crea}}</td>
+                    <td>{{ pago.orden.banco.nombre_banco }}</td>
                     <td>{{ pago.orden.num_trans}}</td>
                     <td>$ {{ pago.total_pago|floatformat:2 }}</td>
                     <td>

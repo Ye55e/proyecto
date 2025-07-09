@@ -12,10 +12,15 @@
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
+     <!-- iziToast CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
+
+
     <link rel="stylesheet" href="{% static 'staticadmin/assets/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'staticadmin/assets/css/plugins.min.css' %}">
     <link rel="stylesheet" href="{% static 'staticadmin/assets/css/kaiadmin.min.css' %}">
     <link rel="stylesheet" href="{% static 'staticadmin/assets/css/demo.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <!-- FileInput CSS (si usas uploads de archivos) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css" crossorigin="anonymous">
@@ -41,22 +46,28 @@
       <div class="sidebar" data-background-color="dark">
         <div class="sidebar-logo">
           <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
-            <a href="index.html" class="logo">
-              <img src="{% static 'staticadmin/assets/img/kaiadmin/logo_light.svg' %}" alt="navbar brand" class="navbar-brand" height="20" />
-            </a>
-            <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
-            </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
+      <!-- Logo Header -->
+<div class="logo-header" data-background-color="dark" style="display: flex; justify-content: center; align-items: center; padding: 15px 0;">
+  <a href="#" class="logo">
+    <!-- Logo Circular -->
+     <img src="{% static 'staticadmin/assets/img/logoAjdiec.jpg' %}" alt="Logo" 
+         class="avatar-img rounded-circle" 
+         style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;">
+  </a>
+  <div class="nav-toggle">
+    <button class="btn btn-toggle toggle-sidebar">
+      <i class="gg-menu-right"></i>
+    </button>
+    <button class="btn btn-toggle sidenav-toggler">
+      <i class="gg-menu-left"></i>
+    </button>
+  </div>
+  <button class="topbar-toggler more">
+    <i class="gg-more-vertical-alt"></i>
+  </button>
+</div>
+<!-- End Logo Header -->
+
           <!-- End Logo Header -->
         </div>
         <div class="sidebar-wrapper scrollbar scrollbar-inner">
@@ -149,26 +160,27 @@
                 </div>
               </li>
               <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#tables">
-                  <i class="fas fa-users"></i>
-                  <p>Gestion de Usuarios</p>
-                  <span class="caret"></span>
+                <a data-bs-toggle="collapse" href="#usuarios" aria-expanded="false">
+                    <i class="fas fa-users"></i>
+                    <p>Gestión de Usuarios</p>
+                    <span class="caret"></span>
                 </a>
-                <div class="collapse" id="tables">
-                  <ul class="nav nav-collapse">
-                    <li>
-                      <a href="tables/tables.html">
-                        <span class="sub-item">Basic Table</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="tables/datatables.html">
-                        <span class="sub-item">Datatables</span>
-                      </a>
-                    </li>
-                  </ul>
+                <div class="collapse" id="usuarios">
+                    <ul class="nav nav-collapse">
+                        <li>
+                            <a href="/listadoUsuario">
+                                <i class="fas fa-list-ul me-2"></i> Listado de Usuarios
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tables/datatables.html">
+                                <span class="sub-item">Datatables</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-              </li>
+            </li>
+
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#ordenes" aria-expanded="false">
                     <i class="fas fa-file-invoice-dollar"></i>
@@ -185,33 +197,59 @@
                     </ul>
                 </div>
               </li>
+              <!--BANCOS-->
+              
               <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#charts">
-                  <i class="far fa-chart-bar"></i>
-                  <p>Charts</p>
-                  <span class="caret"></span>
+                <a data-bs-toggle="collapse" href="#bancos" aria-expanded="false">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <p>Gestión de Bancos</p>
+                    <span class="caret"></span>
                 </a>
-                <div class="collapse" id="charts">
-                  <ul class="nav nav-collapse">
-                    <li>
-                      <a href="charts/charts.html">
-                        <span class="sub-item">Chart Js</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="charts/sparkline.html">
-                        <span class="sub-item">Sparkline</span>
-                      </a>
-                    </li>
-                  </ul>
+                <div class="collapse" id="bancos">
+                    <ul class="nav nav-collapse">
+                        <li>
+                            <a href="/nuevoBanco">
+                                <i class="fas fa-list-ul me-2"></i> Listado de Bancos
+                            </a>
+                        </li>
+                    </ul>
                 </div>
               </li>
-              <li class="nav-item">
-                <a href="widgets.html">
-                  <i class="fas fa-desktop"></i>
-                  <p>Widgets</p>
-                  <span class="badge badge-success">4</span>
+              <!--MOVIMIENT-->
+                <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#movi" aria-expanded="false">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <p>Movimiento de inventario</p>
+                    <span class="caret"></span>
                 </a>
+                <div class="collapse" id="movi">
+                    <ul class="nav nav-collapse">
+                        <li>
+                            <a href="/nuevoIngreso">
+                                <i class="fas fa-list-ul me-2"></i> Listado de Movimientos
+                            </a>
+                        </li>
+                       
+
+                    </ul>
+                </div>
+                 <!--REPORTES-->
+                        <li class="nav-item">
+                          <a data-bs-toggle="collapse" href="#sidebarReportes" aria-expanded="false">
+                              <i class="fas fa-chart-pie"></i>
+                              <p>Reportes</p>
+                              <span class="caret"></span>
+                          </a>
+                          <div class="collapse" id="sidebarReportes">
+                              <ul class="nav nav-collapse">
+                                  <li>
+                                      <a href="/reporteVentas">
+                                          <i class="fas fa-chart-bar me-2"></i> Reporte de Productos
+                                      </a>
+                                  </li>
+                              </ul>
+                          </div>
+                      </li>
               </li>
             </ul>
           </div>
@@ -223,7 +261,7 @@
         <div class="main-header">
           <div class="main-header-logo">
             <!-- Logo Header -->
-            <div class="logo-header" data-background-color="dark">
+            <div class="logo-header" data-background-color="dark" style="display: flex; justify-content: center; align-items: center; padding: 15px 0;">
               <a href="index.html" class="logo">
                 <img src="{% static 'staticadmin/assets/img/kaiadmin/logo_light.svg' %}" alt="navbar brand" class="navbar-brand" height="20" />
               </a>
@@ -251,7 +289,7 @@
                       <i class="fa fa-search search-icon"></i>
                     </button>
                   </div>
-                  <input type="text" placeholder="Search ..." class="form-control" />
+                  <input type="text" placeholder="Búsqueda ..." class="form-control" />
                 </div>
               </nav>
 
@@ -263,7 +301,7 @@
                   <ul class="dropdown-menu dropdown-search animated fadeIn">
                     <form class="navbar-left navbar-form nav-search">
                       <div class="input-group">
-                        <input type="text" placeholder="Search ..." class="form-control" />
+                        <input type="text" placeholder="Búsqueda ..." class="form-control" />
                       </div>
                     </form>
                   </ul>
@@ -333,86 +371,73 @@
                 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-bell"></i>
-                    <span class="notification">4</span>
+                    {% if total_notif > 0 %}
+                    <span class="notification">{{ total_notif }}</span>
+                    {% endif %}
                   </a>
                   <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
                     <li>
-                      <div class="dropdown-title">You have 4 new notification</div>
+                      <div class="dropdown-title">Tienes {{ total_notif }} notificación(es) nueva(s)</div>
                     </li>
                     <li>
                       <div class="notif-scroll scrollbar-outer">
                         <div class="notif-center">
+                          {% for notif in notificaciones %}
                           <a href="#">
                             <div class="notif-icon notif-primary">
-                              <i class="fa fa-user-plus"></i>
+                              <i class="fa fa-info-circle"></i>
                             </div>
                             <div class="notif-content">
-                              <span class="block"> New user registered </span>
-                              <span class="time">5 minutes ago</span>
+                              <span class="block">{{ notif.titulo }}</span>
+                              <small>{{ notif.mensaje }}</small><br>
+                              <span class="time">{{ notif.fecha_noti|timesince }} atrás</span>
                             </div>
                           </a>
+                          {% empty %}
                           <a href="#">
-                            <div class="notif-icon notif-success">
-                              <i class="fa fa-comment"></i>
-                            </div>
                             <div class="notif-content">
-                              <span class="block">Rahmad commented on Admin</span>
-                              <span class="time">12 minutes ago</span>
+                              <span class="block">Sin notificaciones nuevas</span>
                             </div>
                           </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img src="{% static 'staticadmin/assets/img/profile2.jpg' %}" alt="Img Profile" />
-                            </div>
-                            <div class="notif-content">
-                              <span class="block">Reza send messages to you</span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-icon notif-danger">
-                              <i class="fa fa-heart"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block"> Farrah liked Admin </span>
-                              <span class="time">17 minutes ago</span>
-                            </div>
-                          </a>
+                          {% endfor %}
                         </div>
                       </div>
                     </li>
                     <li>
-                      <a class="see-all" href="javascript:void(0);">See all notifications<i class="fa fa-angle-right"></i></a>
+                      <a class="see-all" href="{% url 'verNotificaciones' %}">Ver todas <i class="fa fa-angle-right"></i></a>
                     </li>
                   </ul>
                 </li>
+
+
+                <!--LOGIN-->
                 <li class="nav-item topbar-user dropdown hidden-caret">
-  <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-    <div class="avatar-sm">
-      <img src="{% static 'staticadmin/assets/img/logoAjdiec.jpg' %}" alt="..." class="avatar-img rounded-circle" />
-    </div>
-    <span class="profile-username">
-      <span class="op-7">Hola,</span>
-      <span class="fw-bold">{{ request.user.username }}</span>
-    </span>
-  </a>
-  <ul class="dropdown-menu dropdown-user animated fadeIn">
-    <div class="dropdown-user-scroll scrollbar-outer">
-      <li>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href=#>Mi Perfil</a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a>
-      </li>
-    </div>
-  </ul>
-</li>             
- </ul>
+                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                      <div class="avatar-sm">
+                        <img src="{% static 'staticadmin/assets/img/logoAjdiec.jpg' %}" alt="..." class="avatar-img rounded-circle" />
+                      </div>
+                      <span class="profile-username">
+                        <span class="op-7">Hola,</span>
+                        <span class="fw-bold">{{ request.user.username }}</span>
+                      </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user animated fadeIn">
+                      <div class="dropdown-user-scroll scrollbar-outer">
+                        <li>
+                          <div class="dropdown-divider"></div>
+                          <a class="dropdown-item" href=#>Mi Perfil</a>
+                          <div class="dropdown-divider"></div>
+                          <a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a>
+                        </li>
+                      </div>
+                    </ul>
+                  </li>             
+                  </ul>
             </div>
           </nav>
           <!-- End Navbar -->
         </div>
-
+       
         <!-- Bloque de contenido principal -->
         <div class="container">
           <div class="page-inner">
@@ -457,7 +482,8 @@
     <script src="{% static 'staticadmin/assets/js/core/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'staticadmin/assets/js/core/popper.min.js' %}"></script>
     <script src="{% static 'staticadmin/assets/js/core/bootstrap.min.js' %}"></script>
-
+    <!-- iziToast JS -->
+    <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
     <!-- Plugins JS -->
     <script src="{% static 'staticadmin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
     <script src="{% static 'staticadmin/assets/js/plugin/chart.js/chart.min.js' %}"></script>
@@ -472,45 +498,20 @@
     <!-- Kaiadmin JS -->
     <script src="{% static 'staticadmin/assets/js/kaiadmin.min.js' %}"></script>
     
-    <!-- Demo JS -->
-    <script src="{% static 'staticadmin/assets/js/setting-demo.js' %}"></script>
-    <script src="{% static 'staticadmin/assets/js/demo.js' %}"></script>
+    
+    
+  
+  <!-- FileInput -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js" crossorigin="anonymous"></script>
 
-    <script>
-      // Inicialización de gráficos
-      $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
-        type: "line",
-        height: "70",
-        width: "100%",
-        lineWidth: "2",
-        lineColor: "#177dff",
-        fillColor: "rgba(23, 125, 255, 0.14)",
-      });
-    </script>
-    <!-- Core JS Files -->
-     <!-- Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-
-<script src="{% static 'staticadmin/assets/js/core/jquery-3.7.1.min.js' %}"></script>
-<script src="{% static 'staticadmin/assets/js/core/popper.min.js' %}"></script>
-<script src="{% static 'staticadmin/assets/js/core/bootstrap.min.js' %}"></script>
-<script src="{% static 'staticadmin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
-<script src="{% static 'staticadmin/assets/js/plugin/chart.js/chart.min.js' %}"></script>
-<script src="{% static 'staticadmin/assets/js/plugin/sweetalert/sweetalert.min.js' %}"></script>
-<script src="{% static 'staticadmin/assets/js/kaiadmin.min.js' %}"></script>
-
-<!-- FileInput -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js" crossorigin="anonymous"></script>
-
-<!-- DataTables y Buttons -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
@@ -519,6 +520,17 @@
 {% block scripts %}
 {% endblock %}
 
-
 </body>
+<script>
+{% if messages %}
+    {% for message in messages %}
+        iziToast.show({
+            title: "{% if message.tags == 'success' %}Éxito{% elif message.tags == 'error' %}Error{% else %}Info{% endif %}",
+            message: "{{ message|escapejs }}",
+            position: "topRight",
+            color: "{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}"
+        });
+    {% endfor %}
+{% endif %}
+</script>
 </html>

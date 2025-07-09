@@ -32,6 +32,7 @@ class Producto(models.Model):
     borrado_prod = models.BooleanField(default=False)
     fechcreac_prod = models.DateField(auto_now_add=True)
     fechactu_prod = models.DateField(auto_now=True)
+    marca = models.CharField(max_length=100, null=True, blank=True)
     id_cat = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='productos', db_column='id_cat')
 
     class Meta:
@@ -77,16 +78,31 @@ class Inventario(models.Model):
         else:
             self.producto.esta_prod = 'Disponible'
         self.producto.save()
-
-    def actualizar_stock(self, cantidad, tipo):
+   
+    def actualizar_stock(self, cantidad, tipo, observacion=None):
         if tipo == 'Entrada':
             self.stock_actual += cantidad
         elif tipo == 'Salida' and self.stock_actual >= cantidad:
             self.stock_actual -= cantidad
         else:
             raise ValueError("Stock insuficiente para realizar la operación.")
+        
+        # Guardamos el precio anterior antes de hacer la actualización
+        precio_anterior = self.precunit_prod  # El precio anterior antes de la actualización
+
+        # Actualizamos el precio y el stock
         self.save()
         self.actualizar_estado_producto()
+        
+        # Registrar el movimiento de inventario con el precio anterior
+        MovimientoInventario.objects.create(
+            tipo=tipo,
+            cantidad=cantidad,
+            precio_uni=self.precunit_prod,  # El precio actualizado
+            precio_anterior=precio_anterior,  # Guardamos el precio anterior
+            producto=self.producto,
+            observacion=observacion
+        )
 
 
 
@@ -128,7 +144,26 @@ class DetalleCarrito(models.Model):
     class Meta:
         db_table = 'detalle_carrito'
 
+#BANCO 
+class Banco(models.Model):
+    TIPO_CUENTA = [
+        ('Ahorros', 'Ahorros'),
+        ('Corriente', 'Corriente'),
+    ]
 
+    id_banco = models.AutoField(primary_key=True)
+    nombre_banco= models.CharField(max_length=100, verbose_name="Nombre del Banco")
+    numero_cuenta = models.CharField(max_length=20, verbose_name="Número de Cuenta")
+    tipo_cuenta = models.CharField(max_length=10, choices=TIPO_CUENTA, verbose_name="Tipo de Cuenta")
+    nombre_titular = models.CharField(max_length=150, verbose_name="Nombre del Titular")
+    identificacion_titular = models.CharField(max_length=13, verbose_name="Cédula o RUC del Titular")
+    activo = models.BooleanField(default=True, verbose_name="¿Activo?")
+
+    class Meta:
+        db_table = 'banco'
+
+    def __str__(self):
+        return f"{self.nombre} - {self.numero_cuenta} ({self.nombre_titular})"
 
 class Orden(models.Model):
     ESTADO_CHOICES = [
@@ -136,6 +171,7 @@ class Orden(models.Model):
         ('Entregado', 'Entregado'),
         ('Rechazado', 'Rechazado'),
     ]
+    
 
     id_ord = models.AutoField(primary_key=True)
     nombre_cliente = models.CharField(max_length=150)
@@ -152,6 +188,14 @@ class Orden(models.Model):
     estado_ord = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='Pendiente')
     fechacrea_ord = models.DateField(auto_now_add=True)
     fechactua_ord = models.DateField(auto_now=True)
+    banco = models.ForeignKey(
+    Banco,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    
+    db_column='id_banco'
+)
 
     usuarios = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='id_user')
     carrito = models.ForeignKey(Carrito, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_carr')
@@ -195,23 +239,6 @@ class RegistroPago(models.Model):
         db_table = 'registro_pago'
 
 
-# DetalleTransferencia
-class DetalleTrans(models.Model):
-    BANCOS = [
-        ('Banco Produbanco', 'Banco Produbanco'),
-        ('Banco Pichincha', 'Banco Pichincha'),
-    ]
-    id_detaltrans = models.AutoField(primary_key=True)
-    monto_trans = models.DecimalField(max_digits=10, decimal_places=2)
-    banco_transfe = models.CharField(max_length=50, choices=BANCOS, default='Banco Pichincha')
-    codigo_compro = models.CharField(max_length=25, unique=True)
-    fecha_trans = models.DateField()
-    registro_pago = models.ForeignKey(RegistroPago, on_delete=models.CASCADE, related_name='regispagos', db_column='id_regpag')
-
-    class Meta:
-        db_table = 'detalle_trans'
-
-
 # MovimientoInventario
 class MovimientoInventario(models.Model):
     TIPO_MOVIMIENTO = [
@@ -221,9 +248,34 @@ class MovimientoInventario(models.Model):
     id_mov = models.AutoField(primary_key=True)
     tipo = models.CharField(max_length=10, choices=TIPO_MOVIMIENTO)
     cantidad = models.IntegerField()
+    precio_uni = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) 
+    precio_anterior = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) 
     fecha = models.DateTimeField(auto_now_add=True)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='movimientos', db_column='id_prod')
     observacion = models.TextField(blank=True, null=True)
 
     class Meta:
         db_table = 'movimiento_inventario'
+
+#FILTRADO DE PRODUCTOS 
+#NOTIFICACIONES
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Notificacion(models.Model):
+    id_noti=models.AutoField(primary_key=True)
+    titulo = models.CharField(max_length=100)
+    mensaje = models.TextField()
+    fecha_noti = models.DateTimeField(auto_now_add=True)
+    leido = models.BooleanField(default=False)
+    usuario_destino = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'notificacion'
+
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario_destino.username}"
+
+

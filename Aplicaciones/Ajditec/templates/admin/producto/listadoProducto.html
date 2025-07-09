@@ -7,7 +7,7 @@
 <div class="card shadow">
     <div class="card-body">
         <table class="table table-bordered table-striped table-hover" id="tbl_producto">
-            <thead>
+            <thead class="table-dark">
                 <tr>
                     <th>ID</th>
                     <th>PRODUCTO</th>
@@ -36,8 +36,14 @@
                     <td>{{ prod.fechcreac_prod }}</td>
                     <td>{{ prod.fechactu_prod }}</td>
                     <td>
-                        <a href="/editarProducto/{{ prod.id_prod }}" class="btn btn-warning btn-sm me-2">Editar</a>
-                        <a onclick="return confirm('¿Está seguro de eliminar este producto?')" href="/eliminarProducto/{{ prod.id_prod }}" class="btn btn-danger btn-sm">Eliminar</a>
+                        <a href="/editarProducto/{{ prod.id_prod }}" class="btn btn-warning btn-sm me-2" title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <a onclick="return confirm('¿Está seguro de eliminar este producto?')" href="/eliminarProducto/{{ prod.id_prod }}" class="btn btn-danger btn-sm" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </a>
+
                     </td>
                 </tr>
                 {% endfor %}

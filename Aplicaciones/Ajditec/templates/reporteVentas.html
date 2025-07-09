@@ -1,0 +1,78 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+{% block contenido %}
+<br>
+<h3 class="text-center">Reporte de Productos Vendidos</h3>
+
+<form method="get" class="row mb-4">
+    <div class="col-md-3">
+        <label for="fecha_inicio">Fecha inicio:</label>
+        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+    </div>
+    <div class="col-md-3">
+        <label for="fecha_fin">Fecha fin:</label>
+        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+    </div>
+    <div class="col-md-3">
+        <label for="tipo">Tipo de reporte:</label>
+        <select name="tipo" id="tipo" class="form-select">
+            <option value="mayor" {% if tipo == "mayor" %}selected{% endif %}>Más vendidos</option>
+            <option value="menor" {% if tipo == "menor" %}selected{% endif %}>Menos vendidos</option>
+        </select>
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+</form>
+
+{% if productos_vendidos %}
+<div class="card shadow">
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-hover" id="tbl_productos">
+            <thead class="table-dark">
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad Vendida</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in productos_vendidos %}
+                <tr>
+                    <td>{{ item.nomb_prod }}</td>
+                    <td>{{ item.total_vendido }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+</div>
+{% else %}
+    <p class="text-center">Selecciona un rango de fechas para ver los resultados.</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function() {
+    $('#tbl_productos').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'excelHtml5',  text: 'Excel',     className: 'btn btn-success me-2' },
+        { extend: 'csvHtml5',    text: 'CSV',       className: 'btn btn-info me-2'    },
+        { extend: 'pdfHtml5',    text: 'PDF',       className: 'btn btn-danger me-2'  },
+        { extend: 'print',       text: 'Imprimir',  className: 'btn btn-primary' }
+      ]
+    });
+  });
+</script>
+
+<style>
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}

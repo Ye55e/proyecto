@@ -1,0 +1,75 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+
+{% block contenido %}
+<br><br>
+<h3 class="text-center mb-4">LISTADO DE USUARIOS</h3>
+
+<div class="card shadow">
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-hover" id="tbl_usuario">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>USUARIO</th>
+                    <th>EMAIL</th>
+                    <th>CELULAR</th>
+                    <th>ROL</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usu in usuario %}
+                <tr>
+                    <td>{{ usu.id }}</td>
+                    <td>{{ usu.username }}</td>
+                    <td>{{ usu.email }}</td>
+                    <td>{{ usu.cel_user }}</td>
+                     <td>
+                        {% if usu.tipo_usuario == 'admin' %}
+                            Administrador
+                        {% elif usu.tipo_usuario == 'cliente' %}
+                            Cliente
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/editarUsuario/{{ usu.id }}" class="btn btn-warning btn-sm me-2" title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <a onclick="return confirm('¿Está seguro de eliminar este usuario?')" href="/eliminarUsuario/{{ usu.id }}" class="btn btn-danger btn-sm" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function() {
+    $('#tbl_usuario').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'excelHtml5',  text: 'Excel',     className: 'btn btn-success me-2' },
+        { extend: 'csvHtml5',    text: 'CSV',       className: 'btn btn-info me-2'    },
+        { extend: 'pdfHtml5',    text: 'PDF',       className: 'btn btn-danger me-2'  },
+        { extend: 'print',       text: 'Imprimir',  className: 'btn btn-primary' }
+      ]
+    });
+  });
+</script>
+
+<style>
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}

@@ -31,7 +31,7 @@
                 <div class="card-body">
                     <h5 class="text-center mb-3">LISTADO </h5>
                     <table class="table table-bordered table-striped table-hover" id="tbl_categoria">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
                                 <th>TIPO CATEGORÍA</th>
@@ -44,8 +44,14 @@
                                 <td>{{ cat.id_cat }}</td>
                                 <td>{{ cat.tipo_cat }}</td>
                                 <td>
-                                    <a href="/editarCategoria/{{ cat.id_cat }}" class="btn btn-warning btn-sm me-2">Editar</a>
-                                    <a onclick="return confirm('¿Está seguro de eliminar permanentemente?')" href="/eliminarCategoria/{{ cat.id_cat }}" class="btn btn-danger btn-sm">Eliminar</a>
+                                    <a href="/editarCategoria/{{ cat.id_cat }}" class="btn btn-warning btn-sm me-2" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <a onclick="return confirm('¿Está seguro de eliminar permanentemente?')" href="/eliminarCategoria/{{ cat.id_cat }}" class="btn btn-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+
                                 </td>
                             </tr>
                             {% endfor %}

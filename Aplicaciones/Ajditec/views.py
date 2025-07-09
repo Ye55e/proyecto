@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-
-from .models import Producto, Categoria, Inventario,Usuario,DetalleCarrito,Orden,DetalleOrden,RegistroPago
+import os
+from .models import Producto, Categoria, Inventario,Usuario,DetalleCarrito,Orden,DetalleOrden,RegistroPago, Notificacion,Banco,MovimientoInventario
 
 def plantilla_admin(request):
     return render(request, 'plantilla_admin.html')
@@ -13,15 +13,15 @@ def finalPedido(request):
     if carrito_id:
         carrito = get_object_or_404(Carrito, id_carr=carrito_id)
         datos_cliente = request.session.get('datos_cliente', {})
+        bancos = Banco.objects.filter(activo=True)
+
         return render(request, 'finalPedido.html', {
             'cart_items': carrito.detalles.all(),
             'cart_total': carrito.total_carrito(),
             'datos_cliente': datos_cliente,
-            'carrito': carrito
+            'carrito': carrito,
+            'bancos': bancos
         })
-    else:
-        messages.error(request, "No hay carrito activo. Por favor, agregue productos al carrito primero.")
-        return redirect('carrito')
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
@@ -40,6 +40,7 @@ def detalle_orden(request, id_ord):
         'orden': orden,
         'detalles': detalles
     })
+#CREAR ORDEN
 
 @login_required(login_url='login')
 def procesar_pedido(request):
@@ -51,6 +52,9 @@ def procesar_pedido(request):
             metodo_pago = request.POST.get('metodo_pago')
             num_transferencia = request.POST.get('num_transferencia')
             fecha_transferencia = request.POST.get('fecha_transferencia')
+            banco_id = request.POST.get('banco_id')
+
+
             
             # Validar campos requeridos
             if not metodo_entrega or not metodo_pago:
@@ -87,6 +91,8 @@ def procesar_pedido(request):
                 metodo_pago=metodo_pago,
                 num_trans=num_transferencia,
                 fecha_trans=fecha_transferencia,
+                banco=Banco.objects.get(id_banco=banco_id) if banco_id else None,
+
                 estado_ord='Pendiente',   
                 usuarios=request.user,
                 carrito=carrito
@@ -110,6 +116,17 @@ def procesar_pedido(request):
             # Marcar el carrito como pagado
             carrito.estado_carr = 'pagado'
             carrito.save()
+            carrito.detalles.all().delete()  #AL MOMENTO DE GENERAR LA ORDEN EL CARRITO SE LIMPIA
+
+
+            # Crear notificación para todos los administradores
+            admins = Usuario.objects.filter(tipo_usuario='admin')
+            for admin in admins:
+                Notificacion.objects.create(
+                        titulo=f"Nueva Orden #{orden.id_ord} de {orden.nombre_cliente}",
+                        mensaje=f"El cliente {orden.nombre_cliente} ha realizado la orden #{orden.id_ord}.",
+                        usuario_destino=admin
+                )
 
             # Limpiar el carrito de la sesión
             if 'carrito_id' in request.session:
@@ -125,7 +142,7 @@ def procesar_pedido(request):
     else:
         return redirect('finalPedido')
 
-
+#DETALLE DE LA ORDEN
 def conf_pago(request, id_ord):
     """Muestra la confirmación de pago"""
     print("Entrando a conf_pago con orden_id:", id_ord)
@@ -142,32 +159,52 @@ def conf_pago(request, id_ord):
         'registro_pago': registro_pago,
         'detalles_orden': detalles,
         'total': registro_pago.total_pago,
-        'metodo_pago': orden.metodo_pago
+        'metodo_pago': orden.metodo_pago,
+        'Banco': f"{orden.banco.nombre_banco} - {orden.banco.numero_cuenta}" if orden.banco else 'No especificado'
+
     })
 
-def admin_plantilla(request):
-    return render(request, 'plantilla_admin.html')
-#
+from django.utils import timezone
 
 def inicio(request):
     buscar = request.GET.get('buscar', '')
-    filtro = request.GET.get('filtro', 'nombre')  # valor por defecto: 'nombre'
+    categoria_id = request.GET.get('categoria', '')
+    marca = request.GET.get('marca', '')  # Obtener filtro por marca
 
     productos = Producto.objects.filter(borrado_prod=False).select_related('id_cat', 'inventario')
 
+    if categoria_id:
+        productos = productos.filter(id_cat__id_cat=categoria_id)
+
+    if marca:
+        productos = productos.filter(marca__iexact=marca)  # Filtra productos con marca exacta, no case sensitive
+
     if buscar:
-        if filtro == 'nombre':
-            productos = productos.filter(nomb_prod__icontains=buscar)
-        elif filtro == 'categoria':
-            productos = productos.filter(id_cat__tipo_cat__icontains=buscar)
+        productos = productos.filter(nomb_prod__icontains=buscar)
 
     categorias = Categoria.objects.all()
+
+    # Obtener las marcas únicas de los productos
+    marcas = Producto.objects.values_list('marca', flat=True).distinct()
+
+    hoy = timezone.now()
+    productos_recientes = Producto.objects.filter(
+        borrado_prod=False,
+        fechcreac_prod__year=hoy.year,
+        fechcreac_prod__month=hoy.month
+    ).order_by('-fechcreac_prod')
+
     return render(request, 'inicio.html', {
         'productos': productos,
+        'productos_recientes': productos_recientes,
         'categorias': categorias,
+        'marcas': marcas,          # Paso la lista de marcas
         'buscar': buscar,
-        'filtro': filtro,
+        'categoria_id': categoria_id,
+        'marca': marca,            # Paso la marca seleccionada
     })
+
+
 #DETALLE CARRITO
 # views.py
 
@@ -286,13 +323,13 @@ def vista_pago(request):
 #Usuarios
 def nuevoUsuario(request):
     usuario = Usuario.objects.all()
-    return render (request, 'usuarios/nuevoUsuario.html',{
+    return render (request, 'admin/usuarios/nuevoUsuario.html',{
         'usuario':usuario
     })
 
 def listadoUsuario(request):
     usuarioBdd = Usuario.objects.all()
-    return render(request, 'usuarios/listadoUsuario.html', 
+    return render(request, 'admin/usuarios/listadoUsuario.html', 
                   {'usuario':usuarioBdd})
 
 def guardarUsuario(request):
@@ -323,7 +360,7 @@ def eliminarUsuario(request, id):
 
 def editarUsuario(request, id):
     usuarioEditar = Usuario.objects.get(id = id)
-    return render(request,'usuarios/editarUsuario.html', {'usuario':usuarioEditar })
+    return render(request,'admin/usuarios/editarUsuario.html', {'usuario':usuarioEditar })
 
 def procesarEdicionUsuario(request):
     usuario=Usuario.objects.get(id = request.POST['id_usuario'])
@@ -336,8 +373,73 @@ def procesarEdicionUsuario(request):
 
     usuario.save()
     messages.success(request,"Usuario actualizado con exito")
-    return redirect('usuarios/listadoUsuario')
+    return redirect('admin/usuarios/listadoUsuario')
+#BANCO 
+def nuevoBanco(request):
+    bancos = Banco.objects.all()
+    return render(request, 'admin/banco/nuevoBanco.html', {
+        'bancos': bancos
+    })
 
+# Vista opcional si separas el listado
+def listadoBanco(request):
+    bancos = Banco.objects.all()
+    return render(request, 'admin/banco/listadoBanco.html', {
+        'bancos': bancos
+    })
+
+# Guardar nuevo banco
+def guardarBanco(request):
+    if request.method == 'POST':
+        nombre_banco = request.POST.get('nombre_banco', '').strip().upper()
+        numero_cuenta = request.POST.get('numero_cuenta', '').strip()
+        tipo_cuenta = request.POST.get('tipo_cuenta')
+        nombre_titular = request.POST.get('nombre_titular', '').strip()
+        identificacion_titular = request.POST.get('identificacion_titular', '').strip()
+        activo = True if request.POST.get('activo') == 'on' else False
+
+        # Validar si ya existe un banco con mismo nombre y número de cuenta
+        if Banco.objects.filter(nombre_banco__iexact=nombre_banco, numero_cuenta=numero_cuenta).exists():
+            messages.error(request, f"Ya existe un banco con ese nombre y número de cuenta.")
+            return redirect('/nuevoBanco')
+
+        Banco.objects.create(
+            nombre_banco=nombre_banco,
+            numero_cuenta=numero_cuenta,
+            tipo_cuenta=tipo_cuenta,
+            nombre_titular=nombre_titular,
+            identificacion_titular=identificacion_titular,
+            activo=activo
+        )
+        messages.success(request, "Banco registrado correctamente.")
+        return redirect('/nuevoBanco')
+
+# Eliminar banco
+def eliminarBanco(request, id_banco):
+    bancoEliminar = get_object_or_404(Banco, id_banco=id_banco)
+    bancoEliminar.delete()
+    messages.success(request, "Banco eliminado correctamente.")
+    return redirect('/nuevoBanco')
+
+# Mostrar formulario de edición
+def editarBanco(request, id_banco):
+    bancoEditar = get_object_or_404(Banco, id_banco=id_banco)
+    return render(request, 'admin/banco/editarBanco.html', {'banco': bancoEditar})
+
+# Procesar edición
+def procesarEdicionBanco(request):
+    banco = get_object_or_404(Banco, id_banco=request.POST['id_banco'])
+
+    banco.nombre_banco = request.POST['nombre_banco'].strip().upper()
+    banco.numero_cuenta = request.POST['numero_cuenta'].strip()
+    banco.tipo_cuenta = request.POST['tipo_cuenta']
+    banco.nombre_titular = request.POST['nombre_titular'].strip()
+    banco.identificacion_titular = request.POST['identificacion_titular'].strip()
+    banco.activo = True if request.POST.get('activo') == 'on' else False
+
+    banco.save()
+    messages.success(request, "Banco actualizado correctamente.")
+    return redirect('/nuevoBanco')
 #Categoria 
 def nuevoCategoria(request):
     categoria = Categoria.objects.all()
@@ -351,14 +453,18 @@ def listadoCategoria(request):
                   {'categoria':categoriaBdd})
 
 def guardarCategoria(request):
-    tipo_cat = request.POST['tipo_cat']
+    if request.method == 'POST':
+        tipo_cat = request.POST.get('tipo_cat', '').strip().upper()  # quitar espacios y convertir a mayúsculas
 
-    nuevoCategoria = Categoria.objects.create(
-        tipo_cat = tipo_cat,
-    )
+        # Verificar si la categoría ya existe sin importar mayúsculas/minúsculas
+        if Categoria.objects.filter(tipo_cat__iexact=tipo_cat).exists():
+            messages.error(request, f"La categoría '{tipo_cat}' ya existe.")
+            return redirect('/nuevoCategoria')
 
-    messages.success(request,"Se ha guardado la categoria")
-    return redirect ('/nuevoCategoria')
+        # Si no existe, crearla
+        Categoria.objects.create(tipo_cat=tipo_cat)
+        messages.success(request, f"Categoría '{tipo_cat}' guardada exitosamente.")
+        return redirect('/nuevoCategoria')
 
 def eliminarCategoria(request, id_categoria):
     categoriaELiminar = get_object_or_404(Categoria, id_cat=id_categoria)
@@ -394,6 +500,7 @@ def guardarProducto(request):
     if request.method == 'POST':
         nomb = request.POST['nomb_prod']
         descr = request.POST['descrip_prod']
+        marca = request.POST['marca_prod']
         img = request.FILES.get('foto_prod')
         id_categoria = request.POST['id_cat']
 
@@ -402,6 +509,7 @@ def guardarProducto(request):
         Producto.objects.create(
             nomb_prod=nomb,
             descrip_prod=descr,
+            marca=marca,
             img_prod=img,
             id_cat=id_cat
         )
@@ -430,6 +538,7 @@ def procesarEdicionProducto(request):
 
         producto.nomb_prod = request.POST['nomb_prod']
         producto.descrip_prod = request.POST['descrip_prod']
+        producto.marca = request.POST['marca_prod']
         id_cat = request.POST['id_cat']
         producto.id_cat = get_object_or_404(Categoria, id_cat=id_cat)
 
@@ -472,19 +581,16 @@ def nuevoInventario(request):
     })
 def guardarInventario(request):
     if request.method == 'POST':
-        # 1. Recogemos y validamos los datos del POST
         producto_id = request.POST.get('producto')
-        precio_str  = request.POST.get('precunit_prod')
-        stock_str   = request.POST.get('stock_actual')
+        precio_str = request.POST.get('precunit_prod')
+        stock_str = request.POST.get('stock_actual')
 
         if not producto_id or not precio_str or not stock_str:
             messages.error(request, 'Todos los campos son obligatorios.')
             return redirect('nuevoInventario')
 
-        # 2. Buscamos el producto
         producto = get_object_or_404(Producto, id_prod=producto_id)
 
-        # 3. Convertimos precio y stock a tipos adecuados
         try:
             precunit = float(precio_str)
             stock_inicial = int(stock_str)
@@ -492,7 +598,6 @@ def guardarInventario(request):
             messages.error(request, 'Precio unitario o stock inválido.')
             return redirect('nuevoInventario')
 
-        # 4. Obtenemos (o creamos) el único Inventario para ese producto
         inventario, created = Inventario.objects.get_or_create(
             producto=producto,
             defaults={
@@ -502,29 +607,36 @@ def guardarInventario(request):
         )
 
         if not created:
-            # Si ya existía, actualizamos sus campos
             inventario.precunit_prod = precunit
             inventario.stock_actual = stock_inicial
             inventario.save()
-            messages.success(
-                request,
-                f'Stock de "{producto.nomb_prod}" actualizado correctamente.'
-            )
+            mensaje = f'Stock de "{producto.nomb_prod}" actualizado correctamente.'
         else:
-            messages.success(
-                request,
-                f'Inventario para "{producto.nomb_prod}" creado correctamente.'
-            )
+            mensaje = f'Inventario para "{producto.nomb_prod}" creado correctamente.'
 
+        # ✅ REGISTRO DE MOVIMIENTO
+        MovimientoInventario.objects.create(
+            tipo='Entrada',
+            cantidad=stock_inicial,
+            precio_uni=precunit,
+            producto=producto,
+            observacion='Registro de inventario' if created else 'Actualización de inventario'
+        )
+
+        messages.success(request, mensaje)
         return redirect('listadoInventario')
 
-    # Si no es POST, redirigimos al formulario
-    return redirect('nuevoInventario')
+from django.shortcuts import render
+from .models import Inventario, MovimientoInventario
+
 def listadoInventario(request):
-    inventarios = Inventario.objects.select_related('producto').all()
+    # Obtener todos los inventarios y precargar los movimientos asociados a cada producto
+    inventarios = Inventario.objects.select_related('producto').prefetch_related('producto__movimientos').all()
+
     return render(request, 'admin/inventario/listadoInventario.html', {
         'inventarios': inventarios
     })
+
 
 # LOGIN
 # views.py
@@ -578,17 +690,35 @@ def logout_usuario(request):
     logout(request)
     return redirect('login')
 
+from django.contrib import messages
+
+from .models import Notificacion
+
 @login_required
 def admin_dashboard(request):
     if request.user.tipo_usuario != 'admin':
-        return redirect('catalogo')  # o mostrar un error
-    return render(request, 'plantilla_admin.html')
+        messages.error(request, "Acceso denegado: Solo para administradores.")
+        return redirect('catalogo')
+
+    # Obtener notificaciones no leídas para este admin
+    notificaciones = Notificacion.objects.filter(usuario_destino=request.user, leido=False).order_by('-fecha_noti')[:5]
+    total_notif = notificaciones.count()
+
+    return render(request, 'plantilla_admin.html', {
+        'notificaciones': notificaciones,
+        'total_notif': total_notif,
+    })
+
+
+
 
 @login_required
 def catalogo(request):
     if request.user.tipo_usuario != 'cliente':
-        return redirect('admin_dashboard')  # o mostrar un error
+        messages.error(request, "Acceso denegado: Solo para clientes.")
+        return redirect('admin_dashboard')
     return render(request, 'inicio.html')
+
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
@@ -905,10 +1035,17 @@ def producto_vista_rapida(request, id_prod):
     })
 
 ### DASHBORAD ADMIN ACEPTAR O RECHAZAR ORDEN 
-from django.core.mail import EmailMessage
-from django.conf import settings
+
+
+
 from io import BytesIO
+from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from django.core.mail import EmailMessage
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import RegistroPago
+from django.conf import settings
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
@@ -918,9 +1055,36 @@ def admin_confirmar_pago(request, id_regpag):
 
     if registro_pago.estado_reg == 'Pendiente':
         # Descontar stock
+        # Descontar stock y registrar movimiento
         for detalle in orden.detalles.all():
-            detalle.producto.inventario.actualizar_stock(detalle.cantidad, 'Salida')
+            try:
+                inventario = detalle.producto.inventario
 
+                # Guardar el precio anterior antes de actualizar
+                precio_anterior = inventario.precunit_prod  # Precio del producto en ese momento
+
+                # Registrar el movimiento de salida (venta)
+                inventario.actualizar_stock(
+                    detalle.cantidad,
+                    'Salida',  # Tipo de movimiento: 'Salida' porque es una venta
+                    observacion=f'Salida por confirmación de orden #{orden.id_ord} - Venta'
+                )
+
+                # Registrar el movimiento de inventario con el precio que tenía en el momento de la venta
+                MovimientoInventario.objects.create(
+                    tipo='Salida',  # Tipo de movimiento
+                    cantidad=detalle.cantidad,
+                    precio_uni=precio_anterior,  # Usamos el precio anterior como el precio de venta
+                    precio_anterior=precio_anterior,  # Guardamos el precio anterior
+                    producto=detalle.producto,
+                    observacion=f'Venta de producto por orden #{orden.id_ord}'
+                )
+
+            except ValueError as e:
+                messages.error(request, f"No se pudo procesar la orden: {str(e)}")
+                return redirect('admin_detalle_pago', id_regpag=registro_pago.id_regpag)
+
+        # Actualizamos el estado de la orden y el pago
         registro_pago.estado_reg = 'Confirmado'
         registro_pago.save()
         orden.estado_ord = 'Entregado'
@@ -928,24 +1092,47 @@ def admin_confirmar_pago(request, id_regpag):
 
         # ✅ GENERAR PDF EN MEMORIA
         buffer = BytesIO()
-        p = canvas.Canvas(buffer)
-        p.setTitle(f"Comprobante Orden #{orden.id_ord}")
+        p = canvas.Canvas(buffer, pagesize=letter)
+        p.setTitle(f"Presupuesto #{orden.id_ord}")
 
-        p.drawString(100, 800, f"AJ DITEC DISTRIBUIDORA")
+        # Título "COMPROBANTE"
+        p.setFont("Helvetica-Bold", 16)
+        
+        # Cabecera con márgenes ajustados
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(100, 735, "AJ DITEC DISTRIBUIDORA")
         p.drawString(100, 780, f"Comprobante de Compra - Orden #{orden.id_ord}")
-        p.drawString(100, 760, f"Cliente: {orden.nombre_cliente}")
-        p.drawString(100, 740, f"Email: {orden.correo_cliente}")
-        p.drawString(100, 720, f"Teléfono: {orden.telefono_cliente}")
+        p.setFont("Helvetica", 10)
+        p.drawString(100, 720, "RUC: 1791101030101")
+        p.drawString(100, 705, "AV. 10 de Agosto, Quito 170129")
+        p.drawString(400, 735, f"Cliente: {orden.nombre_cliente}")
+        p.drawString(400, 720, f"CEDULA/RUC: {orden.cedula_ruc}")
+        p.drawString(400, 705, f"Dirección: {orden.direccion_cliente}")
+        p.drawString(400, 690, f"Fecha: {registro_pago.fech_crea}")
 
-        y = 700
-        p.drawString(100, y, "Detalle de la compra:")
-        y -= 20
+        # Separación para la tabla
+        p.setFont("Helvetica-Bold", 10)
+        p.drawString(100, 680, "Descripción")
+        p.drawString(300, 680, "Cantidad")
+        p.drawString(400, 680, "Precio Unitario")
 
+        # Detalle de productos con márgenes ajustados
+        y = 660
+        p.setFont("Helvetica", 9)  # Reducir tamaño de fuente para detalles
         for det in orden.detalles.all():
-            p.drawString(120, y, f"- {det.producto.nomb_prod} x{det.cantidad} - ${det.subtotal:.2f}")
-            y -= 20
+            p.drawString(100, y, det.producto.nomb_prod)
+            p.drawString(300, y, f"x{det.cantidad}")
+            p.drawString(400, y, f"${det.producto.inventario.precunit_prod:.2f}")
+            y -= 15  # Reducir el espacio entre productos para evitar desbordamiento
 
-        p.drawString(100, y-10, f"Total: ${registro_pago.total_pago:.2f}")
+        # Total
+        p.setFont("Helvetica-Bold", 10)
+        p.drawString(400, y-10, "Total")
+        p.drawString(500, y-10, f"${registro_pago.total_pago:.2f}")
+
+        # Mensaje de agradecimiento
+        p.setFont("Helvetica", 10)
+        p.drawString(100, y-40, "Gracias por tu compra. ¡Esperamos verte pronto!")
 
         p.showPage()
         p.save()
@@ -953,15 +1140,15 @@ def admin_confirmar_pago(request, id_regpag):
 
         # ✅ ENVIAR EMAIL CON PDF ADJUNTO
         email = EmailMessage(
-            subject=f"Compra confirmada - Orden #{orden.id_ord}",
-            body=f"Hola {orden.nombre_cliente},\n\nAdjuntamos el comprobante de tu compra. Gracias por confiar en nosotros.",
+            subject=f"Presupuesto confirmado - Orden #{orden.id_ord}",
+            body=f"Hola {orden.nombre_cliente},\n\nAdjuntamos el presupuesto de tu compra. Gracias por confiar en nosotros.",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[orden.correo_cliente],
         )
-        email.attach(f"Comprobante_Orden_{orden.id_ord}.pdf", buffer.read(), "application/pdf")
+        email.attach(f"Presupuesto_Orden_{orden.id_ord}.pdf", buffer.read(), "application/pdf")
         email.send()
 
-        messages.success(request, f"Pago confirmado, stock descontado y comprobante PDF enviado por email.")
+        messages.success(request, f"Pago confirmado, stock descontado y presupuesto PDF enviado por email.")
     else:
         messages.info(request, "Este pago ya fue procesado.")
 
@@ -1041,3 +1228,146 @@ def admin_detalle_pago(request, id_regpag):
         'orden': registro_pago.orden,
         'detalles': detalles_orden
     })
+#NOTIFICACIONES
+from django.contrib.auth.decorators import login_required
+from .models import Notificacion
+
+@login_required
+def verNotificaciones(request):
+    if request.user.tipo_usuario != 'admin':
+        messages.error(request, "Acceso denegado: Solo para administradores.")
+        return redirect('catalogo')
+
+    # Traer todas las notificaciones de este admin
+    notificaciones = Notificacion.objects.filter(usuario_destino=request.user).order_by('-fecha_noti')
+
+    # Marcar todas como leídas
+    Notificacion.objects.filter(usuario_destino=request.user, leido=False).update(leido=True)
+
+    return render(request, 'admin/verNotificaciones.html', {
+        'notificaciones': notificaciones
+    })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Producto, Inventario, MovimientoInventario
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Producto, Inventario, MovimientoInventario
+#MOVIMIENTO 
+@login_required
+def nuevoIngresoInventario(request):
+    if request.method == 'POST':
+        producto_id = request.POST.get('producto')
+        cantidad = request.POST.get('cantidad')
+        nuevo_precio = request.POST.get('precio')
+
+        producto = get_object_or_404(Producto, id_prod=producto_id)
+
+        # Verificar si el producto tiene inventario asociado
+        try:
+            inventario = producto.inventario
+        except Inventario.DoesNotExist:
+            messages.error(request, "El producto no tiene inventario asociado.")
+            return redirect('nuevoIngreso')
+
+        # Validación de la cantidad y precio ingresados
+        try:
+            cantidad = int(cantidad)
+            nuevo_precio = float(nuevo_precio)
+        except ValueError:
+            messages.error(request, "Cantidad o precio inválido.")
+            return redirect('nuevoIngreso')
+
+        # Guardar el precio anterior antes de actualizar
+        precio_anterior = inventario.precunit_prod
+
+        # Registrar el movimiento de inventario solo si el precio o el stock cambian
+        if nuevo_precio != precio_anterior or cantidad > 0:
+            # Registrar el movimiento de inventario con el precio anterior
+            MovimientoInventario.objects.create(
+                tipo='Entrada',  # Tipo de movimiento
+                cantidad=cantidad,
+                precio_uni=nuevo_precio,
+                precio_anterior=precio_anterior,  # Guardamos el precio anterior en el movimiento
+                producto=producto,
+                observacion=f'Ingreso por reposición manual'
+            )
+
+            # Si el precio ha cambiado, actualizamos el precio en el inventario
+            if nuevo_precio != precio_anterior:
+                inventario.precunit_prod = nuevo_precio
+                inventario.save()
+
+            # Actualizamos el stock
+            inventario.stock_actual += cantidad  # Añadimos las unidades al stock
+            inventario.save()  # Guardamos el nuevo stock
+
+            # Mensaje de éxito
+            messages.success(request, f'Se ingresaron {cantidad} unidades de {producto.nomb_prod}.')
+            return redirect('listadoInventario')
+
+        else:
+            messages.warning(request, "No se realizó ningún cambio en el precio ni en el stock.")
+            return redirect('nuevoIngreso')
+
+    # Obtener todos los productos que no están marcados como borrados
+    productos = Producto.objects.filter(borrado_prod=False).select_related('inventario')
+
+    # Renderizar el formulario para ingresar nuevos productos
+    return render(request, 'admin/inventario/nuevoIngreso.html', {
+        'productos': productos
+    })
+
+
+#reportes de ventas 
+from django.shortcuts import render
+from django.db.models import Sum, Q
+from .models import Producto
+from datetime import datetime
+
+def reporte_ventas_productos(request):
+    productos_vendidos = []
+    tipo = request.GET.get('tipo', 'mayor')  # 'mayor' o 'menor'
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+
+    try:
+        if fecha_inicio and fecha_fin:
+            fecha_inicio_dt = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+            fecha_fin_dt = datetime.strptime(fecha_fin, "%Y-%m-%d")
+
+            productos = Producto.objects.annotate(
+                total_vendido=Sum(
+                    'detalleorden__cantidad',
+                    filter=Q(detalleorden__orden__fechacrea_ord__range=(fecha_inicio_dt, fecha_fin_dt))
+                )
+            )
+
+            # Reemplazar None por 0
+            for p in productos:
+                if p.total_vendido is None:
+                    p.total_vendido = 0
+
+            # Filtrar y ordenar según tipo
+            if tipo == 'menor':
+                productos_filtrados = [p for p in productos if p.total_vendido <= 1]
+                productos_vendidos = sorted(productos_filtrados, key=lambda x: x.total_vendido)[:10]
+            else:
+                productos_filtrados = [p for p in productos if p.total_vendido > 0]
+                productos_vendidos = sorted(productos_filtrados, key=lambda x: x.total_vendido, reverse=True)[:10]
+
+    except Exception as e:
+        print("Error:", e)
+
+    context = {
+        'productos_vendidos': productos_vendidos,
+        'fecha_inicio': fecha_inicio or '',
+        'fecha_fin': fecha_fin or '',
+        'tipo': tipo
+    }
+    return render(request, 'reporteVentas.html', context)
+
+
+

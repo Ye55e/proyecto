@@ -1,0 +1,122 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+{% block contenido %}
+
+<div class="container mt-4">
+    <h3 class="text-center mb-4">GESTIÓN DE BANCOS</h3>
+    <div class="row">
+        <!-- Columna izquierda: Formulario -->
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">REGISTRO</h5>
+                    <form action="/guardarBanco/" method="POST" id="frm_nuevo_banco">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombre_banco" class="form-label"><b>NOMBRE DEL BANCO:</b></label>
+                            <input type="text" name="nombre_banco" id="nombre_banco" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="numero_cuenta" class="form-label"><b>NÚMERO DE CUENTA:</b></label>
+                            <input type="text" name="numero_cuenta" id="numero_cuenta" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tipo_cuenta" class="form-label"><b>TIPO DE CUENTA:</b></label>
+                            <select name="tipo_cuenta" id="tipo_cuenta" class="form-select" required>
+                                <option value="Ahorros">Ahorros</option>
+                                <option value="Corriente">Corriente</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombre_titular" class="form-label"><b>NOMBRE DEL TITULAR:</b></label>
+                            <input type="text" name="nombre_titular" id="nombre_titular" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="identificacion_titular" class="form-label"><b>CÉDULA O RUC:</b></label>
+                            <input type="text" name="identificacion_titular" id="identificacion_titular" class="form-control" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input class="form-check-input" type="checkbox" id="activo" name="activo" checked>
+                            <label class="form-check-label" for="activo"><b>Activo</b></label>
+                        </div>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="reset" class="btn btn-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Tabla -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">LISTADO DE BANCOS</h5>
+                    <table class="table table-bordered table-striped table-hover" id="tbl_banco">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>NOMBRE</th>
+                                <th>CUENTA</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for banco in bancos %}
+                            <tr>
+                                <td>{{ banco.id_banco }}</td>
+                                <td>{{ banco.nombre_banco }}</td>
+                                <td>{{ banco.numero_cuenta }}</td>
+                                <td>
+                                    {% if banco.activo %}
+                                        Activo
+                                    {% else %}
+                                        Inactivo
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <a href="/editarBanco/{{ banco.id_banco }}" class="btn btn-warning btn-sm me-2" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a onclick="return confirm('¿Está seguro de eliminar este banco?')" href="/eliminarBanco/{{ banco.id_banco }}" class="btn btn-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Script DataTable -->
+{% block scripts %}
+<script>
+  $(document).ready(function() {
+    $('#tbl_banco').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'excelHtml5',  text: 'Excel',  className: 'btn btn-success' },
+        { extend: 'pdfHtml5',    text: 'PDF',    className: 'btn btn-danger'  },
+        { extend: 'print',       text: 'Imprimir', className: 'btn btn-primary' }
+      ]
+    });
+  });
+</script>
+
+<style>
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}

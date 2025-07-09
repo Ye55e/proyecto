@@ -51,7 +51,7 @@ urlpatterns = [
     path('registro/', views.registrar_cliente, name='registro'),
     path('logout/', views.logout_usuario, name='logout'),
     path('plantilla/', views.admin_dashboard, name='admin_dashboard'),
-    path('inicio/', views.catalogo, name='catalogo'),
+    path('catalogo/', views.catalogo, name='catalogo'),
     #LISTAR ORDENES
     path('listar_ordenes/', views.listar_ordenes, name='listar_ordenes'),
     #DETALLE DE ORDEN
@@ -63,6 +63,26 @@ urlpatterns = [
     path('admin_detalle_pago/<int:id_regpag>/', views.admin_detalle_pago, name='admin_detalle_pago'),
     path('admin_confirmar_pago/<int:id_regpag>/', views.admin_confirmar_pago, name='admin_confirmar_pago'),
     path('admin_rechazar_pago/<int:id_regpag>/', views.admin_rechazar_pago, name='admin_rechazar_pago'),
+
+    #FINAL PEDIDOA
+    path('finalPedido/', views.finalPedido, name='finalPedido'),
+    path('orden_confirmada/<int:id_ord>/', views.orden_confirmada, name='orden_confirmada'),
+    path('procesar_pedido/', views.procesar_pedido, name='procesar_pedido'),
+    path('conf_pago/<int:id_ord>/', views.conf_pago, name='conf_pago'),
+    path('final_pedido/', views.final_pedido, name='final_pedido'),
+    #NOTIFICACIONES
+    path('verNotificaciones/', views.verNotificaciones, name='verNotificaciones'),
+    #BANCO
+    path('nuevoBanco/', views.nuevoBanco, name='nuevoBanco'),
+    path('guardarBanco/', views.guardarBanco, name='guardarBanco'),
+    path('editarBanco/<int:id_banco>/', views.editarBanco, name='editarBanco'),
+    path('procesarEdicionBanco/', views.procesarEdicionBanco, name='procesarEdicionBanco'),
+    path('eliminarBanco/<int:id_banco>/', views.eliminarBanco, name='eliminarBanco'),
+
+    path('nuevoIngreso', views.nuevoIngresoInventario, name='nuevoIngreso'),
+    path('reporteVentas/', views.reporte_ventas_productos, name='reporteVentas'),
+
+
 
 
     

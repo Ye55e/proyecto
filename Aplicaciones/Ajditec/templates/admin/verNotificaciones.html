@@ -1,0 +1,25 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+{% block contenido %}
+<div class="container mt-4">
+  <h2 class="mb-4">Notificaciones</h2>
+
+  {% if notificaciones %}
+  <div class="list-group">
+    {% for notif in notificaciones %}
+    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start {% if not notif.leido %}list-group-item-warning{% else %}list-group-item-light{% endif %}">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">{{ notif.titulo }}</div>
+        <small class="text-muted">{{ notif.mensaje }}</small>
+      </div>
+      <small class="text-secondary">{{ notif.fecha_noti|timesince }} atrás</small>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    No tienes notificaciones.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

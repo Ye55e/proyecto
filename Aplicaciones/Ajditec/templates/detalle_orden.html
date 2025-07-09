@@ -109,6 +109,7 @@
             </span>
         </p>
         <p><strong>Método de Pago:</strong> {{ orden.metodo_pago }}</p>
+        <p><strong>Banco:</strong> {{ orden.nom_banco }}</p>
         {% if orden.num_trans %}
             <p><strong>Número de Transferencia:</strong> {{ orden.num_trans }}</p>
         {% endif %}

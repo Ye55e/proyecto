@@ -63,14 +63,18 @@
 
 			<!-- MAIN HEADER -->
 				<div id="header">
-					<div class="container">
-						<div class="row">
-						<div class="col-md-3">
-							<div class="header-logo">
-							<a href="#" class="logo">
-								<img src="{% static 'plantilla_cliente/img/logo.PNg' %}" alt="Logo">
-							</a>
-							</div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="header-logo">
+          <a href="#" class="logo">
+            <!-- Imagen de logo circular -->
+            <img src="{% static 'plantilla_cliente/img/logoAjdiec.jpg' %}" alt="Logo" 
+                 class="avatar-img rounded-circle" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover;">
+          </a>
+        </div>
+    
+<!-- /LOGO -->
 						</div>
 					
       <!-- /LOGO -->
@@ -113,7 +117,6 @@
 								</div>
 								<div class="cuenta-menu" id="menuCuenta">
                                     <a href="{% url 'listar_ordenes' %}"><i class="fa fa-history"></i> Historial de Órdenes</a>
-                                    <a href="{% url 'catalogo' %}"><i class="fa fa-id-card"></i> Mi cuenta</a>
                                     <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
                                 </div>
 								{% else %}
@@ -184,59 +187,113 @@
 		</nav>
 		<!-- /NAVIGATION -->
 
-		<!-- SECTION -->
-		<div class="section">
-			<!-- container -->
-			<div class="container">
-				<!-- row -->
-				<div class="row">
-					<!-- shop -->
-					<div class="col-md-4 col-xs-6">
-						<div class="shop">
-							<div class="shop-img">
-								<img src="{% static 'plantilla_cliente/img/shop01.png' %}" alt="shop">
+	
+		 <!-- SECCION DE CATALOGO CON CATEGORIAS A LA IZQUIERDA Y PRODUCTOS EN CUADRICULA -->
+			<div class="section">
+				<div class="container">
+					<div class="row">
 
-								
-							</div>
-							<div class="shop-body">
-								<h3>Pantallas<br>Colección</h3>
-								<a href="#" class="cta-btn">Compra ahora <i class="fa fa-arrow-circle-right"></i></a>
-							</div>
-						</div>
-					</div>
-					<!-- /shop -->
-
-					<!-- shop -->
-					<div class="col-md-4 col-xs-6">
-						<div class="shop">
-							<div class="shop-img">
-								<img src="{% static 'plantilla_cliente/img/shop03.png' %}" alt="">
-							</div>
-							<div class="shop-body">
-								<h3>Accessorios<br>Colección</h3>
-								<a href="#" class="cta-btn">Compra ahora <i class="fa fa-arrow-circle-right"></i></a>
-							</div>
-						</div>
-					</div>
-					<!-- /shop -->
-					<div class="col-md-4 col-xs-6">
-						<div class="shop">
-							<div class="shop-img">
-								<img src="{% static 'plantilla_cliente/img/cargador2.jpg' %}" alt="">
-							</div>
-							<div class="shop-body">
-								<h3>Baterías y Cargadores<br>Colección</h3>
-								<a href="#" class="cta-btn">Compra ahora <i class="fa fa-arrow-circle-right"></i></a>
-							</div>
-						</div>
-					</div>
-					<!-- /shop -->
+						<!-- BARRA LATERAL DE CATEGORIAS -->
+			<!-- BARRA LATERAL DE CATEGORIAS -->
+			<div class="col-md-3">
+			<div class="aside" style="position: sticky; top: 80px;">
+				<h3 class="aside-title">CATEGORÍAS POPULARES</h3>
+				<div class="list-group" style="padding-left: 10px; padding-right: 10px;">
+				<!-- Opción 'Todas' -->
+				<a href="?{% if marca %}marca={{ marca }}&{% endif %}" class="list-group-item {% if not categoria_id %}active{% endif %}" 
+					style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if not categoria_id %}#0b4b85{% else %}transparent{% endif %}; color: {% if not categoria_id %}#FFF{% else %}#000{% endif %};">
+					Todas
+				</a>
+				{% for cat in categorias %}
+					<a href="?categoria={{ cat.id_cat }}{% if marca %}&marca={{ marca }}{% endif %}" class="list-group-item {% if categoria_id == cat.id_cat|stringformat:"s" %}active{% endif %}" 
+					style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if categoria_id == cat.id_cat|stringformat:"s" %}#0b4b85{% else %}transparent{% endif %}; color: {% if categoria_id == cat.id_cat|stringformat:"s" %}#FFF{% else %}#000{% endif %};">
+					{{ cat.tipo_cat }}
+					</a>
+				{% endfor %}
 				</div>
-				<!-- /row -->
+
+				<h3 class="aside-title mt-4">MARCAS SELECCIONADAS</h3>
+				<div class="list-group" style="padding-left: 10px; padding-right: 10px;">
+				<a href="?{% if categoria_id %}categoria={{ categoria_id }}&{% endif %}" class="list-group-item {% if not marca %}active{% endif %}" 
+					style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if not marca %}#0b4b85{% else %}transparent{% endif %}; color: {% if not marca %}#FFF{% else %}#000{% endif %};">
+					Todas
+				</a>
+				{% for m in marcas %}
+					<a href="?marca={{ m }}{% if categoria_id %}&categoria={{ categoria_id }}{% endif %}" class="list-group-item {% if marca == m %}active{% endif %}" 
+					style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if marca == m %}#0b4b85{% else %}transparent{% endif %}; color: {% if marca == m %}#FFF{% else %}#000{% endif %};">
+					{{ m }}
+					</a>
+				{% endfor %}
+				</div>
 			</div>
-			<!-- /container -->
-		</div>
-		<!-- /SECTION -->
+			</div>
+
+
+
+            <!-- /BARRA LATERAL DE CATEGORIAS -->
+
+            <!-- SECCION DE PRODUCTOS -->
+            <div class="col-md-9">
+                <div class="store-filter clearfix">
+                    <span class="store-qty">Mostrando {{ productos|length }} productos</span>
+                    <!-- Puedes agregar opciones de vista si lo deseas -->
+                </div>
+
+                <div class="row">
+                    {% for producto in productos %}
+                        <div class="col-md-4 col-xs-6">
+                            <div class="product">
+                                <div class="product-img">
+                                    <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}">
+                                    {% if producto.inventario.stock_actual <= 0 %}
+                                        <span class="label label-danger" style="position:absolute; top:10px; right:10px;">AGOTADO</span>
+                                    {% endif %}
+                                </div>
+                                <div class="product-body">
+                                    <p class="product-category">{{ producto.id_cat.tipo_cat }}</p>
+                                    <h3 class="product-name"><a href="#">{{ producto.nomb_prod }}</a></h3>
+                                    <h4 class="product-price">
+                                        ${{ producto.inventario.precunit_prod }}
+                                        <del class="product-old-price">${{ producto.inventario.precunit_prod|add:50 }}</del>
+                                    </h4>
+                                    {% if producto.inventario.stock_actual <= 0 %}
+                                        <p class="estado-agotado">AGOTADO</p>
+                                    {% else %}
+                                        <p class="estado-disponible">DISPONIBLE</p>
+                                    {% endif %}
+
+                                   <div class="product-btns">
+										<a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn">
+											<i class="fa fa-eye"></i>
+											<span class="tooltipp">Vista rápida</span>
+										</a>
+
+										{% if producto.inventario.stock_actual > 1 %}
+											<button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}">
+												<i class="fa fa-shopping-cart"></i>
+												<span class="tooltipp">Añadir al carrito</span>
+											</button>
+										{% else %}
+											<button class="add-to-cart-btn" style="visibility: hidden;">
+												<i class="fa fa-shopping-cart"></i>
+												<span class="tooltipp">Añadir al carrito</span>
+											</button>
+										{% endif %}
+									</div>
+
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- /SECCION DE PRODUCTOS -->
+
+        </div>
+    </div>
+
+<!-- /SECCION DE CATALOGO -->
+
 
 		<!-- SECTION -->
 		<div class="section">
@@ -262,61 +319,65 @@
 					</div>
 					<!-- /section title -->
 
+
 					<!-- Products tab & slick -->
-					<div class="col-md-12">
-						<div class="row">
-							<div class="products-tabs">
-								<!-- tab -->
-								<div id="tab1" class="tab-pane active">
-									<div class="products-slick" data-nav="#slick-nav-1">
-										<!-- product -->
-										{% for producto in productos %}
-										<div class="product" style="height: 370px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+					<!-- Products tab & slick -->
+<div class="col-md-12">
+  <div class="row">
+    <div class="products-tabs">
+      <!-- tab -->
+      <div id="tab1" class="tab-pane active">
+        <div class="products-slick" data-nav="#slick-nav-1">
+          <!-- product -->
+          {% for producto in productos_recientes %}
+          <div class="product" style="height: 370px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
 
-										<div class="product-img">
-											<img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}">
-										</div>
-										<div class="product-body">
-											<p class="product-category">{{ producto.id_cat.tipo_cat }}</p>
-											<h3 class="product-name"><a href="#">{{ producto.nomb_prod }}</a></h3>
-											<h4 class="product-price">
-											${{ producto.inventario.precunit_prod }}
-											<del class="product-old-price">${{ producto.inventario.precunit_prod|add:50 }}</del>
-											</h4>
+            <div class="product-img" style="flex: 0 0 auto; max-height: 180px; overflow: hidden;">
+              <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}">
+            </div>
 
-											<!-- Estado del producto en texto dentro de un cuadro -->
-										 {% if producto.inventario.stock_actual <= 3%}
-											<p class="estado-agotado">AGOTADO</p>
-											{% else %}
-											<p class="estado-disponible">DISPONIBLE</p>
-											{% endif %}
+            <div class="product-body" style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
+              <p class="product-category" style="margin: 2px 0;">{{ producto.id_cat.tipo_cat }}</p>
+              <h3 class="product-name" style="margin: 2px 0;"><a href="#">{{ producto.nomb_prod }}</a></h3>
+              <h4 class="product-price" style="margin: 2px 0;">
+                ${{ producto.inventario.precunit_prod }}
+                <del class="product-old-price">${{ producto.inventario.precunit_prod|add:50 }}</del>
+              </h4>
 
+              {% if producto.inventario.stock_actual <= 0 %}
+			  
+				<p class="estado-agotado">AGOTADO</p>           
+				   {% else %}
+					<p class="estado-disponible">DISPONIBLE</p>	
+              {% endif %}
 
-										<div class="product-btns">
-										<!-- Botón de Vista Rápida -->
-										<a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn">
-											<i class="fa fa-eye"></i>
-											<span class="tooltipp">Vista rápida</span>
-										</a>
-										
+              <div class="product-btns" style="margin: 2px 0; min-height: 40px;">
+                <!-- Botón de Vista Rápida siempre visible -->
+                <a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn">
+                  <i class="fa fa-eye"></i>
+                  <span class="tooltipp">Vista rápida</span>
+                </a>
 
-										<!-- Botón de Añadir al carrito -->
-										<button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}">
-											<i class="fa fa-shopping-cart"></i>
-											<span class="tooltipp">Añadir al carrito</span>
-										</button>
-										</div>
-										</div>
-										</div>
-										{% endfor %}
-						
-									</div>
-									<div id="slick-nav-1" class="products-slick-nav"></div>
-								</div>
-								<!-- /tab -->
-							</div>
-						</div>
-					</div>
+                <!-- Mostrar botón Añadir al carrito solo si hay stock -->
+                {% if producto.inventario.stock_actual > 0 %}
+                <button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}">
+                  <i class="fa fa-shopping-cart"></i>
+                  <span class="tooltipp">Añadir al carrito</span>
+                </button>
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+          {% endfor %}
+        </div>
+        <div id="slick-nav-1" class="products-slick-nav"></div>
+      </div>
+      <!-- /tab -->
+    </div>
+  </div>
+</div>
+
 					<!-- Products tab & slick -->
 				</div>
 				<!-- /row -->
@@ -349,32 +410,7 @@
 <!-- /HOT DEAL SECTION -->
 
 
-		<!-- SECTION -->
-		<div class="section">
-			<!-- container -->
-			<div class="container">
-				<!-- row -->
-				<div class="row">
-
-					<!-- section title -->
-					<div class="col-md-12">
-						<div class="section-title">
-							<h3 class="title">Productos más vendidos</h3>
-						</div>
-					</div>
-					<!-- /section title -->
-
-					
-							</div>
-						</div>
-					</div>
-					<!-- /Products tab & slick -->
-				</div>
-				<!-- /row -->
-			</div>
-			<!-- /container -->
-		</div>
-		<!-- /SECTION -->
+		
 
 		<!-- NEWSLETTER -->
 		<div id="newsletter" class="section">
@@ -384,11 +420,6 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="newsletter">
-							<p>Suscríbete a nuestras <strong>NOVEDADES</strong></p>
-							<form>
-								<input class="input" type="email" placeholder="Ingresa tu correo electrónico">
-								<button class="newsletter-btn"><i class="fa fa-envelope"></i> Suscribete</button>
-							</form>
 							<ul class="newsletter-follow">
 								<li>
 									<a href="#"><i class="fa fa-facebook"></i></a>
