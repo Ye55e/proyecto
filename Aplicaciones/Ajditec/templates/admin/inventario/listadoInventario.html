@@ -4,6 +4,13 @@
 
 <br><br>
 <h3 class="text-center mb-4">INVENTARIO AJ DITEC DISTRIBUIDORA</h3>
+   <!-- Alerta para productos con stock bajo -->
+    {% if productos_bajos_stock %}
+        <div class="alert alert-danger small">
+            <strong>¡Alerta!</strong> Algunos productos tienen un stock bajo. Por favor, verifique.
+        </div>
+    {% endif %}
+
 <div class="card shadow">
   <div class="card-body">
     <table id="tbl_inventario" class="table table-striped table-bordered">
@@ -21,7 +28,8 @@
       </thead>
       <tbody>
         {% for inv in inventarios %}
-        <tr>
+        
+        <tr {% if inv.stock_actual <= 3 %} class="table-danger" {% endif %}>
           <td>{{ inv.id_inve }}</td>
           <td>{{ inv.producto.id_prod }}</td>
           <td>{{ inv.producto.nomb_prod }}</td>

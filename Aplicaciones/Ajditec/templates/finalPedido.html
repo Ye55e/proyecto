@@ -67,7 +67,7 @@
                  <div class="form-check mb-4">
                     <input class="form-check-input" type="radio" name="metodo_entrega" id="envio_quito" value="envio">
                     <label class="form-check-label" for="envio_quito">
-                        Envío a domicilio desde Quito <span class="badge bg-secondary">Valor adicional</span>
+                        Envío a domicilio desde Quito <span class="badge bg-secondary">Valor adicional Pendiente</span>
                     </label>
                 </div>
 
@@ -85,14 +85,18 @@
                     <div class="mb-3 row">
                         <div class="col-md-6">
                             <label class="form-label">Número de Transferencia</label>
-                            <input type="text" name="num_transferencia" class="form-control" placeholder="Número de transferencia">
+                            <input type="text" name="num_transferencia" class="form-control" 
+                                   placeholder="Número de transferencia" 
+                                   pattern="^[0-9]+$" 
+                                   title="Solo se permiten números" 
+                                   required>
                         </div>
                     <div class="col-md-6">
-                    <label for="nom_banco" class="form-label"><b>Banco</b></label>
-                    <select name="nom_banco" id="nom_banco" class="form-select" required>
+                    <label for="banco_id" class="form-label"><b>Banco</b></label>
+                    <select name="banco_id" id="banco_id" class="form-select" required>
                         <option value="" disabled selected>Seleccione un banco</option>
                         {% for banco in bancos %}
-                            <option value="{{ banco.nombre_banco }}">{{ banco.nombre_banco|upper }} # {{ banco.numero_cuenta }}</option>
+                            <option value="{{ banco.id_banco }}">{{ banco.nombre_banco|upper }} # {{ banco.numero_cuenta }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -200,7 +204,29 @@
 
 <!-- JavaScript corregido -->
 <script>
+// Validar número de transferencia en tiempo real
+const numTransferencia = document.querySelector('input[name="num_transferencia"]');
+if (numTransferencia) {
+    numTransferencia.addEventListener('input', function() {
+        // Eliminar caracteres no numéricos
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+}
+
+// Validar número de transferencia al enviar el formulario
 document.addEventListener('DOMContentLoaded', function() {
+    const formulario = document.getElementById('checkout-form');
+    if (formulario) {
+        formulario.addEventListener('submit', function(e) {
+            const numTransferencia = document.querySelector('input[name="num_transferencia"]');
+            if (numTransferencia && !/^[0-9]+$/.test(numTransferencia.value)) {
+                e.preventDefault();
+                numTransferencia.setCustomValidity('Solo se permiten números en el número de transferencia');
+                numTransferencia.reportValidity();
+            }
+        });
+    }
+}
     const metodoEntregaInputs = document.querySelectorAll('input[name="metodo_entrega"]');
     const metodoPagoInputs = document.querySelectorAll('input[name="metodo_pago"]');
     const envioAdicional = document.getElementById('envio-adicional');

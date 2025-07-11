@@ -23,13 +23,28 @@ def finalPedido(request):
             'bancos': bancos
         })
 
+#HISTORIAL DE ORDENES USUARIO 
+from django.core.exceptions import ObjectDoesNotExist
+
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
 def listar_ordenes(request):
     ordenes = Orden.objects.filter(usuarios=request.user).order_by('-fechacrea_ord')
+
+    # Intentamos obtener el registro_pago para cada orden, y manejamos la excepción si no existe
+    for orden in ordenes:
+        try:
+            # Intentamos obtener el RegistroPago correspondiente
+            orden.registro_pago = RegistroPago.objects.get(orden=orden)
+        except ObjectDoesNotExist:
+            # Si no existe el RegistroPago, lo seteamos como None
+            orden.registro_pago = None
+
     return render(request, 'listar_ordenes.html', {
         'ordenes': ordenes
     })
+
+
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
@@ -579,18 +594,21 @@ def nuevoInventario(request):
     return render(request, 'admin/inventario/nuevoInventario.html', {
         'productos': productos
     })
+
 def guardarInventario(request):
     if request.method == 'POST':
         producto_id = request.POST.get('producto')
         precio_str = request.POST.get('precunit_prod')
         stock_str = request.POST.get('stock_actual')
 
+        # Validar que todos los campos estén completos
         if not producto_id or not precio_str or not stock_str:
             messages.error(request, 'Todos los campos son obligatorios.')
             return redirect('nuevoInventario')
 
         producto = get_object_or_404(Producto, id_prod=producto_id)
 
+        # Intentar convertir el precio y el stock a valores numéricos
         try:
             precunit = float(precio_str)
             stock_inicial = int(stock_str)
@@ -598,46 +616,45 @@ def guardarInventario(request):
             messages.error(request, 'Precio unitario o stock inválido.')
             return redirect('nuevoInventario')
 
-        inventario, created = Inventario.objects.get_or_create(
+        # Verificar si ya existe un inventario para este producto
+        if Inventario.objects.filter(producto=producto).exists():
+            messages.error(request, f"El producto {producto.nomb_prod} ya tiene un inventario registrado.")
+            return redirect('nuevoInventario')
+
+        # Crear un nuevo inventario si no existe
+        inventario = Inventario.objects.create(
             producto=producto,
-            defaults={
-                'precunit_prod': precunit,
-                'stock_actual': stock_inicial
-            }
+            precunit_prod=precunit,
+            stock_actual=stock_inicial
         )
 
-        if not created:
-            inventario.precunit_prod = precunit
-            inventario.stock_actual = stock_inicial
-            inventario.save()
-            mensaje = f'Stock de "{producto.nomb_prod}" actualizado correctamente.'
-        else:
-            mensaje = f'Inventario para "{producto.nomb_prod}" creado correctamente.'
-
-        # ✅ REGISTRO DE MOVIMIENTO
+        # Registrar el movimiento de entrada en inventario
         MovimientoInventario.objects.create(
-            tipo='Entrada',
+            tipo='Entrada',  # Tipo de movimiento: Entrada
             cantidad=stock_inicial,
             precio_uni=precunit,
             producto=producto,
-            observacion='Registro de inventario' if created else 'Actualización de inventario'
+            observacion='Primer ingreso al inventario'
         )
 
-        messages.success(request, mensaje)
+        # Mensaje de éxito
+        messages.success(request, f'Inventario para "{producto.nomb_prod}" creado correctamente con un stock inicial de {stock_inicial}.')
         return redirect('listadoInventario')
 
-from django.shortcuts import render
-from .models import Inventario, MovimientoInventario
-
+#LISTADO INVENTARIO 
+@login_required
 def listadoInventario(request):
-    # Obtener todos los inventarios y precargar los movimientos asociados a cada producto
-    inventarios = Inventario.objects.select_related('producto').prefetch_related('producto__movimientos').all()
+    # Obtener todos los productos e inventarios asociados
+    inventarios = Inventario.objects.select_related('producto').all()
 
+    # Filtrar productos con stock bajo
+    productos_bajos_stock = [inventario for inventario in inventarios if inventario.stock_actual <= 3]
+
+    # Pasar los inventarios y productos con stock bajo al template
     return render(request, 'admin/inventario/listadoInventario.html', {
-        'inventarios': inventarios
+        'inventarios': inventarios,
+        'productos_bajos_stock': productos_bajos_stock,  # Para alertar sobre productos con stock bajo
     })
-
-
 # LOGIN
 # views.py
 from django.shortcuts import render, redirect
@@ -1070,16 +1087,6 @@ def admin_confirmar_pago(request, id_regpag):
                     observacion=f'Salida por confirmación de orden #{orden.id_ord} - Venta'
                 )
 
-                # Registrar el movimiento de inventario con el precio que tenía en el momento de la venta
-                MovimientoInventario.objects.create(
-                    tipo='Salida',  # Tipo de movimiento
-                    cantidad=detalle.cantidad,
-                    precio_uni=precio_anterior,  # Usamos el precio anterior como el precio de venta
-                    precio_anterior=precio_anterior,  # Guardamos el precio anterior
-                    producto=detalle.producto,
-                    observacion=f'Venta de producto por orden #{orden.id_ord}'
-                )
-
             except ValueError as e:
                 messages.error(request, f"No se pudo procesar la orden: {str(e)}")
                 return redirect('admin_detalle_pago', id_regpag=registro_pago.id_regpag)
@@ -1155,6 +1162,7 @@ def admin_confirmar_pago(request, id_regpag):
     return redirect('admin_listar_pagos')
 
 
+from django.core.mail import send_mail
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
@@ -1248,14 +1256,13 @@ def verNotificaciones(request):
         'notificaciones': notificaciones
     })
 
-
+#MOVIMIENTO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Producto, Inventario, MovimientoInventario
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Producto, Inventario, MovimientoInventario
-#MOVIMIENTO 
 @login_required
 def nuevoIngresoInventario(request):
     if request.method == 'POST':
@@ -1278,6 +1285,15 @@ def nuevoIngresoInventario(request):
             nuevo_precio = float(nuevo_precio)
         except ValueError:
             messages.error(request, "Cantidad o precio inválido.")
+            return redirect('nuevoIngreso')
+
+        # Asegurarse que la cantidad y el precio sean mayores que 0
+        if cantidad <= 0:
+            messages.error(request, "La cantidad debe ser mayor a cero.")
+            return redirect('nuevoIngreso')
+
+        if nuevo_precio <= 0:
+            messages.error(request, "El precio debe ser mayor a cero.")
             return redirect('nuevoIngreso')
 
         # Guardar el precio anterior antes de actualizar

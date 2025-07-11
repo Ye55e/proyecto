@@ -21,6 +21,22 @@ class Categoria(models.Model):
 
     class Meta:
         db_table = 'categoria'
+#PROVEEDOR
+
+class Proveedor(models.Model):
+    id_prov = models.AutoField(primary_key=True)
+    nombre_prov = models.CharField(max_length=200, verbose_name="Nombre del Proveedor")
+    direccion_prov = models.CharField(max_length=255, verbose_name="Dirección del Proveedor")
+    telefono_prov = models.CharField(max_length=20, verbose_name="Teléfono del Proveedor")
+    correo_prov = models.EmailField(verbose_name="Correo Electrónico")
+    contacto_prov = models.CharField(max_length=150, verbose_name="Nombre de Contacto")
+    activo = models.BooleanField(default=True, verbose_name="¿Activo?")
+
+    class Meta:
+        db_table = 'proveedor'
+
+    def __str__(self):
+        return self.nombre_prov
 
 
 # Producto
@@ -34,6 +50,9 @@ class Producto(models.Model):
     fechactu_prod = models.DateField(auto_now=True)
     marca = models.CharField(max_length=100, null=True, blank=True)
     id_cat = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='productos', db_column='id_cat')
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, related_name='productos', db_column='id_prov', null=True)
+
+
 
     class Meta:
         db_table = 'producto'

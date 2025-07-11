@@ -29,7 +29,13 @@
             <tr>
               <td>S{{ orden.id_ord }}</td>
               <td>{{ orden.fechacrea_ord }}</td>
-              <td>$ {{ orden.carrito.total_carrito }}</td>
+              <td>
+                {% if orden.registro_pago %}
+                  $ {{ orden.registro_pago.total_pago }}
+                {% else %}
+                  No registrado
+                {% endif %}
+              </td>
               <td>
                 <span class="estado-orden {% if orden.estado_ord == 'Pendiente' %}pendiente{% elif orden.estado_ord == 'Entregado' %}entregado{% else %}rechazado{% endif %}">
                   {{ orden.estado_ord }}
@@ -37,7 +43,13 @@
               </td>
               <td>{{ orden.metodo_pago }}</td>
               <td>{{ orden.num_trans }}</td>
-              <td>{{ orden.banco.nombre_banco }}</td>
+              <td>
+                {% if orden.banco %}
+                  {{ orden.banco.nombre_banco }}
+                {% else %}
+                  No especificado
+                {% endif %}
+              </td>
               <td>
                 <a href="{% url 'detalle_orden' orden.id_ord %}" class="btn btn-primary btn-sm">Ver Detalles</a>
               </td>
