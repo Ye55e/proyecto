@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -17,24 +16,7 @@
 
 		<!-- Bootstrap -->
 		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/bootstrap.min.css' %}"/>
-        {# DataTables + Bootstrap 5 JS #}
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-        {# DataTables Buttons + Bootstrap 5 JS #}
-        <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
-
-        {# Dependencias de exportación #}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
-
-        {# FileInput JS (opcional) #}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js" integrity="sha512-0wQvB58..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js" integrity="sha512-8Mq7UmH..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<!-- Slick -->
 		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/slick.css' %}"/>
 		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/slick-theme.css' %}"/>
@@ -48,9 +30,6 @@
 		<!-- Custom stlylesheet -->
 		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}"/>
     </head>
-    <body>
-        <!-- Resto del contenido HTML -->
-         <body>
 		<!-- HEADER -->
 		<header>
 			<!-- TOP HEADER -->
@@ -81,17 +60,19 @@
 
 			<!-- MAIN HEADER -->
 				<div id="header">
-					<div class="container">
-						<div class="row">
-						<div class="col-md-3">
-							<div class="header-logo">
-							<a href="#" class="logo">
-								<img src="{% static 'plantilla_cliente/img/logo.PNg' %}" alt="Logo">
-							</a>
-							</div>
-						</div>
-					
-      <!-- /LOGO -->
+			<div class="container">
+				<div class="row">
+				<div class="col-md-3">
+					<div class="header-logo">
+					<a href="/" class="logo">
+						<!-- Imagen de logo circular -->
+						<img src="{% static 'plantilla_cliente/img/logoAjdiec.jpg' %}" alt="Logo" 
+							class="avatar-img rounded-circle" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover;">
+					</a>
+					</div>
+    
+					<!-- /LOGO -->
+						</div>					
 
 						<!-- BARRA DE BUSQUEDA -->
 					<div class="col-md-6">
@@ -119,29 +100,6 @@
 						<div class="col-md-3 clearfix">
 							<div class="header-ctn">
 								
-						<!-- CUENTA -->
-						<div class="cuenta-contenedor">
-								{% if request.user.is_authenticated %}
-								<div class="cuenta-login" id="btnCuenta">
-									<i class="fa fa-user"></i>
-									<div class="cuenta-texto">
-									<span>{{ request.user.get_full_name|default:request.user.username }}</span>
-									<i class="fa fa-caret-down"></i>
-									</div>
-								</div>
-								<div class="cuenta-menu" id="menuCuenta">
-                                    <a href="{% url 'listar_ordenes' %}"><i class="fa fa-history"></i> Historial de Órdenes</a>
-                                    <a href="{% url 'catalogo' %}"><i class="fa fa-id-card"></i> Mi cuenta</a>
-                                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
-                                </div>
-								{% else %}
-								<a href="{% url 'login' %}" class="cuenta-login">
-									<i class="fa fa-user"></i>
-									<span>Mi Cuenta</span>
-								</a>
-								{% endif %}
-							</div>
-								<!-- CUENTA -->
 							<!-- CARRITO -->
 							<div class="dropdown">
 							<a href="{% url 'carrito' %}" class="dropdown-toggle" aria-expanded="true">
@@ -158,6 +116,28 @@
 						</div>
 
 							<!-- /CARRITO -->
+							 <!-- CUENTA -->
+						<div class="cuenta-contenedor">
+								{% if request.user.is_authenticated %}
+								<div class="cuenta-login" id="btnCuenta">
+									<i class="fa fa-user"></i>
+									<div class="cuenta-texto">
+									<span>{{ request.user.get_full_name|default:request.user.username }}</span>
+									<i class="fa fa-caret-down"></i>
+									</div>
+								</div>
+								<div class="cuenta-menu" id="menuCuenta">
+                                    <a href="{% url 'listar_ordenes' %}"><i class="fa fa-history"></i> Historial de Órdenes</a>
+                                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+                                </div>
+								{% else %}
+								<a href="{% url 'login' %}" class="cuenta-login">
+									<i class="fa fa-user"></i>
+									<span>Mi Cuenta</span>
+								</a>
+								{% endif %}
+							</div>
+								<!-- CUENTA -->
 
 
 
@@ -180,6 +160,28 @@
 			<!-- /MAIN HEADER -->
 		</header>
 		<!-- /HEADER -->
+
+		<!-- NAVIGATION -->
+		<nav id="navigation">
+			<!-- container -->
+			<div class="container">
+				<!-- responsive-nav -->
+				<div id="responsive-nav">
+					<!-- NAV -->
+					<ul class="main-nav nav navbar-nav">
+						<li class="active"><a href="/">Home</a></li>
+						<li><a href="#">Categories</a></li>
+						<li><a href="#">Pantallas</a></li>
+						<li><a href="#">Accessorios</a></li>
+					</ul>
+					<!-- /NAV -->
+				</div>
+				<!-- /responsive-nav -->
+			</div>
+			<!-- /container -->
+		</nav>
+		<!-- /NAVIGATION -->
+
           <div class="container-fluid">
     {% block contenido %}{% endblock %}
 

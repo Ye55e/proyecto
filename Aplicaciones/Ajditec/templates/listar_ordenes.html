@@ -4,84 +4,80 @@
 {% block contenido %}
 <link rel="stylesheet" href="{% static 'plantilla_cliente/css/estilos.css' %}">
 <link rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}">
-<br>
-<br>
+<br><br>
+
 <h3 class="text-center mb-4">HISTORIAL DE ÓRDENES</h3>
+
 <div class="card shadow">
-    <div class="card-body">
-        <table class="table table-bordered table-striped table-hover" id="tbl_ordenes">
-            <thead>
-                <tr>
-                    <th>NÚMERO DE ORDEN</th>
-                    <th>FECHA</th>
-                    <th>TOTAL</th>
-                    <th>ESTADO</th>
-                    <th>MÉTODO DE PAGO</th>
-                    <th>NUM TRANSFERENCIA</th>
-                    <th>BANCO</th>
-                    <th>ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-
-                {% for orden in ordenes %}
-                <tr>
-                    <td>S{{ orden.id_ord }}</td>
-                    <td>{{ orden.fechacrea_ord }}</td>
-                    <td>$ {{ orden.carrito.total_carrito }}</td>
-                    <td>
-                        <span class="estado-orden {% if orden.estado_ord == 'Pendiente' %}pendiente{% elif orden.estado_ord == 'Entregado' %}entregado{% else %}rechazado{% endif %}">
-                            {{ orden.estado_ord }}
-                        </span>
-                    </td>
-                    <td>{{ orden.metodo_pago }}</td>
-                    <td>{{ orden.num_trans }}</td>
-                    <td>{{ orden.banco.nombre_banco }}</td>
-                    <td>
-                        <a href="{% url 'detalle_orden' orden.id_ord %}" class="btn btn-primary btn-sm">Ver Detalles</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-            {% endblock %}
-{% block scripts %}
-
-        <script>
-            $(document).ready(function() {
-                $('#tbl_ordenes').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
-                    },
-                    dom: 'Bfrtip',
-                    buttons: [
-                        { extend: 'excelHtml5',  text: 'Excel',     className: 'btn btn-success me-2' },
-                        { extend: 'csvHtml5',    text: 'CSV',       className: 'btn btn-info me-2'    },
-                        { extend: 'pdfHtml5',    text: 'PDF',       className: 'btn btn-danger me-2'  },
-                        { extend: 'print',       text: 'Imprimir',  className: 'btn btn-primary' }
-                    ]
-                });
-            });
-            </script>
-    
-            <!-- Estilos para DataTables y botones -->
-            <style>
-                div.dt-buttons .btn {
-                    margin-right: 10px;
-                }
-                .estado-orden {
-                    font-weight: bold;
-                    padding: 5px 10px;
-                    border-radius: 15px;
-                    display: inline-block;
-                }
-                .pendiente { background-color: #ffc107; color: #000; }
-                .entregado { background-color: #28a745; color: #fff; }
-                .rechazado { background-color: #dc3545; color: #fff; }
-            </style>
-        </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped table-hover" id="tbl_ordenes">
+        <thead>
+          <tr>
+            <th>NÚMERO DE ORDEN</th>
+            <th>FECHA</th>
+            <th>TOTAL</th>
+            <th>ESTADO</th>
+            <th>MÉTODO DE PAGO</th>
+            <th>NUM TRANSFERENCIA</th>
+            <th>BANCO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for orden in ordenes %}
+            <tr>
+              <td>S{{ orden.id_ord }}</td>
+              <td>{{ orden.fechacrea_ord }}</td>
+              <td>$ {{ orden.carrito.total_carrito }}</td>
+              <td>
+                <span class="estado-orden {% if orden.estado_ord == 'Pendiente' %}pendiente{% elif orden.estado_ord == 'Entregado' %}entregado{% else %}rechazado{% endif %}">
+                  {{ orden.estado_ord }}
+                </span>
+              </td>
+              <td>{{ orden.metodo_pago }}</td>
+              <td>{{ orden.num_trans }}</td>
+              <td>{{ orden.banco.nombre_banco }}</td>
+              <td>
+                <a href="{% url 'detalle_orden' orden.id_ord %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% endblock %}
-    
-          
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function() {
+    $('#tbl_ordenes').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: [
+        { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-success me-2' },
+        { extend: 'csvHtml5', text: 'CSV', className: 'btn btn-info me-2' },
+        { extend: 'pdfHtml5', text: 'PDF', className: 'btn btn-danger me-2' },
+        { extend: 'print', text: 'Imprimir', className: 'btn btn-primary' }
+      ]
+    });
+  });
+</script>
+
+<!-- Estilos para los estados de la orden -->
+<style>
+  .estado-orden {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+    display: inline-block;
+  }
+  .pendiente { background-color: #ffc107; color: #000; }
+  .entregado { background-color: #28a745; color: #fff; }
+  .rechazado { background-color: #dc3545; color: #fff; }
+</style>
+{% endblock %}

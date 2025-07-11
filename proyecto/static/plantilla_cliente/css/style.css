@@ -1937,7 +1937,7 @@ textarea.input {
 
 #newsletter.section {
   border-top: 2px solid #E4E7ED;
-  border-bottom: 3px solid #0b4b85;
+  border-bottom: 3px solid #000;
   margin-top: 30px;
 }
 
@@ -1979,7 +1979,7 @@ textarea.input {
   width: 160px;
   height: 40px;
   font-weight: 700;
-  background: #D10024;
+  background: #0b4b85;
   color: #FFF;
   border: none;
   border-radius: 0px 40px 40px 0px;
@@ -2013,7 +2013,7 @@ textarea.input {
 
 .newsletter .newsletter-follow li a:hover, .newsletter .newsletter-follow li a:focus {
   background-color: #E4E7ED;
-  color: #D10024;
+  color: #0b4b85;
 }
 
 /*=========================================================
@@ -2021,8 +2021,12 @@ textarea.input {
 ===========================================================*/
 
 #footer {
-  background: #15161D;
+  background:#0b4b85;
   color: #B9BABC;
+  min-height: 80px;
+
+  
+
 }
 
 #bottom-footer {
@@ -2030,7 +2034,7 @@ textarea.input {
 }
 
 .footer {
-  margin: 30px 0px;
+  margin: 20px 0px;
 }
 
 .footer .footer-title {
@@ -2050,13 +2054,13 @@ textarea.input {
 
 .footer-links li i {
   margin-right: 15px;
-  color: #D10024;
-  width: 14px;
+  color: #000;
+  width: 9px;
   text-align: center;
 }
 
 .footer-links li a:hover {
-  color: #D10024;
+  color: #000
 }
 
 .copyright {
@@ -2071,7 +2075,7 @@ textarea.input {
 }
 
 .footer-payments li a {
-  color: #15161D;
+  color: #000;
   font-size: 36px;
   display: block;
 }

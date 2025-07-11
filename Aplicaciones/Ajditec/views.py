@@ -675,7 +675,7 @@ def login_usuario(request):
             if user.tipo_usuario == 'admin':
                 return redirect('admin_dashboard')
             elif user.tipo_usuario == 'cliente':
-                return redirect('catalogo')
+                return redirect('inicio')
             else:
                 messages.error(request, 'Tipo de usuario no válido.')
                 return redirect('login_usuario')
@@ -698,7 +698,7 @@ from .models import Notificacion
 def admin_dashboard(request):
     if request.user.tipo_usuario != 'admin':
         messages.error(request, "Acceso denegado: Solo para administradores.")
-        return redirect('catalogo')
+        return redirect('inicio')
 
     # Obtener notificaciones no leídas para este admin
     notificaciones = Notificacion.objects.filter(usuario_destino=request.user, leido=False).order_by('-fecha_noti')[:5]

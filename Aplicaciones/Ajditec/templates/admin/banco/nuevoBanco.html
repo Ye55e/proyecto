@@ -101,6 +101,8 @@
 <script>
   $(document).ready(function() {
     $('#tbl_banco').DataTable({
+        scrollX:true,
+        responsive:true,
       language: {
         url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
       },
@@ -115,6 +117,37 @@
 </script>
 
 <style>
+    
+        /* Asegura que la tabla use todo el ancho disponible */
+    .table {
+        width: 100% !important;
+        table-layout: auto;
+    }
+
+    /* Contenedor de la tabla, asegurando que no haya un margen que limite su tamaño */
+    .card-body {
+        padding: 0;
+        overflow-x: auto;
+    }
+
+    /* Ajustar para que la tabla se pueda desplazar horizontalmente si es necesario */
+    #tbl_inventario_wrapper {
+        overflow-x: auto;
+    }
+
+    /* Aseguramos que los botones de DataTables también estén bien organizados */
+    div.dt-buttons {
+        margin-bottom: 10px;
+    }
+
+    .dataTables_scrollHeadInner {
+        width: 100% !important;
+    }
+
+    .dataTables_scrollBody {
+        width: 100% !important;
+    }
+    
     div.dt-buttons .btn {
         margin-right: 10px;
     }

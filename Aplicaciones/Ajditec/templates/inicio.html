@@ -30,9 +30,6 @@
 		<!-- Custom stlylesheet -->
 		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}"/>
     </head>
-    <body>
-        <!-- Resto del contenido HTML -->
-         <body>
 		<!-- HEADER -->
 		<header>
 			<!-- TOP HEADER -->
@@ -63,21 +60,19 @@
 
 			<!-- MAIN HEADER -->
 				<div id="header">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-3">
-        <div class="header-logo">
-          <a href="#" class="logo">
-            <!-- Imagen de logo circular -->
-            <img src="{% static 'plantilla_cliente/img/logoAjdiec.jpg' %}" alt="Logo" 
-                 class="avatar-img rounded-circle" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover;">
-          </a>
-        </div>
+			<div class="container">
+				<div class="row">
+				<div class="col-md-3">
+					<div class="header-logo">
+					<a href="/" class="logo">
+						<!-- Imagen de logo circular -->
+						<img src="{% static 'plantilla_cliente/img/logoAjdiec.jpg' %}" alt="Logo" 
+							class="avatar-img rounded-circle" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover;">
+					</a>
+					</div>
     
-<!-- /LOGO -->
-						</div>
-					
-      <!-- /LOGO -->
+					<!-- /LOGO -->
+						</div>					
 
 						<!-- BARRA DE BUSQUEDA -->
 					<div class="col-md-6">
@@ -105,7 +100,23 @@
 						<div class="col-md-3 clearfix">
 							<div class="header-ctn">
 								
-						<!-- CUENTA -->
+							<!-- CARRITO -->
+							<div class="dropdown">
+							<a href="{% url 'carrito' %}" class="dropdown-toggle" aria-expanded="true">
+								<i class="fa fa-shopping-cart"></i>
+								<span>Carrito</span>
+								<div class="qty">
+									{% if carrito_total_items %}
+										{{ carrito_total_items }}
+									{% else %}
+										0
+									{% endif %}
+								</div>
+							</a>
+						</div>
+
+							<!-- /CARRITO -->
+							 <!-- CUENTA -->
 						<div class="cuenta-contenedor">
 								{% if request.user.is_authenticated %}
 								<div class="cuenta-login" id="btnCuenta">
@@ -127,22 +138,6 @@
 								{% endif %}
 							</div>
 								<!-- CUENTA -->
-							<!-- CARRITO -->
-							<div class="dropdown">
-							<a href="{% url 'carrito' %}" class="dropdown-toggle" aria-expanded="true">
-								<i class="fa fa-shopping-cart"></i>
-								<span>Carrito</span>
-								<div class="qty">
-									{% if carrito_total_items %}
-										{{ carrito_total_items }}
-									{% else %}
-										0
-									{% endif %}
-								</div>
-							</a>
-						</div>
-
-							<!-- /CARRITO -->
 
 
 
@@ -195,10 +190,10 @@
 
 						<!-- BARRA LATERAL DE CATEGORIAS -->
 			<!-- BARRA LATERAL DE CATEGORIAS -->
-			<div class="col-md-3">
-			<div class="aside" style="position: sticky; top: 80px;">
+			<div class="col-12 col-md-3">
+			<div class="aside">
 				<h3 class="aside-title">CATEGORÍAS POPULARES</h3>
-				<div class="list-group" style="padding-left: 10px; padding-right: 10px;">
+				<div class="list-group">
 				<!-- Opción 'Todas' -->
 				<a href="?{% if marca %}marca={{ marca }}&{% endif %}" class="list-group-item {% if not categoria_id %}active{% endif %}" 
 					style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if not categoria_id %}#0b4b85{% else %}transparent{% endif %}; color: {% if not categoria_id %}#FFF{% else %}#000{% endif %};">
@@ -213,7 +208,7 @@
 				</div>
 
 				<h3 class="aside-title mt-4">MARCAS SELECCIONADAS</h3>
-				<div class="list-group" style="padding-left: 10px; padding-right: 10px;">
+				<div class="list-group">
 				<a href="?{% if categoria_id %}categoria={{ categoria_id }}&{% endif %}" class="list-group-item {% if not marca %}active{% endif %}" 
 					style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if not marca %}#0b4b85{% else %}transparent{% endif %}; color: {% if not marca %}#FFF{% else %}#000{% endif %};">
 					Todas
@@ -233,7 +228,7 @@
             <!-- /BARRA LATERAL DE CATEGORIAS -->
 
             <!-- SECCION DE PRODUCTOS -->
-            <div class="col-md-9">
+            <div class="col-12 col-md-9">
                 <div class="store-filter clearfix">
                     <span class="store-qty">Mostrando {{ productos|length }} productos</span>
                     <!-- Puedes agregar opciones de vista si lo deseas -->
@@ -242,45 +237,116 @@
                 <div class="row">
                     {% for producto in productos %}
                         <div class="col-md-4 col-xs-6">
-                            <div class="product">
-                                <div class="product-img">
-                                    <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}">
+                            <div class="product" style="height: 450px; display: flex; flex-direction: column; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.3s ease;">
+                                <div class="product-hover" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.1); opacity: 0; transition: opacity 0.3s ease;"></div>
+                                <div class="product-img" style="flex: 0 0 auto; height: 200px; position: relative; overflow: hidden;">
+                                    <div class="image-container" style="
+                                        width: 100%;
+                                        height: 100%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        position: relative;
+                                    ">
+                                        <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}" style="
+                                            max-width: 100%;
+                                            max-height: 100%;
+                                            object-fit: contain;
+                                            transition: transform 0.3s ease;
+                                        ">
+                                    </div>
+                                    <div class="product-overlay" style="
+                                        position: absolute;
+                                        bottom: 0;
+                                        left: 0;
+                                        right: 0;
+                                        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+                                        height: 40%;
+                                        opacity: 0;
+                                        transition: opacity 0.3s ease;
+                                    "></div>
                                     {% if producto.inventario.stock_actual <= 0 %}
-                                        <span class="label label-danger" style="position:absolute; top:10px; right:10px;">AGOTADO</span>
+                                        <span class="label label-danger" style="
+                                            position: absolute;
+                                            top: 10px;
+                                            right: 10px;
+                                            background: #ff6b6b;
+                                            color: white;
+                                            padding: 5px 10px;
+                                            border-radius: 15px;
+                                            font-size: 0.9em;
+                                        ">AGOTADO</span>
                                     {% endif %}
                                 </div>
-                                <div class="product-body">
-                                    <p class="product-category">{{ producto.id_cat.tipo_cat }}</p>
-                                    <h3 class="product-name"><a href="#">{{ producto.nomb_prod }}</a></h3>
-                                    <h4 class="product-price">
+                                <div class="product-body" style="flex: 1 1 auto; padding: 15px; position: relative; z-index: 2;">
+                                    <p class="product-category" style="margin: 5px 0;">{{ producto.id_cat.tipo_cat }}</p>
+                                    <h3 class="product-name" style="margin: 5px 0; font-size: 16px; line-height: 1.2;">
+                                        <a href="#">{{ producto.nomb_prod }}</a>
+                                    </h3>
+                                    <h4 class="product-price" style="margin: 5px 0;">
                                         ${{ producto.inventario.precunit_prod }}
                                         <del class="product-old-price">${{ producto.inventario.precunit_prod|add:50 }}</del>
                                     </h4>
                                     {% if producto.inventario.stock_actual <= 0 %}
-                                        <p class="estado-agotado">AGOTADO</p>
+                                        <p class="estado-agotado" style="margin: 5px 0;">AGOTADO</p>
                                     {% else %}
-                                        <p class="estado-disponible">DISPONIBLE</p>
+                                        <p class="estado-disponible" style="margin: 5px 0;">DISPONIBLE</p>
                                     {% endif %}
 
-                                   <div class="product-btns">
-										<a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn">
-											<i class="fa fa-eye"></i>
-											<span class="tooltipp">Vista rápida</span>
-										</a>
-
-										{% if producto.inventario.stock_actual > 1 %}
-											<button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}">
-												<i class="fa fa-shopping-cart"></i>
-												<span class="tooltipp">Añadir al carrito</span>
-											</button>
-										{% else %}
-											<button class="add-to-cart-btn" style="visibility: hidden;">
-												<i class="fa fa-shopping-cart"></i>
-												<span class="tooltipp">Añadir al carrito</span>
-											</button>
-										{% endif %}
-									</div>
-
+                                    <div class="product-btns" style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
+                                        <a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn" style="
+                                            background: #f1f1f1;
+                                            color: #333;
+                                            border: none;
+                                            padding: 6px 15px;
+                                            border-radius: 25px;
+                                            cursor: pointer;
+                                            transition: all 0.3s ease;
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                            font-weight: 500;
+                                            font-size: 14px;
+                                            min-width: 100px;
+                                            white-space: nowrap;
+                                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                                            &:hover {
+                                                transform: translateY(-2px);
+                                                box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+                                                background: #e1e1e1;
+                                            }
+                                        ">
+                                            <i class="fa fa-eye" style="font-size: 14px;"></i>
+                                            <span class="tooltipp">Vista rápida</span>
+                                        </a>
+                                        {% if producto.inventario.stock_actual > 0 %}
+                                            <button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}" style="
+                                                background: #0b4b85;
+                                                color: white;
+                                                border: none;
+                                                padding: 6px 15px;
+                                                border-radius: 25px;
+                                                cursor: pointer;
+                                                transition: all 0.3s ease;
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                font-weight: 500;
+                                                font-size: 14px;
+                                                min-width: 100px;
+                                                white-space: nowrap;
+                                                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                                                &:hover {
+                                                    transform: translateY(-2px);
+                                                    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+                                                    background: #155f9a;
+                                                }
+                                            ">
+                                                <i class="fa fa-shopping-cart" style="font-size: 14px;"></i>
+                                                <span class="tooltipp">Añadir al carrito</span>
+                                            </button>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -351,17 +417,59 @@
 					<p class="estado-disponible">DISPONIBLE</p>	
               {% endif %}
 
-              <div class="product-btns" style="margin: 2px 0; min-height: 40px;">
+              <div class="product-btns" style="margin: 2px 0; min-height: 40px; display: flex; justify-content: center; gap: 10px;">
                 <!-- Botón de Vista Rápida siempre visible -->
-                <a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn">
-                  <i class="fa fa-eye"></i>
+                <a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn" style="
+                    background: #f1f1f1;
+                    color: #333;
+                    border: none;
+                    padding: 6px 15px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    min-width: 100px;
+                    white-space: nowrap;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+                        background: #e1e1e1;
+                    }
+                ">
+                  <i class="fa fa-eye" style="font-size: 14px;"></i>
                   <span class="tooltipp">Vista rápida</span>
                 </a>
 
                 <!-- Mostrar botón Añadir al carrito solo si hay stock -->
                 {% if producto.inventario.stock_actual > 0 %}
-                <button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}">
-                  <i class="fa fa-shopping-cart"></i>
+                <button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}" style="
+                    background: #0b4b85;
+                    color: white;
+                    border: none;
+                    padding: 6px 15px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    min-width: 100px;
+                    white-space: nowrap;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+                        background: #155f9a;
+                    }
+                ">
+                  <i class="fa fa-shopping-cart" style="font-size: 14px;"></i>
                   <span class="tooltipp">Añadir al carrito</span>
                 </button>
                 {% endif %}
@@ -425,14 +533,9 @@
 									<a href="#"><i class="fa fa-facebook"></i></a>
 								</li>
 								<li>
-									<a href="#"><i class="fa fa-twitter"></i></a>
+									<a href="#"><i class="fa fa-whatsapp"></i></a>
 								</li>
-								<li>
-									<a href="#"><i class="fa fa-instagram"></i></a>
-								</li>
-								<li>
-									<a href="#"><i class="fa fa-pinterest"></i></a>
-								</li>
+								
 							</ul>
 						</div>
 					</div>
@@ -443,86 +546,58 @@
 		</div>
 		<!-- /NEWSLETTER -->
 		
-
 		<!-- FOOTER -->
 		<footer id="footer">
-			<!-- top footer -->
 			<div class="section">
-				<!-- container -->
 				<div class="container">
-					<!-- row -->
-					<div class="row">
-						<div class="col-md-3 col-xs-6">
+					<div class="row justify-content-center text-center">
+						<!-- Sobre Nosotros -->
+						<div class="col-md-4 col-sm-6">
 							<div class="footer">
 								<h3 class="footer-title">SOBRE NOSOTROS</h3>
-								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.</p>
+								<p>Tu mejor aliado en repuestos y accesorios para computadoras. Calidad, variedad y el soporte que tu equipo necesita.</p>
 								<ul class="footer-links">
-									<li><a href="#"><i class="fa fa-map-marker"></i>1734 Stonecoal Road</a></li>
-									<li><a href="#"><i class="fa fa-phone"></i>+021-95-51-84</a></li>
-									<li><a href="#"><i class="fa fa-envelope-o"></i>email@email.com</a></li>
+									<li><a href="#"><i class="fa fa-map-marker"></i> QGW2+5HR, Av. 10 de Agosto, Quito 170129</a></li>
+									<li><a href="#"><i class="fa fa-phone"></i> +593 9 6902 5956</a></li>
+									<li><a href="#"><i class="fa fa-envelope-o"></i> ajditec.ventas@gmail.com</a></li>
 								</ul>
 							</div>
 						</div>
 
-						<div class="col-md-3 col-xs-6">
-							<div class="footer">
-								<h3 class="footer-title">Categorias</h3>
-								<ul class="footer-links">
-									<li><a href="#">Hot deals</a></li>
-									<li><a href="#">Pantalla</a></li>
-									<li><a href="#">Baterias</a></li>
-									<li><a href="#">Cargadores</a></li>
-									<li><a href="#">Accesorios</a></li>
-								</ul>
-							</div>
-						</div>
-
-						<div class="clearfix visible-xs"></div>
-
-						<div class="col-md-3 col-xs-6">
-							<div class="footer">
-								<h3 class="footer-title">Information</h3>
-								<ul class="footer-links">
-									<li><a href="#">About Us</a></li>
-									<li><a href="#">Contact Us</a></li>
-									<li><a href="#">Privacy Policy</a></li>
-									<li><a href="#">Orders and Returns</a></li>
-									<li><a href="#">Terms & Conditions</a></li>
-								</ul>
-							</div>
-						</div>
-
-						<div class="col-md-3 col-xs-6">
-							<div class="footer">
-								<h3 class="footer-title">Service</h3>
-								<ul class="footer-links">
-									<li><a href="#">Mi Cuenta</a></li>
-									<li><a href="#">Ver Carrito</a></li>
-									<li><a href="#">Seguimiento del pedido</a></li>
-									<li><a href="#">Ayuda</a></li>
-								</ul>
+							<!-- Categorías -->
+							<div class="col-md-4 col-sm-6">
+								<div class="footer">
+									<h3 class="footer-title">CATEGORÍAS</h3>
+									<ul class="footer-links">
+										<li><a href="#">Pantallas</a></li>
+										<li><a href="#">Baterías</a></li>
+										<li><a href="#">Cargadores</a></li>
+										<li><a href="#">Pantallas</a></li>
+									</ul>
+								</div>
 							</div>
 						</div>
 					</div>
-					<!-- /row -->
 				</div>
-				<!-- /container -->
-			</div>
-			<!-- /top footer -->
-							<span class="copyright">
-								<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-								Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made by: Yesseña Canchig y Adriana Carua
-							<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-							</span>
+
+				<!-- Bottom Footer -->
+				<div class="bottom-footer">
+					<div class="container">
+						<div class="row">
+							<div class="col-md-12 text-center">
+								<span class="copyright">
+									&copy; <script>document.write(new Date().getFullYear());</script> Todos los derechos reservados | Diseñado por <strong>Yesseña Canchig</strong> y <strong>Adriana Carua</strong>
+								</span>
+							</div>
 						</div>
 					</div>
-						<!-- /row -->
 				</div>
-				<!-- /container -->
-			</div>
-			<!-- /bottom footer -->
-		</footer>
-		<!-- /FOOTER -->
+			</footer>
+
+
+
+
+
         
         <!-- jQuery Plugins -->
         <script src="{% static 'plantilla_cliente/js/jquery.min.js' %}"></script>
@@ -626,10 +701,24 @@ $(document).ready(function() {
             headers: {'X-CSRFToken': csrftoken},
             success: function(response) {
                 if (response.success) {
-                    alert(response.message);
-                    // Aquí puedes actualizar un contador en la UI si tienes
+                    // Actualizar el contador del carrito si existe
+                    const cartCount = $('.qty');
+                    if (cartCount.length) {
+                        const currentCount = parseInt(cartCount.text()) || 0;
+                        cartCount.text(currentCount + 1);
+                    }
                 } else {
-                    alert('Error al agregar el producto.');
+                    // Mostrar un mensaje de error sutil
+                    const button = $(this);
+                    button.css({
+                        'background': '#ff6b6b',
+                        'transform': 'translateY(0)'
+                    });
+                    setTimeout(function() {
+                        button.css({
+                            'background': '#0b4b85'
+                        });
+                    }, 1000);
                 }
             },
             error: function() {

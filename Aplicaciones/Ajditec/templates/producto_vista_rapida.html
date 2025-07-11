@@ -25,14 +25,33 @@
         <p><strong>Precio:</strong> No disponible</p>
       {% endif %}
 
-      <form method="post" action="{% url 'add_to_cart' producto.id_prod %}">
-        {% csrf_token %}
-        <label for="cantidad">Cantidad:</label>
-        <input type="number" id="cantidad" name="quantity" value="1" min="1" max="{{ stock }}" {% if stock == 0 %}disabled{% endif %}>
-        <button type="submit" class="btn-add">
-          <i class="fa fa-shopping-cart"></i> Añadir al carrito
-        </button>
-      </form>
+      {% if stock > 0 %}
+        <form method="post" action="{% url 'add_to_cart' producto.id_prod %}">
+          {% csrf_token %}
+          <label for="cantidad">Cantidad:</label>
+          <input type="number" id="cantidad" name="quantity" value="1" min="1" max="{{ stock }}">
+          <button type="submit" class="btn-add">
+            <i class="fa fa-shopping-cart"></i> Añadir al carrito
+          </button>
+        </form>
+      {% else %}
+        <div class="stock-out" style="
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: fit-content;
+        ">
+          <i class="fa fa-times" style="font-size: 16px;"></i>
+          <span>AGOTADO</span>
+        </div>
+      {% endif %}
 
       <a href="{% url 'inicio' %}" class="btn-back">
         <i class="fa fa-arrow-left"></i> Seguir comprando

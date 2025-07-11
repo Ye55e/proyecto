@@ -27,7 +27,6 @@ SECRET_KEY = 'django-insecure-#)*otnq^s^h*$-(y4-+!483vcjvu=0y%-u_kt_#rmzqlu#7+bl
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -142,9 +141,10 @@ MEDIA_ROOT=(os.path.join(BASE_DIR,'proyecto/media/'))
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'adrianacarua2025@gmail.com'
-EMAIL_HOST_PASSWORD = 'jpii jpss gbfb bhzr'
+EMAIL_HOST = 'smtp.privateemail.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL= True
+EMAIL_USE_TLS = False
+EMAIL_HOST_USER = 'info@ajditec.com'
+EMAIL_HOST_PASSWORD = 'Aj8262025'
 DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
