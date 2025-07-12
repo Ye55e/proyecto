@@ -69,7 +69,6 @@ urlpatterns = [
     path('orden_confirmada/<int:id_ord>/', views.orden_confirmada, name='orden_confirmada'),
     path('procesar_pedido/', views.procesar_pedido, name='procesar_pedido'),
     path('conf_pago/<int:id_ord>/', views.conf_pago, name='conf_pago'),
-    path('final_pedido/', views.final_pedido, name='final_pedido'),
     #NOTIFICACIONES
     path('verNotificaciones/', views.verNotificaciones, name='verNotificaciones'),
     #BANCO
@@ -78,9 +77,18 @@ urlpatterns = [
     path('editarBanco/<int:id_banco>/', views.editarBanco, name='editarBanco'),
     path('procesarEdicionBanco/', views.procesarEdicionBanco, name='procesarEdicionBanco'),
     path('eliminarBanco/<int:id_banco>/', views.eliminarBanco, name='eliminarBanco'),
-
+    #MOVIIENTO DE INVENTARIO
     path('nuevoIngreso', views.nuevoIngresoInventario, name='nuevoIngreso'),
+    #REPORTES
     path('reporteVentas/', views.reporte_ventas_productos, name='reporteVentas'),
+    #IMPUESTO
+    path('nuevoImpuesto/', views.nuevoImpuesto, name='nuevoImpuesto'),
+    path('guardarImpuesto/', views.guardarImpuesto, name='guardarImpuesto'),
+    path('editarImpuesto/<int:id_impuesto>/', views.editarImpuesto, name='editarImpuesto'),
+    path('procesarEdicionImpuesto/', views.procesarEdicionImpuesto, name='procesarEdicionImpuesto'),
+    path('eliminarImpuesto/<int:id_impuesto>/', views.eliminarImpuesto, name='eliminarImpuesto'),
+
+
 
 
 

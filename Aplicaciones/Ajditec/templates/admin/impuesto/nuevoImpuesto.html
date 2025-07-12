@@ -1,0 +1,130 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+{% block contenido %}
+
+<div class="container mt-4">
+    <h3 class="text-center mb-4">GESTIÓN DE IMPUESTOS</h3>
+    <div class="row">
+        <!-- Columna izquierda: Formulario -->
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">REGISTRO</h5>
+                    <form action="/guardarImpuesto/" method="POST" id="frm_nuevo_impuesto">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label"><b>NOMBRE DEL IMPUESTO:</b></label>
+                            <input type="text" name="nombre" id="nombre" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valor" class="form-label"><b>VALOR (%):</b></label>
+                            <input type="number" name="valor" id="valor" step="0.01" min="0" class="form-control" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input class="form-check-input" type="checkbox" id="estado" name="estado" checked>
+                            <label class="form-check-label" for="estado"><b>Activo</b></label>
+                        </div>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="reset" class="btn btn-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Tabla -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">LISTADO DE IMPUESTOS</h5>
+                    <table class="table table-bordered table-striped table-hover" id="tbl_impuesto">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>NOMBRE</th>
+                                <th>VALOR (%)</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for impuesto in impuestos %}
+                            <tr>
+                                <td>{{ impuesto.id_impuesto }}</td>
+                                <td>{{ impuesto.nombre }}</td>
+                                <td>{{ impuesto.valor }}</td>
+                                <td>
+                                    {% if impuesto.estado %}
+                                        Activo
+                                    {% else %}
+                                        Inactivo
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/editarImpuesto/{{ impuesto.id_impuesto }}" class="btn btn-warning btn-sm me-2" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a onclick="return confirm('¿Está seguro de eliminar este impuesto?')" href="/eliminarImpuesto/{{ impuesto.id_impuesto }}" class="btn btn-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function() {
+    $('#tbl_impuesto').DataTable({
+        scrollX: true,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-success' },
+            { extend: 'pdfHtml5', text: 'PDF', className: 'btn btn-danger' },
+            { extend: 'print', text: 'Imprimir', className: 'btn btn-primary' }
+        ]
+    });
+  });
+</script>
+
+<style>
+    .table {
+        width: 100% !important;
+        table-layout: auto;
+    }
+
+    .card-body {
+        padding: 0;
+        overflow-x: auto;
+    }
+
+    #tbl_impuesto_wrapper {
+        overflow-x: auto;
+    }
+
+    div.dt-buttons {
+        margin-bottom: 10px;
+    }
+
+    .dataTables_scrollHeadInner,
+    .dataTables_scrollBody {
+        width: 100% !important;
+    }
+
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}

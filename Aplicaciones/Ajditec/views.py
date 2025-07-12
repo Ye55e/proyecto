@@ -1,27 +1,72 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-import os
-from .models import Producto, Categoria, Inventario,Usuario,DetalleCarrito,Orden,DetalleOrden,RegistroPago, Notificacion,Banco,MovimientoInventario
+from django.conf import settings
+from .models import *
 
 def plantilla_admin(request):
     return render(request, 'plantilla_admin.html')
-def carrito(request):
-    return render(request, 'carrito.html')
+#CARRITO ACTIVO Y PROCESO DE DATOS PARA ORDEN 
+@login_required(login_url='login')
 def finalPedido(request):
+    # Buscar carrito actual
     carrito_id = request.session.get('carrito_id')
-    if carrito_id:
-        carrito = get_object_or_404(Carrito, id_carr=carrito_id)
-        datos_cliente = request.session.get('datos_cliente', {})
-        bancos = Banco.objects.filter(activo=True)
+    carrito = None
 
-        return render(request, 'finalPedido.html', {
-            'cart_items': carrito.detalles.all(),
-            'cart_total': carrito.total_carrito(),
-            'datos_cliente': datos_cliente,
-            'carrito': carrito,
-            'bancos': bancos
-        })
+    if carrito_id:
+        carrito = Carrito.objects.filter(
+            id_carr=carrito_id,
+            usuarios=request.user
+        ).first()
+    if not carrito:
+        # Si no hay en sesión, buscar el más reciente de 48 horas
+        tiempo_limite = timezone.now() - timedelta(hours=48)
+        carrito = Carrito.objects.filter(
+            usuarios=request.user,
+            fechacreac_carr__gte=tiempo_limite
+        ).first()
+
+    if not carrito:
+        messages.error(request, "No se encontró ningún carrito activo. Agregue productos primero.")
+        return redirect('carrito')
+
+    # Guardar en sesión por consistencia
+    request.session['carrito_id'] = carrito.id_carr
+
+    # Obtener items del carrito
+    cart_items = [
+        {
+            'product': detalle.producto,
+            'quantity': detalle.cantidad,
+            'total_price': detalle.subtotal
+        }
+        for detalle in carrito.detalles.select_related('producto', 'producto__inventario').all()
+    ]
+    cart_total = sum(item['total_price'] for item in cart_items)
+
+    # Calcular impuesto
+    impuesto_activo = Impuesto.objects.filter(estado=True).first()
+    iva_valor = Decimal(impuesto_activo.valor) if impuesto_activo else Decimal('0')
+    impuesto = cart_total * (iva_valor / Decimal('100'))
+    total_con_impuesto = cart_total + impuesto
+
+    
+
+    # Datos cliente
+    datos_cliente = request.session.get('datos_cliente', {})
+    bancos = Banco.objects.filter(activo=True)
+
+    return render(request, 'finalPedido.html', {
+        'cart_items': cart_items,
+        'cart_total': cart_total,
+        'impuesto': impuesto,
+        'total_con_impuesto': total_con_impuesto,
+        'datos_cliente': datos_cliente,
+        'carrito': carrito,
+        'bancos': bancos,
+        'iva_valor': iva_valor
+    })
+
 
 #HISTORIAL DE ORDENES USUARIO 
 from django.core.exceptions import ObjectDoesNotExist
@@ -44,57 +89,73 @@ def listar_ordenes(request):
         'ordenes': ordenes
     })
 
-
+#DETALLE DE ORDENES DEL USUARIO
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
 def detalle_orden(request, id_ord):
     orden = get_object_or_404(Orden, id_ord=id_ord, usuarios=request.user)
     detalles = orden.detalles.all()
+
+    # Calcular subtotal
+    subtotal = sum(det.subtotal for det in detalles)
+
+    # Calcular IVA
+    impuesto_activo = Impuesto.objects.filter(estado=True).first()
+    iva_valor = Decimal(impuesto_activo.valor) if impuesto_activo else Decimal('0')
+    impuesto_total = subtotal * (iva_valor / Decimal('100'))
+
+    total_con_impuesto = subtotal + impuesto_total
+
     return render(request, 'detalle_orden.html', {
         'orden': orden,
-        'detalles': detalles
+        'detalles': detalles,
+        'subtotal': subtotal,
+        'iva_valor': iva_valor,
+        'impuesto_total': impuesto_total,
+        'total_con_impuesto': total_con_impuesto
     })
-#CREAR ORDEN
+#CREAR ORDEN DE MI FINALPEDIDO
+from django.utils import timezone
+from datetime import timedelta
 
 @login_required(login_url='login')
 def procesar_pedido(request):
-    """Procesa el pedido y crea la orden, sin descontar stock todavía"""
     if request.method == 'POST':
         try:
-            # Obtener datos del formulario
             metodo_entrega = request.POST.get('metodo_entrega')
             metodo_pago = request.POST.get('metodo_pago')
             num_transferencia = request.POST.get('num_transferencia')
             fecha_transferencia = request.POST.get('fecha_transferencia')
             banco_id = request.POST.get('banco_id')
 
-
-            
-            # Validar campos requeridos
             if not metodo_entrega or not metodo_pago:
                 messages.error(request, "Por favor, seleccione un método de entrega y pago.")
                 return redirect('finalPedido')
-            
+
             if metodo_pago == 'transferencia' and not num_transferencia:
                 messages.error(request, "Por favor, ingrese el número de transferencia.")
                 return redirect('finalPedido')
 
-            # Obtener el carrito
             carrito_id = request.session.get('carrito_id')
             if not carrito_id:
                 messages.error(request, "No hay carrito activo.")
                 return redirect('carrito')
             
             carrito = get_object_or_404(Carrito, id_carr=carrito_id)
-            
-            # Obtener datos del cliente
+
             datos_cliente = request.session.get('datos_cliente', {})
             if not datos_cliente:
                 messages.error(request, "No se encontraron datos del cliente. Complete el formulario primero.")
                 return redirect('pago')
 
-            # Crear la orden
+            cart_total = carrito.total_carrito()
+            impuesto_activo = Impuesto.objects.filter(estado=True).first()
+            iva_valor = Decimal(impuesto_activo.valor) if impuesto_activo else Decimal('0')
+            impuesto = cart_total * (iva_valor / Decimal('100'))
+            total_con_impuesto = cart_total + impuesto
+
+            #  Crear orden con fecha de expiración a 48h
             orden = Orden.objects.create(
                 nombre_cliente=datos_cliente.get('nombre', ''),
                 cedula_ruc=datos_cliente.get('cedula', ''),
@@ -107,47 +168,48 @@ def procesar_pedido(request):
                 num_trans=num_transferencia,
                 fecha_trans=fecha_transferencia,
                 banco=Banco.objects.get(id_banco=banco_id) if banco_id else None,
-
-                estado_ord='Pendiente',   
+                estado_ord='Pendiente',
                 usuarios=request.user,
-                carrito=carrito
+                carrito=carrito,
+                fecha_expira=timezone.now() + timedelta(hours=48)  # ⏰
             )
-            
-            # Crear detalles de la orden
+
+            #  Crear detalles y descontar stock reservando
             for detalle in carrito.detalles.all():
                 DetalleOrden.objects.create(
                     orden=orden,
                     producto=detalle.producto,
                     cantidad=detalle.cantidad
                 )
+                # Descontar stock ahora mismo (reserva)
+                inventario = detalle.producto.inventario
+                if inventario.stock_actual >= detalle.cantidad:
+                    inventario.stock_actual -= detalle.cantidad
+                    inventario.save()
+                else:
+                    raise ValueError(f"No hay suficiente stock para {detalle.producto.nomb_prod}.")
 
-            # Crear registro de pago
             RegistroPago.objects.create(
                 orden=orden,
-                total_pago=carrito.total_carrito(),
+                total_pago=total_con_impuesto,
                 estado_reg='Pendiente'
             )
 
-            # Marcar el carrito como pagado
             carrito.estado_carr = 'pagado'
             carrito.save()
-            carrito.detalles.all().delete()  #AL MOMENTO DE GENERAR LA ORDEN EL CARRITO SE LIMPIA
+            carrito.detalles.all().delete()
 
-
-            # Crear notificación para todos los administradores
             admins = Usuario.objects.filter(tipo_usuario='admin')
             for admin in admins:
                 Notificacion.objects.create(
-                        titulo=f"Nueva Orden #{orden.id_ord} de {orden.nombre_cliente}",
-                        mensaje=f"El cliente {orden.nombre_cliente} ha realizado la orden #{orden.id_ord}.",
-                        usuario_destino=admin
+                    titulo=f"Nueva Orden #{orden.id_ord} de {orden.nombre_cliente}",
+                    mensaje=f"El cliente {orden.nombre_cliente} ha realizado la orden #{orden.id_ord}.",
+                    usuario_destino=admin
                 )
 
-            # Limpiar el carrito de la sesión
             if 'carrito_id' in request.session:
                 del request.session['carrito_id']
 
-            # Mensaje de éxito
             messages.success(request, f"¡Orden #{orden.id_ord} creada exitosamente! Está pendiente de confirmación.")
             return redirect('orden_confirmada', id_ord=orden.id_ord)
 
@@ -156,6 +218,7 @@ def procesar_pedido(request):
             return redirect('carrito')
     else:
         return redirect('finalPedido')
+
 
 #DETALLE DE LA ORDEN
 def conf_pago(request, id_ord):
@@ -218,75 +281,7 @@ def inicio(request):
         'categoria_id': categoria_id,
         'marca': marca,            # Paso la marca seleccionada
     })
-
-
-#DETALLE CARRITO
-# views.py
-
-from .models import Carrito, DetalleCarrito, Producto
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from datetime import timedelta
-from django.contrib import messages
-
-#vista del resumen de pedido en el template del final del pedido
-def final_pedido(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
-    # Obtener el carrito del usuario
-    carrito_id = request.session.get('carrito_id')
-    print(f"ID del carrito en sesión: {carrito_id}")
-    
-    if not carrito_id:
-        messages.warning(request, "No hay carrito_id en sesión")
-        # Si no hay carrito en sesión, obtener el más reciente
-        tiempo_limite = timezone.now() - timedelta(hours=48)
-        carrito = Carrito.objects.filter(
-            usuarios=request.user,
-            fechacreac_carr__gte=tiempo_limite
-        ).first()
-    else:
-        carrito = Carrito.objects.filter(
-            id_carr=carrito_id,
-            usuarios=request.user
-        ).first()
-
-    if not carrito:
-        messages.error(request, "No se encontró ningún carrito activo. Por favor, agregue productos al carrito primero.")
-        return redirect('carrito')
-    else:
-        print(f"Carrito encontrado: {carrito.id_carr}")
-
-    # Guardar el ID del carrito en la sesión
-    request.session['carrito_id'] = carrito.id_carr
-
-    # Obtener los detalles del carrito
-    cart_items_qs = carrito.detalles.select_related('producto', 'producto__inventario').all()
-    print(f"Cantidad de detalles en el carrito: {cart_items_qs.count()}")
-    
-    cart_items = [
-        {
-            'product': detalle.producto,
-            'quantity': detalle.cantidad,
-            'total_price': detalle.subtotal
-        }
-        for detalle in cart_items_qs
-    ]
-
-    # Calcular el total del carrito
-    cart_total = sum(detalle.subtotal for detalle in cart_items_qs)
-    print(f"Total del carrito: {cart_total}")
-
-    # Pasar los productos y el total al template
-    context = {
-        'cart_items': cart_items,
-        'cart_total': cart_total,
-        'carrito': carrito
-    }
-
-    return render(request, 'finalPedido.html', context)
-
+#carriito
 
 def vista_pago(request):
     if not request.user.is_authenticated:
@@ -817,11 +812,13 @@ def add_to_cart(request, id_prod):
             messages.success(request, f'Se agregó {cantidad} unidad(es) de "{producto.nomb_prod}" al carrito temporal.')
             return redirect('producto_vista_rapida', id_prod=id_prod)
 
+from decimal import Decimal
+
 def carrito(request):
-    carrito = None  # Inicializamos para evitar errores
+    cart_items = []  # 🛡 Evita NameError en cualquier rama
+    carrito = None
 
     if request.user.is_authenticated:
-        # Buscar el carrito activo del usuario
         tiempo_limite = timezone.now() - timedelta(hours=48)
         carrito = Carrito.objects.filter(
             usuarios=request.user,
@@ -835,14 +832,8 @@ def carrito(request):
                 'total_price': detalle.subtotal
             } for detalle in carrito.detalles.all()]
             request.session['carrito_id'] = carrito.id_carr
-        else:
-            cart_items = []
-            if 'carrito_id' in request.session:
-                del request.session['carrito_id']
     else:
-        # Usuarios no autenticados: carrito en sesión
         carrito_sesion = request.session.get('carrito', {})
-        cart_items = []
         for id_prod_str, quantity in carrito_sesion.items():
             try:
                 producto = Producto.objects.get(pk=int(id_prod_str))
@@ -857,12 +848,22 @@ def carrito(request):
 
     cart_total = sum(item['total_price'] for item in cart_items)
 
+    impuesto_activo = Impuesto.objects.filter(estado=True).first()
+    iva_valor = Decimal(impuesto_activo.valor) if impuesto_activo else Decimal('0')
+
+    impuesto = cart_total * (iva_valor / Decimal('100'))
+    total_con_impuesto = cart_total + impuesto
+
     return render(request, 'carrito.html', {
         'cart_items': cart_items,
         'cart_total': cart_total,
-        'carrito': carrito,  # Será None si el usuario no tiene carrito en DB
+        'impuesto': impuesto,
+        'iva_valor': iva_valor,
+        'total_con_impuesto': total_con_impuesto,
+        'carrito': carrito,
     })
 
+#ORDEN CONFIRMADA 
 @login_required(login_url='login')
 def orden_confirmada(request, id_ord):
     """Muestra la página de confirmación de orden"""
@@ -870,11 +871,26 @@ def orden_confirmada(request, id_ord):
         orden = get_object_or_404(Orden, id_ord=id_ord, usuarios=request.user)
         detalles_orden = orden.detalles.all()
         registro_pago = orden.pagos.first()
-        
+
+        # Calcular subtotal e impuesto
+        impuesto_activo = Impuesto.objects.filter(estado=True).first()
+        iva_valor = Decimal(impuesto_activo.valor) if impuesto_activo else Decimal('0')
+
+        # Si existe IVA, calcularlo a partir del total
+        if iva_valor > 0:
+            impuesto = registro_pago.total_pago * iva_valor / (100 + iva_valor)
+            subtotal = registro_pago.total_pago - impuesto
+        else:
+            impuesto = Decimal('0')
+            subtotal = registro_pago.total_pago
+
         return render(request, 'orden_confirmada.html', {
             'orden': orden,
             'detalles_orden': detalles_orden,
-            'registro_pago': registro_pago
+            'registro_pago': registro_pago,
+            'subtotal': subtotal,
+            'impuesto': impuesto,
+            'total': registro_pago.total_pago
         })
     except Orden.DoesNotExist:
         messages.error(request, "No se encontró la orden solicitada")
@@ -939,35 +955,30 @@ def actualizar_cantidad_carrito(request, id_prod):
 
         return JsonResponse({'success': True, 'message': f'Cantidad actualizada para "{producto.nomb_prod}".'})
 
-#PAGO
+# PROCESO DE DATOS DEL CLIENTE 
+from decimal import Decimal
+
+
 @login_required(login_url='login')  
 def pago(request):
     if request.method == 'POST':
         try:
-            # Obtener datos del formulario
             nombre = request.POST.get('nombre', '')
             cedula = request.POST.get('cedula', '')
             email = request.POST.get('email', '')
             direccion = request.POST.get('direccion', '')
             ciudad = request.POST.get('ciudad', '')
             telefono = request.POST.get('telefono', '')
-            
-            # Debug: Mostrar datos recibidos
-            print(f"Datos recibidos: {request.POST}")
-            print(f"Nombre: {nombre}, Cédula: {cedula}, Email: {email}")
-            
-            # Validar campos requeridos
+
             if not all([nombre, cedula, email, direccion, ciudad, telefono]):
                 messages.error(request, "Por favor, complete todos los campos del formulario")
                 return redirect('pago')
-            
-            # Verificar que el carrito existe
+
             carrito_id = request.session.get('carrito_id')
             if not carrito_id:
                 messages.error(request, "No hay carrito activo")
                 return redirect('carrito')
-            
-            # Guardar datos del cliente en la sesión
+
             datos_cliente = {
                 'nombre': nombre,
                 'cedula': cedula,
@@ -976,39 +987,26 @@ def pago(request):
                 'ciudad': ciudad,
                 'telefono': telefono
             }
-            
-            # Verificar si ya existen datos del cliente en la sesión
+
             if 'datos_cliente' in request.session:
-                # Actualizar los datos existentes
                 request.session['datos_cliente'].update(datos_cliente)
             else:
-                # Crear nuevos datos del cliente
                 request.session['datos_cliente'] = datos_cliente
-            
-            # Debug: Confirmar que los datos se guardaron correctamente
-            print(f"Datos del cliente guardados en sesión: {request.session['datos_cliente']}")
-            
-            # Redirigir a la vista finalPedido con mensaje de éxito
+
             messages.success(request, "Datos del cliente guardados exitosamente")
-            
-            # Usar la URL completa para la redirección
             return redirect('/finalPedido/')
-            
+
         except Exception as e:
-            # Debug: Mostrar el error completo
             print(f"Error en pago: {str(e)}")
             messages.error(request, f"Error al procesar los datos: {str(e)}")
             return redirect('pago')
-    
-    # Si es GET, mostrar el formulario
+
+    # Si es GET
     carrito_id = request.session.get('carrito_id')
     if carrito_id:
         carrito = get_object_or_404(Carrito, id_carr=carrito_id)
-        
-        # Obtener los detalles del carrito
         detalles = carrito.detalles.select_related('producto', 'producto__inventario').all()
-        
-        # Preparar los items para el template
+
         cart_items = [
             {
                 'product': detalle.producto,
@@ -1017,15 +1015,25 @@ def pago(request):
             }
             for detalle in detalles
         ]
-        
-        # Verificar si hay datos del cliente en la sesión y prellenar el formulario
+
+        cart_total = carrito.total_carrito()
+
+        # 🚀 NUEVO: calcular impuesto y total con impuesto
+        impuesto_activo = Impuesto.objects.filter(estado=True).first()
+        iva_valor = Decimal(impuesto_activo.valor) if impuesto_activo else Decimal('0')
+        impuesto = cart_total * (iva_valor / Decimal('100'))
+        total_con_impuesto = cart_total + impuesto
+
         datos_cliente = request.session.get('datos_cliente', {})
-        
+
         return render(request, 'datosPedido.html', {
             'cart_items': cart_items,
-            'cart_total': carrito.total_carrito(),
+            'cart_total': cart_total,
+            'impuesto': impuesto,
+            'total_con_impuesto': total_con_impuesto,
             'datos_cliente': datos_cliente,
-            'carrito': carrito
+            'carrito': carrito,
+            'iva_valor': iva_valor
         })
     else:
         messages.error(request, "No hay carrito activo. Por favor, agregue productos al carrito primero.")
@@ -1166,22 +1174,45 @@ from django.core.mail import send_mail
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
 def admin_rechazar_pago(request, id_regpag):
     registro_pago = get_object_or_404(RegistroPago, id_regpag=id_regpag)
     orden = registro_pago.orden
 
     if registro_pago.estado_reg == 'Pendiente':
+        # DEVOLVER EL STOCK
+        for detalle in orden.detalles.all():
+            inventario = detalle.producto.inventario
+
+            # Sumar nuevamente la cantidad al stock actual
+            inventario.stock_actual += detalle.cantidad
+            inventario.save()
+
+            # Registrar el movimiento como "Entrada por devolución"
+            MovimientoInventario.objects.create(
+                tipo='Entrada',
+                cantidad=detalle.cantidad,
+                precio_uni=inventario.precunit_prod,
+                precio_anterior=inventario.precunit_prod,
+                producto=detalle.producto,
+                observacion=f"Devolución por rechazo de orden #{orden.id_ord}"
+            )
+
+        # Cambiar el estado
         registro_pago.estado_reg = 'Rechazado'
         registro_pago.save()
         orden.estado_ord = 'Rechazado'
         orden.save()
 
-        whatsapp_link = "https://wa.me/593 9 6902 5956?text=Hola,%20tengo%20una%20consulta%20sobre%20mi%20pedido."
+        # Notificación por correo
+        whatsapp_link = "https://wa.me/593969025956?text=Hola,%20tengo%20una%20consulta%20sobre%20mi%20pedido."
 
         detalles_texto = "\n".join(
             f"- {det.producto.nomb_prod}, Cantidad: {det.cantidad}, Subtotal: ${det.subtotal:.2f}"
             for det in orden.detalles.all()
         )
+
         mensaje = f"""
 Hola {orden.nombre_cliente},
 
@@ -1198,7 +1229,7 @@ Para más información o solucionar este inconveniente, puedes contactarnos dire
 Gracias por tu comprensión.
 
 AJ Ditec Distribuidora
-        """
+"""
 
         send_mail(
             subject=f"Orden #{orden.id_ord} rechazada",
@@ -1208,11 +1239,12 @@ AJ Ditec Distribuidora
             fail_silently=False,
         )
 
-        messages.warning(request, f"Orden #{orden.id_ord} rechazada y correo enviado al cliente.")
+        messages.warning(request, f"Orden #{orden.id_ord} rechazada, stock devuelto y correo enviado al cliente.")
     else:
-        messages.info(request, "Este pago ya fue procesado.")
+        messages.info(request, "Este pago ya fue procesado anteriormente.")
 
     return redirect('admin_listar_pagos')
+
 
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
@@ -1226,16 +1258,35 @@ def admin_listar_pagos(request):
     return render(request, 'admin_listar_pagos.html', {
         'pagos': pagos
     })
+# admin_detalle_pago
 @login_required
 @user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
 def admin_detalle_pago(request, id_regpag):
     registro_pago = get_object_or_404(RegistroPago, id_regpag=id_regpag)
-    detalles_orden = DetalleOrden.objects.filter(orden=registro_pago.orden)
+    orden = registro_pago.orden
+    detalles_orden = DetalleOrden.objects.filter(orden=orden)
+
+    # Calcular subtotal
+    subtotal = sum(det.subtotal for det in detalles_orden)
+
+    # Obtener IVA activo
+    impuesto_activo = Impuesto.objects.filter(estado=True).first()
+    iva_valor = impuesto_activo.valor if impuesto_activo else 0
+
+    # Calcular impuesto total
+    impuesto_total = subtotal * (iva_valor / 100)
+
     return render(request, 'admin_detalle_pago.html', {
         'registro_pago': registro_pago,
-        'orden': registro_pago.orden,
-        'detalles': detalles_orden
+        'orden': orden,
+        'detalles': detalles_orden,
+        'subtotal': subtotal,
+        'impuesto_total': impuesto_total,
+        'iva_valor': iva_valor,
+        'total_con_impuesto': registro_pago.total_pago
     })
+
+
 #NOTIFICACIONES
 from django.contrib.auth.decorators import login_required
 from .models import Notificacion
@@ -1386,4 +1437,66 @@ def reporte_ventas_productos(request):
     return render(request, 'reporteVentas.html', context)
 
 
+#IMPUESTO
+# Mostrar formulario para nuevo impuesto
+def nuevoImpuesto(request):
+    impuestos = Impuesto.objects.all()
+    return render(request, 'admin/impuesto/nuevoImpuesto.html', {
+        'impuestos': impuestos
+    })
 
+# Listado de impuestos (opcional si usas vista separada)
+def listadoImpuesto(request):
+    impuestos = Impuesto.objects.all()
+    return render(request, 'admin/impuesto/listadoImpuesto.html', {
+        'impuestos': impuestos
+    })
+
+# Guardar nuevo impuesto
+def guardarImpuesto(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip().upper()
+        valor = request.POST.get('valor')
+        estado = True if request.POST.get('estado') == 'on' else False
+
+        # Validar si ya existe un impuesto con el mismo nombre y valor
+        if Impuesto.objects.filter(nombre__iexact=nombre, valor=valor).exists():
+            messages.error(request, "Ya existe un impuesto con ese nombre y valor.")
+            return redirect('/nuevoImpuesto')
+
+        Impuesto.objects.create(
+            nombre=nombre,
+            valor=valor,
+            estado=estado
+        )
+        messages.success(request, "Impuesto registrado correctamente.")
+        return redirect('/nuevoImpuesto')
+
+# Eliminar impuesto
+def eliminarImpuesto(request, id_impuesto):
+    impuestoEliminar = get_object_or_404(Impuesto, id_impuesto=id_impuesto)
+    impuestoEliminar.delete()
+    messages.success(request, "Impuesto eliminado correctamente.")
+    return redirect('/nuevoImpuesto')
+
+# Mostrar formulario para editar impuesto
+def editarImpuesto(request, id_impuesto):
+    impuestoEditar = get_object_or_404(Impuesto, id_impuesto=id_impuesto)
+    # Convertir a string con punto decimal
+    impuestoEditar.valor_str = str(impuestoEditar.valor).replace(',', '.')
+    return render(request, 'admin/impuesto/editarImpuesto.html', {
+        'impuesto': impuestoEditar
+    })
+
+
+# Procesar edición del impuesto
+def procesarEdicionImpuesto(request):
+    impuesto = get_object_or_404(Impuesto, id_impuesto=request.POST['id_impuesto'])
+
+    impuesto.nombre = request.POST.get('nombre', '').strip().upper()
+    impuesto.valor = request.POST.get('valor')
+    impuesto.estado = True if request.POST.get('estado') == 'on' else False
+
+    impuesto.save()
+    messages.success(request, "Impuesto actualizado correctamente.")
+    return redirect('/nuevoImpuesto')

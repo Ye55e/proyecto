@@ -66,11 +66,14 @@
 
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label">Cédula o RUC</label>
-                        <input type="text" class="form-control" placeholder="Cédula o RUC" name="cedula" 
-                               value="{{ datos_cliente.cedula|default:"" }}" 
-                               pattern="^[0-9]{10,13}$" title="Debe tener entre 10 y 13 dígitos numéricos" required>
+                        <label class="form-label">Cédula, RUC o Pasaporte</label>
+                        <input type="text" class="form-control" placeholder="Cédula, RUC o Pasaporte" name="cedula" 
+                            value="{{ datos_cliente.cedula|default:"" }}" 
+                            pattern="^([0-9]{10}|[0-9]{13}|[A-Za-z0-9]{6,15})$"
+                            title="Debe ingresar una cédula (10 dígitos), un RUC (13 dígitos) o un pasaporte alfanumérico (6-15 caracteres)"
+                            required>
                     </div>
+
                     <div class="col">
                         <label class="form-label">Correo Electrónico</label>
                         <input type="email" class="form-control" placeholder="correo@ejemplo.com" 
@@ -140,13 +143,14 @@
                     <span>$ {{ cart_total|floatformat:2 }}</span>
                 </div>
                 <div class="d-flex justify-content-between small mb-1">
-                    <strong>Impuestos:</strong>
-                    <span>$ 0.00</span>
+                    <strong>IVA ({{ iva_valor }}%):</strong>
+                    <span>$ {{ impuesto|floatformat:2 }}</span>
                 </div>
                 <div class="d-flex justify-content-between small mb-3">
                     <strong>Total:</strong>
-                    <span class="text-success fw-bold">$ {{ cart_total|floatformat:2 }}</span>
+                    <span class="text-success fw-bold">$ {{ total_con_impuesto|floatformat:2 }}</span>
                 </div>
+
 
             </div>
         </div>

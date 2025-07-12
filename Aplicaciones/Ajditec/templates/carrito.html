@@ -120,13 +120,14 @@
                         <strong>$ {{ cart_total|floatformat:2 }}</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
-                        <strong>Impuestos:</strong>
-                        <strong>$ 0.00</strong>
+                        <strong>IVA ({{ iva_valor }}%):</strong>
+                        <strong>$ {{ impuesto|floatformat:2 }}</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Total:</strong>
-                        <strong class="text-success">$ {{ cart_total|floatformat:2 }}</strong>
+                        <strong class="text-success">$ {{ total_con_impuesto|floatformat:2 }}</strong>
                     </div>
+
 
                     <div class="text-center">
                         <a href="{% if user.is_authenticated %}{% url 'datosPedido' %}{% else %}{% url 'login' %}?next={% url 'datosPedido' %}{% endif %}" class="btn btn-primary btn-block">

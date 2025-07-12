@@ -49,19 +49,20 @@
                                 {% endfor %}
 
                                 <div class="total-section">
-                                    <div class="total-row">
-                                        <span>Subtotal:</span>
-                                        <span>$ {{ registro_pago.total_pago|floatformat:2 }}</span>
-                                    </div>
-                                    <div class="total-row">
-                                        <span>Impuestos:</span>
-                                        <span>$ 0.00</span>
-                                    </div>
-                                    <div class="total-row">
-                                        <span>Total:</span>
-                                        <span>$ {{ registro_pago.total_pago|floatformat:2 }}</span>
-                                    </div>
-                                </div>
+    <div class="total-row">
+        <span>Subtotal:</span>
+        <span>$ {{ subtotal|floatformat:2 }}</span>
+    </div>
+    <div class="total-row">
+        <span>Impuestos:</span>
+        <span>$ {{ impuesto|floatformat:2 }}</span>
+    </div>
+    <div class="total-row">
+        <span>Total:</span>
+        <span>$ {{ total|floatformat:2 }}</span>
+    </div>
+</div>
+
                             </div>
                         </div>
                     </div>

@@ -206,6 +206,7 @@ class Orden(models.Model):
     fecha_trans= models.DateField(null=True, blank=True)
     estado_ord = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='Pendiente')
     fechacrea_ord = models.DateField(auto_now_add=True)
+    fecha_expira = models.DateTimeField(null=True, blank=True) 
     fechactua_ord = models.DateField(auto_now=True)
     banco = models.ForeignKey(
     Banco,
@@ -298,3 +299,19 @@ class Notificacion(models.Model):
         return f"{self.titulo} - {self.usuario_destino.username}"
 
 
+#IMPUESTO
+from django.utils import timezone
+
+class Impuesto(models.Model):
+    id_impuesto = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100)  # Ej: 'IVA', 'ICE'
+    valor = models.DecimalField(max_digits=5, decimal_places=2)  # Ej: 12.00 = 12%
+    estado = models.BooleanField(default=True)  # Activo (True) o Inactivo (False)
+    fecha_creacion = models.DateTimeField(default=timezone.now)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'impuesto'
+
+    def __str__(self):
+        return f"{self.nombre} ({self.valor}%)"
