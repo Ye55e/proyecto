@@ -48,6 +48,7 @@ urlpatterns = [
     
     #LOGIN
     path('login/', views.login_usuario, name='login'),
+    path('reporteVentas/', views.reporte_ventas_productos, name='reporte_ventas_productos'),
     path('registro/', views.registrar_cliente, name='registro'),
     path('logout/', views.logout_usuario, name='logout'),
     path('plantilla/', views.admin_dashboard, name='admin_dashboard'),

@@ -2,6 +2,14 @@
 {% load static %}
 
 {% block contenido %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
 <br><br>
 <h3 class="text-center mb-4">LISTADO DE USUARIOS</h3>
 
@@ -15,7 +23,6 @@
                     <th>EMAIL</th>
                     <th>CELULAR</th>
                     <th>ROL</th>
-                    <th>ACCIONES</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,15 +39,7 @@
                             Cliente
                         {% endif %}
                     </td>
-                    <td>
-                        <a href="/editarUsuario/{{ usu.id }}" class="btn btn-warning btn-sm me-2" title="Editar">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-
-                        <a onclick="return confirm('¿Está seguro de eliminar este usuario?')" href="/eliminarUsuario/{{ usu.id }}" class="btn btn-danger btn-sm" title="Eliminar">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                    </td>
+                    
                 </tr>
                 {% endfor %}
             </tbody>

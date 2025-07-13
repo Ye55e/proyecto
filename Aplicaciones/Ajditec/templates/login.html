@@ -3,6 +3,45 @@
 
 {% block extra_css %}
 <style>
+.password-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.password-container input[type="password"] {
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: #007bff;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.eye-icon:hover {
+    color: #007bff;
+}
   .login-container {
     max-width: 400px;
     margin: 60px auto;
@@ -83,7 +122,22 @@
   <h2>Iniciar Sesión</h2>
   <form method="post" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
+    {% for field in form %}
+      <p>
+        {% if field.name == 'password' %}
+          <div class="password-container">
+            {{ field.label_tag }}
+            {{ field }}
+            <span class="toggle-password" onclick="togglePasswordVisibility(this)">
+              <i class="bi bi-eye-slash"></i>
+            </span>
+          </div>
+        {% else %}
+          {{ field.label_tag }}
+          {{ field }}
+        {% endif %}
+      </p>
+    {% endfor %}
     <button type="submit">Ingresar</button>
   </form>
 
@@ -92,5 +146,24 @@
     <a href="{% url 'registro' %}">Regístrate aquí</a>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePasswordVisibility(element) {
+    const input = element.previousElementSibling;
+    const icon = element.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    }
+}
+</script>
 {% endblock %}
 

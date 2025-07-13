@@ -64,7 +64,7 @@
                         Retiro en local <span class="badge bg-success">Gratuito</span>
                     </label>
                 </div>
-                 <div class="form-check mb-4">
+                <div class="form-check mb-4">
                     <input class="form-check-input" type="radio" name="metodo_entrega" id="envio_quito" value="envio">
                     <label class="form-check-label" for="envio_quito">
                         Envío a domicilio desde Quito <span class="badge bg-secondary">Valor adicional Pendiente</span>
@@ -89,23 +89,29 @@
                                    placeholder="Número de transferencia" 
                                    pattern="^[0-9]+$" 
                                    title="Solo se permiten números" 
-                                   required>
+                                   required
+                                   value="{{ num_transferencia|default:'' }}">
                         </div>
-                    <div class="col-md-6">
-                    <label for="banco_id" class="form-label"><b>Banco</b></label>
-                    <select name="banco_id" id="banco_id" class="form-select" required>
-                        <option value="" disabled selected>Seleccione un banco</option>
-                        {% for banco in bancos %}
-                            <option value="{{ banco.id_banco }}">{{ banco.nombre_banco|upper }} # {{ banco.numero_cuenta }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
+                        <div class="col-md-6">
+                            <label for="banco_id" class="form-label"><b>Banco</b></label>
+                            <select name="banco_id" id="banco_id" class="form-select" required>
+                                <option value="" disabled {% if not banco_id %}selected{% endif %}>Seleccione un banco</option>
+                                {% for banco in bancos %}
+                                    <option value="{{ banco.id_banco }}" {% if banco.id_banco == banco_id %}selected{% endif %}>
+                                        {{ banco.nombre_banco|upper }} # {{ banco.numero_cuenta }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Fecha de Transferencia</label>
-                        <input type="date" name="fecha_transferencia" class="form-control">
+                        <input type="date" name="fecha_transferencia" class="form-control" id="fecha_transferencia" required
+                               value="{{ fecha_transferencia|default:'' }}">
+                        <div id="fecha_transferencia_error" class="text-danger small d-none mt-1">
+                            La fecha debe ser hoy o máximo 2 días después.
+                        </div>
                     </div>
                 </div>
 
@@ -123,7 +129,7 @@
                     </label>
                 </div>
 
-                <!-- Campos ocultos para los datos del cliente -->
+                <!-- Datos del cliente -->
                 <input type="hidden" name="nombre" value="{{ datos_cliente.nombre }}">
                 <input type="hidden" name="cedula" value="{{ datos_cliente.cedula }}">
                 <input type="hidden" name="email" value="{{ datos_cliente.email }}">
@@ -131,7 +137,7 @@
                 <input type="hidden" name="ciudad" value="{{ datos_cliente.ciudad }}">
                 <input type="hidden" name="telefono" value="{{ datos_cliente.telefono }}">
 
-                <!-- Información Bancaria -->
+                <!-- Bancos -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <div class="banco-card">
@@ -178,13 +184,11 @@
                 </div>
                 {% endfor %}
 
-                <!-- Este es el aviso que aparece solo si eligen envío -->
                 <div id="envio-adicional" class="hidden-section text-danger fw-bold small my-2">
                     + Valor adicional por envío
                 </div>
 
                 <hr>
-
                 <div class="d-flex justify-content-between small mb-1">
                     <strong>Subtotal:</strong>
                     <span>$ {{ cart_total|floatformat:2 }}</span>
@@ -197,72 +201,77 @@
                     <strong>Total:</strong>
                     <span class="text-success fw-bold">$ {{ total_con_impuesto|floatformat:2 }}</span>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
-<!-- JavaScript corregido -->
 <script>
-// Validar número de transferencia en tiempo real
-const numTransferencia = document.querySelector('input[name="num_transferencia"]');
-if (numTransferencia) {
-    numTransferencia.addEventListener('input', function() {
-        // Eliminar caracteres no numéricos
-        this.value = this.value.replace(/[^0-9]/g, '');
-    });
-}
+    function validarFechaTransferencia() {
+        const fechaInput = document.getElementById('fecha_transferencia');
+        const errorDiv = document.getElementById('fecha_transferencia_error');
 
-// Validar número de transferencia al enviar el formulario
-document.addEventListener('DOMContentLoaded', function() {
-    const formulario = document.getElementById('checkout-form');
-    if (formulario) {
-        formulario.addEventListener('submit', function(e) {
-            const numTransferencia = document.querySelector('input[name="num_transferencia"]');
-            if (numTransferencia && !/^[0-9]+$/.test(numTransferencia.value)) {
-                e.preventDefault();
-                numTransferencia.setCustomValidity('Solo se permiten números en el número de transferencia');
-                numTransferencia.reportValidity();
+        if (fechaInput.value) {
+            const fechaSeleccionada = new Date(fechaInput.value);
+            const hoy = new Date();
+            const max = new Date();
+            max.setDate(hoy.getDate() + 2);
+
+            fechaSeleccionada.setHours(0, 0, 0, 0);
+            hoy.setHours(0, 0, 0, 0);
+            max.setHours(0, 0, 0, 0);
+
+            if (fechaSeleccionada < hoy || fechaSeleccionada > max) {
+                errorDiv.classList.remove('d-none');
+                fechaInput.classList.add('is-invalid');
+                return false;
+            } else {
+                errorDiv.classList.add('d-none');
+                fechaInput.classList.remove('is-invalid');
+                return true;
             }
-        });
-    }
-}
-    const metodoEntregaInputs = document.querySelectorAll('input[name="metodo_entrega"]');
-    const metodoPagoInputs = document.querySelectorAll('input[name="metodo_pago"]');
-    const envioAdicional = document.getElementById('envio-adicional');
-    const camposTransferencia = document.getElementById('campos-transferencia');
-
-    function actualizarCamposEntrega() {
-        const selectedEntrega = document.querySelector('input[name="metodo_entrega"]:checked');
-        if (selectedEntrega && selectedEntrega.value === 'envio') {
-            envioAdicional.classList.remove('hidden-section');
-        } else {
-            envioAdicional.classList.add('hidden-section');
         }
+        errorDiv.classList.remove('d-none');
+        fechaInput.classList.add('is-invalid');
+        return false;
     }
 
-    function actualizarCamposPago() {
-        const selectedPago = document.querySelector('input[name="metodo_pago"]:checked');
-        if (selectedPago && selectedPago.value === 'transferencia') {
-            camposTransferencia.style.display = 'block';
-        } else {
-            camposTransferencia.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', function () {
+        const fechaTransferencia = document.getElementById('fecha_transferencia');
+        const form = document.getElementById('checkout-form');
+
+        if (fechaTransferencia) {
+            fechaTransferencia.addEventListener('change', validarFechaTransferencia);
         }
-    }
 
-    metodoEntregaInputs.forEach(function(input) {
-        input.addEventListener('change', actualizarCamposEntrega);
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                if (!validarFechaTransferencia()) {
+                    event.preventDefault();
+                }
+            });
+        }
+
+        const metodoEntregaInputs = document.querySelectorAll('input[name="metodo_entrega"]');
+        const metodoPagoInputs = document.querySelectorAll('input[name="metodo_pago"]');
+        const envioAdicional = document.getElementById('envio-adicional');
+        const camposTransferencia = document.getElementById('campos-transferencia');
+
+        function actualizarCamposEntrega() {
+            const selectedEntrega = document.querySelector('input[name="metodo_entrega"]:checked');
+            envioAdicional.classList.toggle('hidden-section', selectedEntrega.value !== 'envio');
+        }
+
+        function actualizarCamposPago() {
+            const selectedPago = document.querySelector('input[name="metodo_pago"]:checked');
+            camposTransferencia.style.display = selectedPago.value === 'transferencia' ? 'block' : 'none';
+        }
+
+        metodoEntregaInputs.forEach(input => input.addEventListener('change', actualizarCamposEntrega));
+        metodoPagoInputs.forEach(input => input.addEventListener('change', actualizarCamposPago));
+
+        actualizarCamposEntrega();
+        actualizarCamposPago();
     });
-
-    metodoPagoInputs.forEach(function(input) {
-        input.addEventListener('change', actualizarCamposPago);
-    });
-
-    // Ejecutar una vez al cargar la página
-    actualizarCamposEntrega();
-    actualizarCamposPago();
-});
 </script>
-
 {% endblock %}

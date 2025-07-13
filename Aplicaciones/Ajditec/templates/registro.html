@@ -2,6 +2,45 @@
 
 {% block extra_css %}
 <style>
+.password-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.password-container input[type="password"] {
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: #007bff;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.eye-icon:hover {
+    color: #007bff;
+}
   .login-container {
     max-width: 400px;
     margin: 60px auto;
@@ -94,20 +133,51 @@
 
     {% for field in form %}
       <p>
-        {{ field.label_tag }}
-        {{ field }}
-        {% if field.errors %}
-          <div class="errorlist">{{ field.errors }}</div>
+        {% if field.name == 'password' or field.name == 'password2' %}
+          <div class="password-container">
+            {{ field.label_tag }}
+            {{ field }}
+            <span class="toggle-password" onclick="togglePasswordVisibility(this)">
+              <i class="bi bi-eye-slash"></i>
+            </span>
+          </div>
+          {% if field.errors %}
+            <div class="errorlist">{{ field.errors }}</div>
+          {% endif %}
+        {% else %}
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.errors %}
+            <div class="errorlist">{{ field.errors }}</div>
+          {% endif %}
         {% endif %}
       </p>
     {% endfor %}
-
     <button type="submit">Registrarse</button>
     <div class="login-link">
-      ¿Ya tiene una cuenta?
-      <a href="{% url 'login' %}">Iniciar Sesión</a>
+      ¿Ya tienes cuenta?
+      <a href="{% url 'login' %}">Inicia sesión aquí</a>
     </div>
 
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePasswordVisibility(element) {
+    const input = element.previousElementSibling;
+    const icon = element.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    }
+}
+</script>
 {% endblock %}

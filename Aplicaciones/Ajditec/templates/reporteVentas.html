@@ -1,17 +1,24 @@
 {% extends "plantilla_admin.html" %}
 {% load static %}
+
 {% block contenido %}
 <br>
 <h3 class="text-center">Reporte de Productos Vendidos</h3>
 
-<form method="get" class="row mb-4">
+<form method="get" action="{% url 'reporte_ventas_productos' %}" class="row mb-4">
     <div class="col-md-3">
         <label for="fecha_inicio">Fecha inicio:</label>
-        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" 
+               value="{{ fecha_inicio }}" 
+               {% if fecha_minima %}min="{{ fecha_minima }}"{% endif %}
+               {% if fecha_maxima %}max="{{ fecha_maxima }}"{% endif %}>
     </div>
     <div class="col-md-3">
         <label for="fecha_fin">Fecha fin:</label>
-        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" 
+               value="{{ fecha_fin }}" 
+               {% if fecha_minima %}min="{{ fecha_minima }}"{% endif %}
+               {% if fecha_maxima %}max="{{ fecha_maxima }}"{% endif %}>
     </div>
     <div class="col-md-3">
         <label for="tipo">Tipo de reporte:</label>
@@ -25,31 +32,39 @@
     </div>
 </form>
 
-{% if productos_vendidos %}
 <div class="card shadow">
     <div class="card-body">
-        <table class="table table-bordered table-striped table-hover" id="tbl_productos">
-            <thead class="table-dark">
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad Vendida</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in productos_vendidos %}
-                <tr>
-                    <td>{{ item.nomb_prod }}</td>
-                    <td>{{ item.total_vendido }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-
-        </table>
+        {% if productos_vendidos %}
+            <table class="table table-bordered table-striped table-hover" id="tbl_productos">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad Vendida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in productos_vendidos %}
+                    <tr>
+                        <td>{{ item.nomb_prod }}</td>
+                        <td>{{ item.total_vendido }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% elif fecha_minima and fecha_maxima %}
+            <div class="alert alert-info">
+                Rango de fechas válido: del {{ fecha_minima }} al {{ fecha_maxima }}
+            </div>
+            <div class="alert alert-warning">
+                No se encontraron productos que cumplan con el criterio de búsqueda.
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Por favor, seleccione un rango de fechas válido y el tipo de reporte.
+            </div>
+        {% endif %}
     </div>
 </div>
-{% else %}
-    <p class="text-center">Selecciona un rango de fechas para ver los resultados.</p>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -72,22 +87,20 @@
 </script>
 
 <style>
-         /* Asegura que la tabla use todo el ancho disponible */
     .table {
         width: 100% !important;
         table-layout: auto;
     }
 
-    /* Contenedor de la tabla, asegurando que no haya un margen que limite su tamaño */
     .card-body {
         padding: 0;
         overflow-x: auto;
     }
 
-    /* Ajustar para que la tabla se pueda desplazar horizontalmente si es necesario */
     #tbl_inventario_wrapper {
         overflow-x: auto;
     }
+
     div.dt-buttons .btn {
         margin-right: 10px;
     }

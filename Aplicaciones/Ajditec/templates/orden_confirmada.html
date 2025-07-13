@@ -16,6 +16,7 @@
                         <h2 class="mb-4">¡Pedido realizado con éxito!</h2>
                         <p class="detalle-orden mb-4">Número de orden: {{ orden.id_ord }}</p>
                         <p class="detalle-orden mb-4">Fecha: {{ orden.fechacrea_ord }}</p>
+                        <p class="detalle-orden mb-4">Método de entrega: {% if metodo_entrega == 'envio' %}Envío a domicilio{% else %}Retiro en local{% endif %}</p>
                         <p class="detalle-orden mb-4">Método de pago: {{ orden.metodo_pago }}</p>
                         <p class="detalle-orden mb-4">Estado: {{ orden.estado_ord }}</p>
                         <p class="detalle-orden mb-4">Total: ${{ registro_pago.total_pago }}</p>
@@ -47,6 +48,12 @@
                                     <span class="precio">$ {{ detalle.subtotal|floatformat:2 }}</span>
                                 </div>
                                 {% endfor %}
+
+                                {% if metodo_entrega == 'envio' %}
+                                    <div class="total-row text-danger">
+                                        <span>+ Valor adicional por envío (contraentrega)</span>
+                                    </div>
+                                {% endif %}
 
                                 <div class="total-section">
     <div class="total-row">

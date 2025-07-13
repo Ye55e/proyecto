@@ -2,6 +2,14 @@
 {% load static %}
 {% block contenido %}
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
 <br><br>
 <h3 class="text-center mb-4">INVENTARIO AJ DITEC DISTRIBUIDORA</h3>
    <!-- Alerta para productos con stock bajo -->

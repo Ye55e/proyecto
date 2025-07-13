@@ -100,19 +100,27 @@
     </div>
 
     <div class="orden-info">
-        <h5>Información de la Orden</h5>
-        <p><strong>Número de Orden:</strong> S{{ orden.id_ord }}</p>
+        <h5>Información del Cliente</h5>
+        <p><strong>Nombre:</strong> {{ orden.nombre_cliente }}</p>
+        <p><strong>Cédula/RUC:</strong> {{ orden.cedula_ruc }}</p>
+        <p><strong>Email:</strong> {{ orden.correo_cliente }}</p>
+        <p><strong>Teléfono:</strong> {{ orden.telefono_cliente }}</p>
+        <p><strong>Dirección:</strong> {{ orden.direc_entre }}</p>
+        <p><strong>Ciudad:</strong> {{ orden.ciudad_cliente }}</p>
+    </div>
+
+    <div class="orden-info">
+        <h5>Detalles del Pedido</h5>
+        <p><strong>Número de Orden:</strong> {{ orden.id_ord }}</p>
         <p><strong>Fecha:</strong> {{ orden.fechacrea_ord }}</p>
-        <p><strong>Estado:</strong>
-            <span class="badge 
-                {% if orden.estado_ord == 'Pendiente' %}bg-warning
-                {% elif orden.estado_ord == 'Entregado' %}bg-success
-                {% else %}bg-danger
-                {% endif %}">
-                {{ orden.estado_ord }}
-            </span>
-        </p>
+        <p><strong>Método de Entrega:</strong> {% if orden.metodo_entrega == 'envio' %}Envío a domicilio{% else %}Retiro en local{% endif %}</p>
         <p><strong>Método de Pago:</strong> {{ orden.metodo_pago }}</p>
+        <p><strong>Estado:</strong> {{ orden.estado_ord }}</p>
+        <p><strong>Total:</strong> ${{ registro_pago.total_pago }}</p>
+    </div>
+
+    <div class="orden-info">
+        <h5>Información de la Orden</h5>
         <p><strong>Banco:</strong> 
             {% if orden.banco %}
                 {{ orden.banco.nombre_banco }}
@@ -125,42 +133,58 @@
         {% endif %}
     </div>
 
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio Unitario</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for detalle in detalles %}
-                <tr class="producto-item">
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="{{ detalle.producto.img_prod.url }}" 
-                                 alt="{{ detalle.producto.nomb_prod }}" 
-                                 class="img-thumbnail" 
-                                 style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
-                            <div>
-                                <h6 class="mb-0">{{ detalle.producto.nomb_prod }}</h6>
-                                
-                            </div>
-                        </div>
-                    </td>
-                    <td class="text-center">{{ detalle.cantidad }}</td>
-                    <td class="text-end">$ {{ detalle.producto.inventario.precunit_prod|floatformat:2 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
     <div class="orden-info">
-        <h4><strong>Subtotal:</strong> $ {{ subtotal|floatformat:2 }}</p>
-        <h4><strong>IVA ({{ iva_valor }}%):</strong> $ {{ impuesto_total|floatformat:2 }}</p>
-        <h4><strong>Total:</strong> $ {{ total_con_impuesto|floatformat:2 }}</h4>
+        <h5>Resumen del Pedido</h5>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in detalles %}
+                    <tr class="producto-item">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ detalle.producto.img_prod.url }}" alt="{{ detalle.producto.nomb_prod }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">
+                                <div class="ms-3">
+                                    <h6 class="mb-0">{{ detalle.producto.nomb_prod }}</h6>
+                                    <p class="mb-0 small">{{ detalle.producto.descrip_prod|truncatewords:10 }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ detalle.cantidad }}</td>
+                        <td>$ {{ detalle.producto.inventario.precunit_prod|floatformat:2 }}</td>
+                        <td>$ {{ detalle.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                        <td>$ {{ subtotal|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>IVA ({{ iva_valor }}%):</strong></td>
+                        <td>$ {{ impuesto_total|floatformat:2 }}</td>
+                    </tr>
+                    {% if orden.metodo_entrega == 'envio' %}
+                    <tr>
+                        <td colspan="3" class="text-end text-danger"><strong>+ Valor adicional por envío (contraentrega)</strong></td>
+                        <td class="text-danger">*</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                        <td><strong>$ {{ total_con_impuesto|floatformat:2 }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
 
     <div class="text-center mt-4">

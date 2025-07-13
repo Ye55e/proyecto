@@ -9,6 +9,7 @@ class Usuario(AbstractUser):
     ]
     tipo_usuario = models.CharField(max_length=10, choices=TIPO_USUARIO, default='cliente')
     cel_user = models.CharField(max_length=10, verbose_name="Celular")
+    es_dios = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'usuario'
@@ -203,6 +204,7 @@ class Orden(models.Model):
     direc_entre = models.TextField()
     metodo_pago = models.CharField(max_length=100)
     num_trans = models.CharField(max_length=20, null=True, blank=True)
+    metodo_entrega = models.CharField(max_length=10, choices=[('local', 'Local'), ('envio', 'Envío')], default='local') 
     fecha_trans= models.DateField(null=True, blank=True)
     estado_ord = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='Pendiente')
     fechacrea_ord = models.DateField(auto_now_add=True)
