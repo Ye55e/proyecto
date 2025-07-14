@@ -1,5 +1,6 @@
 {% extends "plantilla_admin.html" %}
 {% load static %}
+
 {% block contenido %}
 <link rel="stylesheet" href="{% static 'plantilla_cliente/css/estilos.css' %}">
 <link rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}">
@@ -8,7 +9,13 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="border rounded-4 p-4 shadow-sm bg-light">
-                <h3 class="text-center mb-4 fw-bold">Registrar de Entradas de Movimiento de Inventario</h3>
+                <h3 class="text-center mb-4 fw-bold">Registrar Entrada al Inventario</h3>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
 
                 <form action="{% url 'nuevoIngreso' %}" method="POST">
                     {% csrf_token %}
@@ -20,17 +27,14 @@
                             {% for prod in productos %}
                                 {% if prod.inventario %}
                                     <option value="{{ prod.id_prod }}" data-precio="{{ prod.inventario.precunit_prod }}">
-                                        {{ prod.nomb_prod }}
+                                        {{ prod.nomb_prod }} - Stock: {{ prod.inventario.stock_actual }} - ${{ prod.inventario.precunit_prod }}
                                     </option>
                                 {% endif %}
                             {% endfor %}
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="precio_anterior" class="form-label fw-semibold">Precio anterior:</label>
-                        <input type="text" id="precio_anterior" class="form-control" readonly>
-                    </div>
+                   
 
                     <div class="mb-3">
                         <label for="cantidad" class="form-label fw-semibold">Cantidad a Ingresar:</label>
@@ -40,34 +44,34 @@
                     <div class="mb-4">
                         <label for="precio" class="form-label fw-semibold">Nuevo Precio Unitario:</label>
                         <input type="number" step="0.01" name="precio" min="0" class="form-control" placeholder="Ej. 15.00" required>
+                        <div class="form-text text-muted">Se aplicará el mayor entre el precio anterior y este como precio de venta.</div>
                     </div>
 
                     <div class="d-flex justify-content-center gap-3">
-                        <button type="submit" class="btn btn-primary px-4 text-decoration-none rounded-0">Registrar Ingreso</button>
-                        <a href="{% url 'listadoInventario' %}" class="btn btn-danger px-4 text-decoration-none rounded-0">Cancelar</a>
+                        <button type="submit" class="btn btn-success px-4 rounded-0">
+                            <i class="bi bi-check-circle"></i> Registrar Ingreso
+                        </button>
+                        <a href="{% url 'listadoInventario' %}" class="btn btn-danger px-4 rounded-0">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const productoSelect = document.getElementById('producto');
         const precioAnteriorInput = document.getElementById('precio_anterior');
 
-        // Cuando se cambie el producto seleccionado
-        productoSelect.addEventListener('change', function() {
-            // Obtener el precio del producto seleccionado
-            const precioAnterior = productoSelect.options[productoSelect.selectedIndex].dataset.precio;
-
-            // Asignar el precio al campo de precio anterior
-            precioAnteriorInput.value = precioAnterior || '';  // Si no tiene precio, lo deja vacío
+        productoSelect.addEventListener('change', function () {
+            const precio = this.options[this.selectedIndex].dataset.precio;
+            precioAnteriorInput.value = precio ? `$${parseFloat(precio).toFixed(2)}` : '';
         });
     });
 </script>
-{% endblock %}
-
 {% endblock %}

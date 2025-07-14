@@ -5,62 +5,77 @@
 <br>
 <h3 class="text-center">Reporte de Productos Vendidos</h3>
 
-<form method="get" action="{% url 'reporte_ventas_productos' %}" class="row mb-4">
-    <div class="col-md-3">
-        <label for="fecha_inicio">Fecha inicio:</label>
-        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" 
-               value="{{ fecha_inicio }}" 
-               {% if fecha_minima %}min="{{ fecha_minima }}"{% endif %}
-               {% if fecha_maxima %}max="{{ fecha_maxima }}"{% endif %}>
+<div class="card mb-4 shadow">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="fecha_inicio" class="form-label">Fecha inicio:</label>
+                <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" 
+                       value="{{ fecha_inicio }}"
+                       min="{{ fecha_minima|date:'Y-m-d' }}"
+                       max="{{ fecha_maxima|date:'Y-m-d' }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="fecha_fin" class="form-label">Fecha fin:</label>
+                <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" 
+                       value="{{ fecha_fin }}"
+                       min="{{ fecha_minima|date:'Y-m-d' }}"
+                       max="{{ fecha_maxima|date:'Y-m-d' }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="tipo" class="form-label">Tipo de reporte:</label>
+                <select name="tipo" id="tipo" class="form-select">
+                    <option value="mayor" {% if tipo == "mayor" %}selected{% endif %}>Más vendidos</option>
+                    <option value="menor" {% if tipo == "menor" %}selected{% endif %}>Menos vendidos</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+            </div>
+            
+            <div class="col-12">
+                <a href="{% url 'reporte_ventas_productos' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+            </div>
+        </form>
     </div>
-    <div class="col-md-3">
-        <label for="fecha_fin">Fecha fin:</label>
-        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" 
-               value="{{ fecha_fin }}" 
-               {% if fecha_minima %}min="{{ fecha_minima }}"{% endif %}
-               {% if fecha_maxima %}max="{{ fecha_maxima }}"{% endif %}>
-    </div>
-    <div class="col-md-3">
-        <label for="tipo">Tipo de reporte:</label>
-        <select name="tipo" id="tipo" class="form-select">
-            <option value="mayor" {% if tipo == "mayor" %}selected{% endif %}>Más vendidos</option>
-            <option value="menor" {% if tipo == "menor" %}selected{% endif %}>Menos vendidos</option>
-        </select>
-    </div>
-    <div class="col-md-3 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-    </div>
-</form>
+</div>
 
 <div class="card shadow">
     <div class="card-body">
         {% if productos_vendidos %}
-            <table class="table table-bordered table-striped table-hover" id="tbl_productos">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad Vendida</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in productos_vendidos %}
-                    <tr>
-                        <td>{{ item.nomb_prod }}</td>
-                        <td>{{ item.total_vendido }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% elif fecha_minima and fecha_maxima %}
-            <div class="alert alert-info">
-                Rango de fechas válido: del {{ fecha_minima }} al {{ fecha_maxima }}
-            </div>
-            <div class="alert alert-warning">
-                No se encontraron productos que cumplan con el criterio de búsqueda.
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover" id="tbl_ventas">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Producto</th>
+                            <th>Cantidad Vendida</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in productos_vendidos %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.nomb_prod }}</td>
+                            <td>{{ item.total_vendido }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         {% else %}
             <div class="alert alert-info">
-                Por favor, seleccione un rango de fechas válido y el tipo de reporte.
+                <strong>Información:</strong> No se encontraron productos vendidos en el rango seleccionado.
+                {% if fecha_minima and fecha_maxima %}
+                    <br>Rango disponible: {{ fecha_minima|date:"d/m/Y" }} al {{ fecha_maxima|date:"d/m/Y" }}
+                {% endif %}
             </div>
         {% endif %}
     </div>
@@ -69,40 +84,69 @@
 
 {% block scripts %}
 <script>
-  $(document).ready(function() {
-    $('#tbl_productos').DataTable({
-        scrollX:true,
-        responsive:true,
-      language: {
-        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
-      },
-      dom: 'Bfrtip',
-      buttons: [
-        { extend: 'excelHtml5',  text: 'Excel',     className: 'btn btn-success me-2' },
-        { extend: 'pdfHtml5',    text: 'PDF',       className: 'btn btn-danger me-2'  },
-        { extend: 'print',       text: 'Imprimir',  className: 'btn btn-primary' }
-      ]
+$(document).ready(function() {
+    $('#tbl_ventas').DataTable({
+        scrollX: true,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+        },
+        dom: '<"top"Bf>rt<"bottom"lip><"clear">',
+        buttons: [
+            { 
+                extend: 'excelHtml5', 
+                text: '<i class="bi bi-file-excel"></i> Excel',
+                className: 'btn btn-success me-2',
+                title: 'Reporte_Ventas_Productos'
+            },
+            { 
+                extend: 'pdfHtml5', 
+                text: '<i class="bi bi-file-pdf"></i> PDF',
+                className: 'btn btn-danger me-2',
+                title: 'Reporte_Ventas_Productos'
+            },
+            { 
+                extend: 'print', 
+                text: '<i class="bi bi-printer"></i> Imprimir',
+                className: 'btn btn-primary',
+                title: 'Reporte de Ventas de Productos'
+            }
+        ],
+        order: [[2, 'desc']],
+        pageLength: 25,
+        columnDefs: [
+            { orderable: false, targets: [0, 2] } // Hace que las columnas # y % no sean ordenables
+        ]
     });
-  });
+});
 </script>
 
 <style>
+    /* Estilos consistentes con el listado de movimientos */
     .table {
         width: 100% !important;
-        table-layout: auto;
+        font-size: 0.9rem;
     }
-
-    .card-body {
-        padding: 0;
-        overflow-x: auto;
+    
+    .progress {
+        height: 20px;
+        background-color: #f8f9fa;
     }
-
-    #tbl_inventario_wrapper {
-        overflow-x: auto;
+    
+    .progress-bar {
+        font-size: 0.75rem;
+        line-height: 20px;
     }
-
-    div.dt-buttons .btn {
-        margin-right: 10px;
+    
+    /* Ajustes responsive */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 10px;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
     }
 </style>
 {% endblock %}

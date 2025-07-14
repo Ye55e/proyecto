@@ -1,0 +1,179 @@
+<!-- templates/admin/inventario/listadoMovimiento.html -->
+{% extends "plantilla_admin.html" %}
+{% load static %}
+{% block contenido %}
+<br><br>
+<h3 class="text-center mb-4">HISTORIAL DE MOVIMIENTOS</h3>
+
+<!-- Filtros -->
+<div class="card mb-4 shadow">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="producto" class="form-label">Producto:</label>
+                <select name="producto" id="producto" class="form-select">
+                    <option value="">Todos los productos</option>
+                    {% for prod in productos %}
+                    <option value="{{ prod.id_prod }}" {% if filtro_producto == prod.id_prod %}selected{% endif %}>
+                        {{ prod.nomb_prod }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="tipo" class="form-label">Tipo de movimiento:</label>
+                <select name="tipo" id="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Entrada" {% if filtro_tipo == 'Entrada' %}selected{% endif %}>Entrada</option>
+                    <option value="Salida" {% if filtro_tipo == 'Salida' %}selected{% endif %}>Salida</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="fecha_inicio" class="form-label">Fecha inicio:</label>
+                <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" 
+                       value="{{ fecha_inicio }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="fecha_fin" class="form-label">Fecha fin:</label>
+                <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" 
+                       value="{{ fecha_fin }}">
+            </div>
+            
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+                <a href="{% url 'listadoMovimiento' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de movimientos -->
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover" id="tbl_movimientos">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Producto</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Precio Venta</th>
+                        <th>Stock Actual</th>
+                        <th>Observación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movimientos %}
+                    <tr>
+                        <td>{{ mov.id_mov }}</td>
+                        <td>{{ mov.fecha|date:"d/m/Y H:i" }}</td>
+                        <td>{{ mov.producto.nomb_prod }}</td>
+                        <td>
+                            <span class="badge {% if mov.tipo == 'Entrada' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ mov.tipo }}
+                            </span>
+                        </td>
+                        <td>{{ mov.cantidad }}</td>
+                        <td>${{ mov.precio_uni|default:"-"|floatformat:2 }}</td>
+                        <td>${{ mov.precio_venta|floatformat:2 }}</td>
+                        <td>{{ mov.producto.inventario.stock_actual }}</td>
+                        <td>{{ mov.observacion|truncatechars:50|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center">No se encontraron movimientos</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#tbl_movimientos').DataTable({
+        scrollX: true,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+        },
+        dom: '<"top"Bf>rt<"bottom"lip><"clear">',
+        buttons: [
+            { 
+                extend: 'excelHtml5', 
+                text: '<i class="bi bi-file-excel"></i> Excel',
+                className: 'btn btn-success me-2',
+                title: 'Historial_Movimientos',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            { 
+                extend: 'pdfHtml5', 
+                text: '<i class="bi bi-file-pdf"></i> PDF',
+                className: 'btn btn-danger me-2',
+                title: 'Historial_Movimientos',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+            { 
+                extend: 'print', 
+                text: '<i class="bi bi-printer"></i> Imprimir',
+                className: 'btn btn-primary',
+                title: 'Historial de Movimientos',
+                exportOptions: {
+                    columns: ':visible'
+                }
+            }
+        ],
+        order: [[1, 'desc']], // Ordenar por fecha descendente
+        pageLength: 25,
+        columnDefs: [
+            { targets: [0], visible: false } // Ocultar columna ID
+        ]
+    });
+});
+</script>
+
+<style>
+    /* Estilos para la tabla */
+    .table {
+        width: 100% !important;
+        font-size: 0.9rem;
+    }
+    
+    /* Estilo para los badges */
+    .badge.bg-success {
+        background-color: #198754 !important;
+    }
+    
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
+    
+    /* Ajustes para responsive */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 10px;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}

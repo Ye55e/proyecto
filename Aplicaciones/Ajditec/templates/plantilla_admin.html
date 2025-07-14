@@ -49,229 +49,172 @@
 </head>
   <body>
     <div class="wrapper">
-      <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-      <!-- Logo Header -->
-<div class="logo-header" data-background-color="dark" style="display: flex; justify-content: center; align-items: center; padding: 15px 0;">
-  <a href="#" class="logo">
-    <!-- Logo Circular -->
-     <img src="{% static 'staticadmin/assets/img/logoAjdiec.jpg' %}" alt="Logo" 
-         class="avatar-img rounded-circle" 
-         style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;">
-  </a>
-  <div class="nav-toggle">
-    <button class="btn btn-toggle toggle-sidebar">
-      <i class="gg-menu-right"></i>
-    </button>
-    <button class="btn btn-toggle sidenav-toggler">
-      <i class="gg-menu-left"></i>
-    </button>
+   <!-- Sidebar -->
+<div class="sidebar" data-background-color="dark">
+  <div class="sidebar-logo">
+    <!-- Logo Header -->
+    <div class="logo-header" data-background-color="dark" style="display: flex; justify-content: center; align-items: center; padding: 15px 0;">
+      <a href="#" class="logo">
+        <img src="{% static 'staticadmin/assets/img/logoAjdiec.jpg' %}" alt="Logo" 
+             class="avatar-img rounded-circle" 
+             style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;">
+      </a>
+      <div class="nav-toggle">
+        <button class="btn btn-toggle toggle-sidebar">
+          <i class="gg-menu-right"></i>
+        </button>
+        <button class="btn btn-toggle sidenav-toggler">
+          <i class="gg-menu-left"></i>
+        </button>
+      </div>
+      <button class="topbar-toggler more">
+        <i class="gg-more-vertical-alt"></i>
+      </button>
+    </div>
+    <!-- End Logo Header -->
   </div>
-  <button class="topbar-toggler more">
-    <i class="gg-more-vertical-alt"></i>
-  </button>
-</div>
-<!-- End Logo Header -->
-
-          <!-- End Logo Header -->
-        </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
-            <ul class="nav nav-secondary">
-              <li class="nav-item active">
-                <a data-bs-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
-                  <i class="fas fa-home"></i>
-                  <p>Inicio</p>
-                  <span class="caret"></span>
+  <div class="sidebar-wrapper scrollbar scrollbar-inner">
+    <div class="sidebar-content">
+      <ul class="nav nav-secondary">
+        <!-- Inicio -->
+        <li class="nav-item active">
+          <a href="/">
+            <i class="fas fa-home"></i>
+            <p>Inicio</p>
+          </a>
+        </li>
+        
+        <li class="nav-section">
+          <span class="sidebar-mini-icon">
+            <i class="fa fa-ellipsis-h"></i>
+          </span>
+          <h4 class="text-section">Componentes</h4>
+        </li>
+        
+        <!-- Tienda Virtual -->
+        <li class="nav-item">
+          <a href="/">
+            <i class="fas fa-shopping-cart"></i>
+            <p>Tienda Virtual</p>
+          </a>
+        </li>
+        
+        <!-- Gestión de Productos (Dropdown) -->
+        <li class="nav-item">
+          <a data-bs-toggle="collapse" href="#sidebarProductos" aria-expanded="false">
+            <i class="fas fa-box"></i>
+            <p>Gestión de Productos</p>
+            <span class="caret"></span>
+          </a>
+          <div class="collapse" id="sidebarProductos">
+            <ul class="nav nav-collapse">
+              <li>
+                <a href="/nuevoProducto">
+                  <i class="fas fa-plus-circle me-2"></i> Nuevo Producto
                 </a>
-                <div class="collapse" id="dashboard">
-                  <ul class="nav nav-collapse">
-                    
-                  </ul>
-                </div>
               </li>
-              <li class="nav-section">
-                <span class="sidebar-mini-icon">
-                  <i class="fa fa-ellipsis-h"></i>
-                </span>
-                <h4 class="text-section">Componentes</h4>
-              </li>
-              <li class="nav-item">
-                <a href="/">
-                    <i class="fas fa-shopping-cart"></i>
-                    <p>Tienda Virtual</p>
+              <li>
+                <a href="/listadoProducto">
+                  <i class="fas fa-list-ul me-2"></i> Listado de Productos
                 </a>
-              </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarCategorias" aria-expanded="false">
-                    <i class="fas fa-list"></i>
-                    <p>Gestión de Categorías</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="sidebarCategorias">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/nuevoCategoria">
-                                <i class="fas fa-plus-circle me-2"></i> Registrar Categoría
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-              </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarProductos" aria-expanded="false">
-                    <i class="fas fa-box"></i>
-                    <p>Gestión de Productos</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="sidebarProductos">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/nuevoProducto">
-                                <i class="fas fa-plus-circle me-2"></i> Nuevo Producto
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/listadoProducto">
-                                <i class="fas fa-list-ul me-2"></i> Listado de Productos
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-              </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#inventario" aria-expanded="false">
-                    <i class="fas fa-pen-square"></i>
-                    <p>Gestión de Inventario</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="inventario">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/nuevoInventario">
-                                <i class="fas fa-plus-circle me-2"></i> Nuevo Inventario
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/listadoInventario">
-                                <i class="fas fa-list-ul me-2"></i> Listado de Inventario
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-              </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#usuarios" aria-expanded="false">
-                    <i class="fas fa-users"></i>
-                    <p>Gestión de Usuarios</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="usuarios">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/listadoUsuario">
-                                <i class="fas fa-list-ul me-2"></i> Listado de Usuarios
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#ordenes" aria-expanded="false">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <p>Gestión de Órdenes</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="ordenes">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/admin_listar_pagos">
-                                <i class="fas fa-list-ul me-2"></i> Listado de Órdenes
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-              </li>
-              <!--BANCOS-->
-              
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#bancos" aria-expanded="false">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <p>Gestión de Bancos</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="bancos">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/nuevoBanco">
-                                <i class="fas fa-list-ul me-2"></i> Listado de Bancos
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-              </li>
-              <!--IMPUESTO-->
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#impuestos" aria-expanded="false">
-                    <i class="fas fa-percentage"></i>
-                    <p>Gestión de Impuestos</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="impuestos">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/nuevoImpuesto">
-                                <i class="fas fa-list-ul me-2"></i> Listado de Impuestos
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-              <!--MOVIMIENT-->
-                <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#movi" aria-expanded="false">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <p>Movimiento de inventario</p>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse" id="movi">
-                    <ul class="nav nav-collapse">
-                        <li>
-                            <a href="/nuevoIngreso">
-                                <i class="fas fa-list-ul me-2"></i> Listado de Movimientos
-                            </a>
-                        </li>
-                       
-
-                    </ul>
-                </div>
-                 <!--REPORTES-->
-                        <li class="nav-item">
-                          <a data-bs-toggle="collapse" href="#sidebarReportes" aria-expanded="false">
-                              <i class="fas fa-chart-pie"></i>
-                              <p>Reportes</p>
-                              <span class="caret"></span>
-                          </a>
-                          <div class="collapse" id="sidebarReportes">
-                              <ul class="nav nav-collapse">
-                                  <li>
-                                      <a href="/reporteVentas">
-                                          <i class="fas fa-chart-bar me-2"></i> Reporte de Productos
-                                      </a>
-                                  </li>
-                              </ul>
-                          </div>
-                      </li>
               </li>
             </ul>
           </div>
-        </div>
-      </div>
-      <!-- End Sidebar -->
+        </li>
+        
+        <!-- Gestión de Categorías -->
+        <li class="nav-item">
+          <a href="/nuevoCategoria">
+            <i class="fas fa-list"></i>
+            <p>Gestión de Categorías</p>
+          </a>
+        </li>
+        
+        <!-- Gestión de Inventario (Dropdown) -->
+        <li class="nav-item">
+          <a data-bs-toggle="collapse" href="#inventario" aria-expanded="false">
+            <i class="fas fa-pen-square"></i>
+            <p>Gestión de Inventario</p>
+            <span class="caret"></span>
+          </a>
+          <div class="collapse" id="inventario">
+            <ul class="nav nav-collapse">
+              <li>
+                <a href="/nuevoInventario">
+                  <i class="fas fa-plus-circle me-2"></i> Nuevo Inventario
+                </a>
+              </li>
+              <li>
+                <a href="/listadoInventario">
+                  <i class="fas fa-list-ul me-2"></i> Listado de Inventario
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        
+        <!-- Gestión de Usuarios -->
+        <li class="nav-item">
+          <a href="/listadoUsuario">
+            <i class="fas fa-users"></i>
+            <p>Gestión de Usuarios</p>
+          </a>
+        </li>
+        
+        <!-- Gestión de Órdenes -->
+        <li class="nav-item">
+          <a href="/admin_listar_pagos">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <p>Gestión de Órdenes</p>
+          </a>
+        </li>
+        
+        <!-- Gestión de Bancos -->
+        <li class="nav-item">
+          <a href="/nuevoBanco">
+            <i class="fas fa-university"></i>
+            <p>Gestión de Bancos</p>
+          </a>
+        </li>
+        
+        <!-- Gestión de Impuestos -->
+        <li class="nav-item">
+          <a href="/nuevoImpuesto">
+            <i class="fas fa-percentage"></i>
+            <p>Gestión de Impuestos</p>
+          </a>
+        </li>
+        
+        <!-- Historial de Movimientos -->
+        <li class="nav-item">
+          <a href="/listadoMovimiento">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <p>Historial de Movimientos</p>
+          </a>
+        </li>
+        
+        <!-- Reportes (Dropdown) -->
+        <li class="nav-item">
+          <a data-bs-toggle="collapse" href="#sidebarReportes" aria-expanded="false">
+            <i class="fas fa-chart-pie"></i>
+            <p>Reportes</p>
+            <span class="caret"></span>
+          </a>
+          <div class="collapse" id="sidebarReportes">
+            <ul class="nav nav-collapse">
+              <li>
+                <a href="/reporteVentas">
+                  <i class="fas fa-chart-bar me-2"></i> Reporte de Productos
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- End Sidebar -->
 
       <div class="main-panel">
         <div class="main-header">
@@ -377,10 +320,14 @@
                     <ul class="dropdown-menu dropdown-user animated fadeIn">
                       <div class="dropdown-user-scroll scrollbar-outer">
                         <li>
-                          <div class="dropdown-divider"></div>
-                          <a class="dropdown-item" href=#>Mi Perfil</a>
-                          <div class="dropdown-divider"></div>
-                          <a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'perfil_usuario' %}">
+                                <i class="fas fa-user-circle"></i> Mi Perfil
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </a>
                         </li>
                       </div>
                     </ul>

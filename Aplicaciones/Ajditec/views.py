@@ -3,7 +3,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.conf import settings
 from django.http import HttpResponseForbidden
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from .models import *
+
+
 
 def is_admin(user):
     """Verifica si el usuario es administrador"""
@@ -87,7 +91,8 @@ def finalPedido(request):
 #HISTORIAL DE ORDENES USUARIO 
 from django.core.exceptions import ObjectDoesNotExist
 
-@login_required(login_url='login')
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
 def listar_ordenes(request):
     ordenes = Orden.objects.filter(usuarios=request.user).order_by('-fechacrea_ord')
 
@@ -106,8 +111,10 @@ def listar_ordenes(request):
 
 #DETALLE DE ORDENES DEL USUARIO
 
-@login_required(login_url='login')
-@admin_required
+from django.core.exceptions import ObjectDoesNotExist
+
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'cliente', login_url='login')
 def detalle_orden(request, id_ord):
     orden = get_object_or_404(Orden, id_ord=id_ord, usuarios=request.user)
     detalles = orden.detalles.all()
@@ -122,14 +129,22 @@ def detalle_orden(request, id_ord):
 
     total_con_impuesto = subtotal + impuesto_total
 
+    # Obtener registro de pago (puede no existir)
+    try:
+        registro_pago = RegistroPago.objects.get(orden=orden)
+    except ObjectDoesNotExist:
+        registro_pago = None
+
     return render(request, 'detalle_orden.html', {
         'orden': orden,
         'detalles': detalles,
         'subtotal': subtotal,
         'iva_valor': iva_valor,
         'impuesto_total': impuesto_total,
-        'total_con_impuesto': total_con_impuesto
+        'total_con_impuesto': total_con_impuesto,
+        'registro_pago': registro_pago,  
     })
+
 #CREAR ORDEN DE MI FINALPEDIDO
 from django.utils import timezone
 from datetime import timedelta
@@ -722,6 +737,68 @@ def listadoInventario(request):
     })
 # LOGIN
 # views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import PerfilUsuarioForm
+from .models import Usuario
+
+@login_required
+def perfil_usuario(request):
+    user = request.user
+    if request.method == 'POST':
+        form = PerfilUsuarioForm(request.POST, instance=user)
+        if form.is_valid():
+            try:
+                # Guardar los cambios en el usuario
+                user = form.save()
+                # Actualizar la sesión para reflejar los cambios
+                request.session['user_first_name'] = user.first_name
+                request.session['user_last_name'] = user.last_name
+                request.session['user_email'] = user.email
+                request.session['user_tipo_usuario'] = user.tipo_usuario
+                messages.success(request, 'Perfil actualizado exitosamente')
+                return redirect('perfil_usuario')
+            except Exception as e:
+                messages.error(request, f'Error al actualizar el perfil: {str(e)}')
+                return redirect('perfil_usuario')
+    else:
+        form = PerfilUsuarioForm(instance=user)
+    return render(request, 'admin/perfil_usuario.html', {
+        'perfil_form': form,
+        'user': user
+    })
+
+@login_required
+def cambiar_contraseña(request):
+    user = request.user
+    perfil_form = PerfilUsuarioForm(instance=user)
+    
+    if request.method == 'POST':
+        password_form = PasswordChangeForm(request.user, request.POST)
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # Actualiza la sesión del usuario
+            messages.success(request, 'Contraseña cambiada exitosamente')
+            return redirect('perfil_usuario')
+        else:
+            # Mostrar mensajes de error específicos
+            if 'old_password' in password_form.errors:
+                messages.error(request, 'La contraseña actual es incorrecta.')
+            if 'new_password1' in password_form.errors:
+                messages.error(request, 'La nueva contraseña no cumple con los requisitos.')
+            if 'new_password2' in password_form.errors:
+                messages.error(request, 'Las contraseñas no coinciden.')
+    else:
+        password_form = PasswordChangeForm(request.user)
+    
+    return render(request, 'admin/perfil_usuario.html', {
+        'perfil_form': perfil_form,
+        'password_form': password_form,
+        'cambiar_contraseña': True
+    })
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -1380,13 +1457,6 @@ def verNotificaciones(request):
     })
 
 #MOVIMIENTO
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import Producto, Inventario, MovimientoInventario
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import Producto, Inventario, MovimientoInventario
-@login_required
 @login_required(login_url='login')
 @admin_required
 def nuevoIngresoInventario(request):
@@ -1397,14 +1467,14 @@ def nuevoIngresoInventario(request):
 
         producto = get_object_or_404(Producto, id_prod=producto_id)
 
-        # Verificar si el producto tiene inventario asociado
+        # Verificar inventario existente
         try:
             inventario = producto.inventario
         except Inventario.DoesNotExist:
             messages.error(request, "El producto no tiene inventario asociado.")
             return redirect('nuevoIngreso')
 
-        # Validación de la cantidad y precio ingresados
+        # Validación
         try:
             cantidad = int(cantidad)
             nuevo_precio = float(nuevo_precio)
@@ -1412,55 +1482,89 @@ def nuevoIngresoInventario(request):
             messages.error(request, "Cantidad o precio inválido.")
             return redirect('nuevoIngreso')
 
-        # Asegurarse que la cantidad y el precio sean mayores que 0
-        if cantidad <= 0:
-            messages.error(request, "La cantidad debe ser mayor a cero.")
+        if cantidad <= 0 or nuevo_precio <= 0:
+            messages.error(request, "Cantidad y precio deben ser mayores a cero.")
             return redirect('nuevoIngreso')
 
-        if nuevo_precio <= 0:
-            messages.error(request, "El precio debe ser mayor a cero.")
-            return redirect('nuevoIngreso')
-
-        # Guardar el precio anterior antes de actualizar
+        # Precio anterior
         precio_anterior = inventario.precunit_prod
 
-        # Registrar el movimiento de inventario solo si el precio o el stock cambian
-        if nuevo_precio != precio_anterior or cantidad > 0:
-            # Registrar el movimiento de inventario con el precio anterior
-            MovimientoInventario.objects.create(
-                tipo='Entrada',  # Tipo de movimiento
-                cantidad=cantidad,
-                precio_uni=nuevo_precio,
-                precio_anterior=precio_anterior,  # Guardamos el precio anterior en el movimiento
-                producto=producto,
-                observacion=f'Ingreso por reposición manual'
-            )
+        # Determinar el nuevo precio de venta (mayor entre el anterior y el nuevo)
+        precio_venta = max(precio_anterior, nuevo_precio)
 
-            # Si el precio ha cambiado, actualizamos el precio en el inventario
-            if nuevo_precio != precio_anterior:
-                inventario.precunit_prod = nuevo_precio
-                inventario.save()
+        # Registrar movimiento
+        MovimientoInventario.objects.create(
+            tipo='Entrada',
+            cantidad=cantidad,
+            precio_uni=nuevo_precio,
+            precio_anterior=precio_anterior,
+            producto=producto,
+            observacion='Ingreso por reposición manual'
+        )
 
-            # Actualizamos el stock
-            inventario.stock_actual += cantidad  # Añadimos las unidades al stock
-            inventario.save()  # Guardamos el nuevo stock
+        # Actualizar inventario
+        inventario.precunit_prod = precio_venta
+        inventario.stock_actual += cantidad
+        inventario.save()
 
-            # Mensaje de éxito
-            messages.success(request, f'Se ingresaron {cantidad} unidades de {producto.nomb_prod}.')
-            return redirect('listadoInventario')
+        messages.success(request, f'Ingreso exitoso. {cantidad} unidades agregadas. Nuevo precio de venta: ${precio_venta}')
+        return redirect('listadoInventario')
 
-        else:
-            messages.warning(request, "No se realizó ningún cambio en el precio ni en el stock.")
-            return redirect('nuevoIngreso')
-
-    # Obtener todos los productos que no están marcados como borrados
+    # Mostrar formulario
     productos = Producto.objects.filter(borrado_prod=False).select_related('inventario')
-
-    # Renderizar el formulario para ingresar nuevos productos
     return render(request, 'admin/inventario/nuevoIngreso.html', {
         'productos': productos
     })
 
+# views.py
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
+from datetime import datetime
+
+@login_required
+@user_passes_test(lambda u: u.tipo_usuario == 'admin', login_url='login')
+def listadoMovimiento(request):
+    # Obtener parámetros de filtrado
+    producto_id = request.GET.get('producto')
+    tipo_movimiento = request.GET.get('tipo')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+    
+    # Consulta base
+    movimientos = MovimientoInventario.objects.all().select_related('producto', 'producto__inventario')
+    
+    # Aplicar filtros
+    if producto_id:
+        movimientos = movimientos.filter(producto_id=producto_id)
+    
+    if tipo_movimiento:
+        movimientos = movimientos.filter(tipo=tipo_movimiento)
+    
+    if fecha_inicio and fecha_fin:
+        try:
+            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
+            movimientos = movimientos.filter(
+                fecha__date__gte=fecha_inicio,
+                fecha__date__lte=fecha_fin
+            )
+        except ValueError:
+            pass
+    
+    # Obtener productos para el filtro
+    productos = Producto.objects.filter(borrado_prod=False)
+    
+    context = {
+        'movimientos': movimientos.order_by('-fecha'),
+        'productos': productos,
+        'filtro_producto': int(producto_id) if producto_id else '',
+        'filtro_tipo': tipo_movimiento if tipo_movimiento else '',
+        'fecha_inicio': fecha_inicio if fecha_inicio else '',
+        'fecha_fin': fecha_fin if fecha_fin else '',
+    }
+    
+    return render(request, 'admin/inventario/listadoMovimiento.html', context)
 
 #reportes de ventas 
 from django.shortcuts import render

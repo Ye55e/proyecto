@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 # Usuario
 class Usuario(AbstractUser):
@@ -92,37 +93,36 @@ class Inventario(models.Model):
         verbose_name = 'Inventario'
         verbose_name_plural = 'Inventarios'
 
-    def actualizar_estado_producto(self):
-        if self.stock_actual < 2:
-            self.producto.esta_prod = 'Agotado'
-        else:
-            self.producto.esta_prod = 'Disponible'
-        self.producto.save()
-   
-    def actualizar_stock(self, cantidad, tipo, observacion=None):
+    def actualizar_stock(self, cantidad, tipo, nuevo_precio=None, observacion=None):
         if tipo == 'Entrada':
             self.stock_actual += cantidad
-        elif tipo == 'Salida' and self.stock_actual >= cantidad:
-            self.stock_actual -= cantidad
-        else:
-            raise ValueError("Stock insuficiente para realizar la operación.")
-        
-        # Guardamos el precio anterior antes de hacer la actualización
-        precio_anterior = self.precunit_prod  # El precio anterior antes de la actualización
 
-        # Actualizamos el precio y el stock
+            if nuevo_precio is not None:
+                # Establecer el mayor entre el actual y el nuevo precio
+                self.precunit_prod = max(self.precunit_prod, nuevo_precio)
+
+        elif tipo == 'Salida':
+            if self.stock_actual >= cantidad:
+                self.stock_actual -= cantidad
+            else:
+                raise ValueError("Stock insuficiente para realizar la operación.")
+        else:
+            raise ValueError("Tipo de movimiento no válido.")
+
+        precio_anterior = self.precunit_prod  # Guardamos antes del save si lo prefieres más exacto
+
         self.save()
         self.actualizar_estado_producto()
-        
-        # Registrar el movimiento de inventario con el precio anterior
+
         MovimientoInventario.objects.create(
             tipo=tipo,
             cantidad=cantidad,
-            precio_uni=self.precunit_prod,  # El precio actualizado
-            precio_anterior=precio_anterior,  # Guardamos el precio anterior
+            precio_uni=self.precunit_prod,
+            precio_anterior=precio_anterior,
             producto=self.producto,
             observacion=observacion
         )
+
 
 
 
@@ -226,6 +226,7 @@ class Orden(models.Model):
         db_table = 'orden'
 
 
+from decimal import Decimal
 
 # DetalleOrden
 class DetalleOrden(models.Model):
@@ -233,7 +234,7 @@ class DetalleOrden(models.Model):
     cantidad = models.IntegerField(default=0)
     orden = models.ForeignKey(Orden, on_delete=models.CASCADE, related_name='detalles', db_column='id_ord')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, db_column='id_prod')
-
+    
     @property
     def subtotal(self):
         if hasattr(self.producto, 'inventario'):
@@ -275,6 +276,12 @@ class MovimientoInventario(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='movimientos', db_column='id_prod')
     observacion = models.TextField(blank=True, null=True)
+
+    @property
+    def precio_venta(self):
+        if self.precio_uni is not None and self.precio_anterior is not None:
+            return max(self.precio_uni, self.precio_anterior)
+        return self.precio_uni or self.precio_anterior or 0
 
     class Meta:
         db_table = 'movimiento_inventario'

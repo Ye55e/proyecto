@@ -113,6 +113,23 @@
   .login-link a:hover {
     color: #0056b3;
   }
+  
+  .strength {
+    font-size: 1.2rem;
+    margin-top: 5px;
+  }
+  
+  .weak {
+    color: #ff0000;
+  }
+  
+  .medium {
+    color: #ff9900;
+  }
+  
+  .strong {
+    color: #00ff00;
+  }
 </style>
 {% endblock %}
 
@@ -132,8 +149,8 @@
     {% csrf_token %}
 
     {% for field in form %}
-      <p>
-        {% if field.name == 'password' or field.name == 'password2' %}
+      <div>
+        {% if field.name == 'password1' %}
           <div class="password-container">
             {{ field.label_tag }}
             {{ field }}
@@ -141,16 +158,14 @@
               <i class="bi bi-eye-slash"></i>
             </span>
           </div>
-          {% if field.errors %}
-            <div class="errorlist">{{ field.errors }}</div>
-          {% endif %}
         {% else %}
           {{ field.label_tag }}
           {{ field }}
-          {% if field.errors %}
-            <div class="errorlist">{{ field.errors }}</div>
-          {% endif %}
         {% endif %}
+        {% if field.errors %}
+          <div class="errorlist">{{ field.errors }}</div>
+        {% endif %}
+      </div>
       </p>
     {% endfor %}
     <button type="submit">Registrarse</button>

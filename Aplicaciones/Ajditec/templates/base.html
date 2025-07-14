@@ -1,225 +1,227 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<link rel="stylesheet" href="{% static 'plantilla_cliente/css/estilos.css' %}">
-		<link rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		 <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="{% static 'plantilla_cliente/css/estilos.css' %}">
+    <link rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-		 <title>{% block title %}AJ DITEC{% endblock %}</title>
+    <title>{% block title %}AJ DITEC{% endblock %}</title>
 
-		<!-- Google font -->
-		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
 
-		<!-- Bootstrap -->
-		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/bootstrap.min.css' %}"/>
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/bootstrap.min.css' %}"/>
 
-		<!-- Slick -->
-		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/slick.css' %}"/>
-		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/slick-theme.css' %}"/>
+    <!-- Slick -->
+    <link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/slick.css' %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/slick-theme.css' %}"/>
 
-		<!-- nouislider -->
-		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/nouislider.min.css' %}"/>
+    <!-- nouislider -->
+    <link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/nouislider.min.css' %}"/>
 
-		<!-- Font Awesome Icon -->
-		<link rel="stylesheet" href="{% static 'plantilla_cliente/css/font-awesome.min.css' %}">
+    <!-- Font Awesome Icon -->
+    <link rel="stylesheet" href="{% static 'plantilla_cliente/css/font-awesome.min.css' %}">
 
-		<!-- Custom stlylesheet -->
-		<link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}"/>
-    </head>
-		<!-- HEADER -->
-		<header>
-			<!-- TOP HEADER -->
-			<div id="top-header">
-				<div class="container">
-					<ul class="header-links pull-left">
-						<li>
-						<a
-							href="https://api.whatsapp.com/send?phone=593969025956&text=¡Hola!%20Quisiera%20más%20información%20sobre%20sus%20productos."
-							target="_blank"
-							rel="noopener"
-						>
-							<i class="fa fa-phone"></i> +593 9 6902 5956
-						</a>
-						</li>
-						<li><a href="mailto:ajditec.ventas@gmail.com"><i class="fa fa-envelope-o"></i> ajditec.ventas@gmail.com</a></li>
+    <!-- Custom stlylesheet -->
+    <link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}"/>
 
-						<li>
-						<a href="https://www.google.com/maps/search/?api=1&query=QGW2+5HR,+Av.+10+de+Agosto,+Quito+170129" target="_blank">
-							<i class="fa fa-map-marker"></i> QGW2+5HR, Av. 10 de Agosto, Quito 170129
-						</a>
-						</li>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <!-- TOP HEADER -->
+        <div id="top-header">
+            <div class="container">
+                <ul class="header-links pull-left">
+                    <li>
+                        <a href="https://api.whatsapp.com/send?phone=593969025956&text=¡Hola!%20Quisiera%20más%20información%20sobre%20sus%20productos." target="_blank" rel="noopener">
+                            <i class="fa fa-phone"></i> +593 9 6902 5956
+                        </a>
+                    </li>
+                    <li><a href="mailto:ajditec.ventas@gmail.com"><i class="fa fa-envelope-o"></i> ajditec.ventas@gmail.com</a></li>
+                    <li>
+                        <a href="https://www.google.com/maps/search/?api=1&query=QGW2+5HR,+Av.+10+de+Agosto,+Quito+170129" target="_blank">
+                            <i class="fa fa-map-marker"></i> QGW2+5HR, Av. 10 de Agosto, Quito 170129
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- /TOP HEADER -->
 
-					</ul>
-				</div>
-			</div>
-			<!-- /TOP HEADER -->
+        <!-- MAIN HEADER -->
+        <div id="header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="header-logo">
+                            <a href="/" class="logo">
+                                <img src="{% static 'plantilla_cliente/img/logoAjdiec.jpg' %}" alt="Logo" 
+                                     class="avatar-img rounded-circle" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover;">
+                            </a>
+                        </div>
+                    </div>
 
-			<!-- MAIN HEADER -->
-				<div id="header">
-			<div class="container">
-				<div class="row">
-				<div class="col-md-3">
-					<div class="header-logo">
-					<a href="/" class="logo">
-						<!-- Imagen de logo circular -->
-						<img src="{% static 'plantilla_cliente/img/logoAjdiec.jpg' %}" alt="Logo" 
-							class="avatar-img rounded-circle" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover;">
-					</a>
-					</div>
-    
-					<!-- /LOGO -->
-						</div>					
+                    <!-- BARRA DE BUSQUEDA -->
+                    <div class="col-md-6">
+                        <div class="header-search">
+                            <form method="GET" action="{% url 'inicio' %}">
+                                <select name="categoria" class="input-select">
+                                    <option value="">Todos</option>
+                                    {% for cat in categorias %}
+                                        <option value="{{ cat.id_cat }}" {% if categoria_id == cat.id_cat|stringformat:"s" %}selected{% endif %}>
+                                            {{ cat.tipo_cat }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <input name="buscar" class="input" placeholder="Buscar en AJ DITEC" value="{{ buscar }}">
+                                <button type="submit" class="search-btn">Buscar</button>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- /BARRA DE BUSQUEDA -->
 
-						<!-- BARRA DE BUSQUEDA -->
-					<div class="col-md-6">
-						<div class="header-search">
-							<form method="GET" action="{% url 'inicio' %}">
-						<select name="categoria" class="input-select">
-							<option value="">Todos</option>
-							{% for cat in categorias %}
-								<option value="{{ cat.id_cat }}" {% if categoria_id == cat.id_cat|stringformat:"s" %}selected{% endif %}>
-								{{ cat.tipo_cat }}
-							</option>
+                    <!-- CUENTA -->
+                    <div class="col-md-3 clearfix">
+                        <div class="header-ctn">
 
-								{% endfor %}
-							</select>
-							<input name="buscar" class="input" placeholder="Buscar en AJ DITEC" value="{{ buscar }}">
-							<button type="submit" class="search-btn">Buscar</button>
-						</form>
+                            <!-- CARRITO -->
+                            <div class="dropdown">
+                                <a href="{% url 'carrito' %}" class="dropdown-toggle" aria-expanded="true">
+                                    <i class="fa fa-shopping-cart"></i>
+                                    <span>Carrito</span>
+                                    <div class="qty">
+                                        {% if carrito_total_items %}
+                                            {{ carrito_total_items }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                            <!-- /CARRITO -->
 
-							</div>
-						</div>
-						<!-- /BARRA DE BUSQUEDA -->
+                            <!-- CUENTA -->
+                            <div class="cuenta-contenedor">
+                                {% if request.user.is_authenticated %}
+                                    <div class="cuenta-login" id="btnCuenta">
+                                        <i class="fa fa-user"></i>
+                                        <div class="cuenta-texto">
+                                            <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+                                            <i class="fa fa-caret-down"></i>
+                                        </div>
+                                    </div>
+                                    <div class="cuenta-menu" id="menuCuenta" style="display:none;">
+                                        <a href="{% url 'listar_ordenes' %}"><i class="fa fa-history"></i> Historial de Órdenes</a>
+                                        <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+                                    </div>
+                                {% else %}
+                                    <a href="{% url 'login' %}" class="cuenta-login">
+                                        <i class="fa fa-user"></i>
+                                        <span>Mi Cuenta</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <!-- /CUENTA -->
 
+                            <!-- Menu Toogle -->
+                            <div class="menu-toggle">
+                                <a href="#">
+                                    <i class="fa fa-bars"></i>
+                                    <span>Menu</span>
+                                </a>
+                            </div>
+                            <!-- /Menu Toogle -->
+                        </div>
+                    </div>
+                    <!-- /ACCOUNT -->
+                </div>
+                <!-- row -->
+            </div>
+            <!-- container -->
+        </div>
+        <!-- /MAIN HEADER -->
+    </header>
+    <!-- /HEADER -->
 
-						<!-- CUENTA -->
-						<div class="col-md-3 clearfix">
-							<div class="header-ctn">
-								
-							<!-- CARRITO -->
-							<div class="dropdown">
-							<a href="{% url 'carrito' %}" class="dropdown-toggle" aria-expanded="true">
-								<i class="fa fa-shopping-cart"></i>
-								<span>Carrito</span>
-								<div class="qty">
-									{% if carrito_total_items %}
-										{{ carrito_total_items }}
-									{% else %}
-										0
-									{% endif %}
-								</div>
-							</a>
-						</div>
+    <!-- NAVIGATION -->
+    <nav id="navigation">
+        <!-- container -->
+        <div class="container">
+            <!-- responsive-nav -->
+            <div id="responsive-nav">
+                <!-- NAV -->
+                <ul class="main-nav nav navbar-nav">
+                    <li class="active"><a href="/">Inicio</a></li>
+                    <li><a href="#">Catálogo</a></li>
+                    <li><a href="#">Pantallas</a></li>
+                    <li><a href="#">Accessorios</a></li>
+                </ul>
+                <!-- /NAV -->
+            </div>
+            <!-- /responsive-nav -->
+        </div>
+        <!-- /container -->
+    </nav>
+    <!-- /NAVIGATION -->
 
-							<!-- /CARRITO -->
-							 <!-- CUENTA -->
-						<div class="cuenta-contenedor">
-								{% if request.user.is_authenticated %}
-								<div class="cuenta-login" id="btnCuenta">
-									<i class="fa fa-user"></i>
-									<div class="cuenta-texto">
-									<span>{{ request.user.get_full_name|default:request.user.username }}</span>
-									<i class="fa fa-caret-down"></i>
-									</div>
-								</div>
-								<div class="cuenta-menu" id="menuCuenta">
-                                    <a href="{% url 'listar_ordenes' %}"><i class="fa fa-history"></i> Historial de Órdenes</a>
-                                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
-                                </div>
-								{% else %}
-								<a href="{% url 'login' %}" class="cuenta-login">
-									<i class="fa fa-user"></i>
-									<span>Mi Cuenta</span>
-								</a>
-								{% endif %}
-							</div>
-								<!-- CUENTA -->
+    <div class="container-fluid">
+        {% block contenido %}{% endblock %}
 
+        {% if messages %}
+        <script>
+            const messages = [
+                {% for message in messages %}
+                    { tags: "{{ message.tags }}", message: "{{ message }}" },
+                {% endfor %}
+            ];
+            messages.forEach(msg => {
+                iziToast[msg.tags]({ title: msg.tags.toUpperCase(), message: msg.message, position: 'topRight' });
+            });
+        </script>
+        {% endif %}
 
+        <!-- JavaScript para el dropdown de la cuenta -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const toggle = document.getElementById("btnCuenta");
+                const menu = document.getElementById("menuCuenta");
 
-								<!-- Menu Toogle -->
-								<div class="menu-toggle">
-									<a href="#">
-										<i class="fa fa-bars"></i>
-										<span>Menu</span>
-									</a>
-								</div>
-								<!-- /Menu Toogle -->
-							</div>
-						</div>
-						<!-- /ACCOUNT -->
-					</div>
-					<!-- row -->
-				</div>
-				<!-- container -->
-			</div>
-			<!-- /MAIN HEADER -->
-		</header>
-		<!-- /HEADER -->
+                if (toggle && menu) {
+                    toggle.addEventListener("click", function(e) {
+                        e.stopPropagation();
+                        menu.style.display = (menu.style.display === "block") ? "none" : "block";
+                    });
 
-		<!-- NAVIGATION -->
-		<nav id="navigation">
-			<!-- container -->
-			<div class="container">
-				<!-- responsive-nav -->
-				<div id="responsive-nav">
-					<!-- NAV -->
-					<ul class="main-nav nav navbar-nav">
-						<li class="active"><a href="/">Home</a></li>
-						<li><a href="#">Categories</a></li>
-						<li><a href="#">Pantallas</a></li>
-						<li><a href="#">Accessorios</a></li>
-					</ul>
-					<!-- /NAV -->
-				</div>
-				<!-- /responsive-nav -->
-			</div>
-			<!-- /container -->
-		</nav>
-		<!-- /NAVIGATION -->
+                    document.addEventListener("click", function() {
+                        menu.style.display = "none";
+                    });
+                }
+            });
+        </script>
+    </div>
 
-          <div class="container-fluid">
-    {% block contenido %}{% endblock %}
+    <!-- jQuery (Importante: debe ir antes que cualquier script que use $) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
-    {% if messages %}
-      <script>
-        const messages = [
-          {% for message in messages %}
-            { tags: "{{ message.tags }}", message: "{{ message }}" },
-          {% endfor %}
-        ];
-        messages.forEach(msg => {
-          iziToast[msg.tags]({ title: msg.tags.toUpperCase(), message: msg.message, position: 'topRight' });
-        });
-      </script>
-    {% endif %}
+    <!-- DataTables CSS y JS -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 
-    <!-- JavaScript para el dropdown de la cuenta -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const toggle = document.getElementById("btnCuenta");
-            const menu = document.getElementById("menuCuenta");
+    <!-- DataTables Buttons CSS y JS y dependencias -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
-            if (toggle && menu) {
-                toggle.addEventListener("click", function(e) {
-                    e.stopPropagation();
-                    menu.style.display = (menu.style.display === "block") ? "none" : "block";
-                });
-
-                document.addEventListener("click", function() {
-                    menu.style.display = "none";
-                });
-            }
-        });
-    </script>
-
-  </div>
-
-  {# Bloque para scripts específicos de cada página #}
-  {% block scripts %}{% endblock %}
+    {% block scripts %}{% endblock %}
 </body>
 </html>

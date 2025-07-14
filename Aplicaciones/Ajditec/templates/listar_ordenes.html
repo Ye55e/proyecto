@@ -51,6 +51,7 @@
                 {% endif %}
               </td>
               <td>
+                
                 <a href="{% url 'detalle_orden' orden.id_ord %}" class="btn btn-primary btn-sm">Ver Detalles</a>
               </td>
             </tr>
@@ -68,14 +69,7 @@
     $('#tbl_ordenes').DataTable({
       language: {
         url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
-      },
-      dom: 'Bfrtip',
-      buttons: [
-        { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-success me-2' },
-        { extend: 'csvHtml5', text: 'CSV', className: 'btn btn-info me-2' },
-        { extend: 'pdfHtml5', text: 'PDF', className: 'btn btn-danger me-2' },
-        { extend: 'print', text: 'Imprimir', className: 'btn btn-primary' }
-      ]
+      }
     });
   });
 </script>
