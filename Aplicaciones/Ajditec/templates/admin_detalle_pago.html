@@ -4,14 +4,13 @@
 <div class="container mt-4">
     <h3>Detalle del Pago - Orden #{{ orden.id_ord }}</h3>
     <hr>
-    <h5>Cliente: {{ orden.nombre_cliente }}</h5>
-    <p><strong>Cédula/RUC:</strong> {{ orden.cedula_ruc }}</p>
+    <p><strong>Cliente:</strong> {{ orden.nombre_cliente }}</p>
+    <p><strong>Documento:</strong> {{ orden.tipo_documento|capfirst }} - {{ orden.numero_documento }}</p>
     <p><strong>Correo:</strong> {{ orden.correo_cliente }}</p>
     <p><strong>Teléfono:</strong> {{ orden.telefono_cliente }}</p>
     <p><strong>Dirección:</strong> {{ orden.direccion_cliente }}, {{ orden.ciudad_cliente }}</p>
     <p><strong>Método de Entrega:</strong> {% if orden.metodo_entrega == 'envio' %}Envío a domicilio{% else %}Retiro en local{% endif %}</p>
-    <p><strong>Banco:</strong> {{ orden.banco.nombre_banco }}</p>
-    <p><strong>Cod. Transferencia:</strong>  {{ orden.num_trans }}</p>
+    <p><strong>Transferencia:</strong> {{ orden.banco.nombre_banco }} - {{ orden.num_trans }}</p>
 
     <h5 class="mt-4">Productos:</h5>
     <div class="table-responsive">
@@ -21,17 +20,20 @@
                     <th>Producto</th>
                     <th>Cantidad</th>
                     <th>Precio Unitario</th>
-                    
+                    <th>IVA Aplicado (%)</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody>
-            {% for det in detalles %}
+                {% for det in detalles %}
                 <tr>
                     <td>{{ det.producto.nomb_prod }}</td>
                     <td>{{ det.cantidad }}</td>
-                    <td>$ {{ det.producto.inventario.precunit_prod|floatformat:2 }}</td>
+                    <td>$ {{ det.precio_aplicado|floatformat:2 }}</td>
+                    <td>{{ det.iva_aplicado }}</td>
+                    <td>$ {{ det.subtotal|floatformat:2 }}</td>
                 </tr>
-            {% endfor %}
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -45,30 +47,22 @@
         <h4><strong>Total Pago: $ {{ total_con_impuesto|floatformat:2 }}</strong></h4>
     </div>
 
-   <div class="mt-4 text-center">
-    {% if registro_pago.estado_reg == "Pendiente" %}
-        <a href="{% url 'admin_confirmar_pago' registro_pago.id_regpag %}" class="btn btn-success me-2 mb-2">
-            Confirmar Pago
-        </a>
-        <a href="{% url 'admin_rechazar_pago' registro_pago.id_regpag %}" class="btn btn-danger mb-2">
-            Rechazar Pago
-        </a>
-    {% elif registro_pago.estado_reg == "Confirmado" %}
-        <div class="alert alert-success mx-auto" style="max-width: 400px;">
-            <h5>✅ Pago confirmado</h5>
-            <p>La orden ha sido marcada como entregada.</p>
-        </div>
-    {% elif registro_pago.estado_reg == "Rechazado" %}
-        <div class="alert alert-danger mx-auto" style="max-width: 400px;">
-            <h5>❌ Pago rechazado</h5>
-            <p>La orden ha sido rechazada.</p>
-        </div>
-    {% endif %}
-
-<a href="{% url 'admin_listar_pagos' %}" class="btn mt-3" style="background-color: #0b4b85; color: white;">
-        Volver al listado
-    </a>
+    <div class="mt-4 text-center">
+        {% if registro_pago.estado_reg == "Pendiente" %}
+            <a href="{% url 'admin_confirmar_pago' registro_pago.id_regpag %}" class="btn btn-success me-2 mb-2">Confirmar Pago</a>
+            <a href="{% url 'admin_rechazar_pago' registro_pago.id_regpag %}" class="btn btn-danger mb-2">Rechazar Pago</a>
+        {% elif registro_pago.estado_reg == "Confirmado" %}
+            <div class="alert alert-success mx-auto" style="max-width: 400px;">
+                <h5>✅ Pago confirmado</h5>
+                <p>La orden ha sido marcada como entregada.</p>
+            </div>
+        {% elif registro_pago.estado_reg == "Rechazado" %}
+            <div class="alert alert-danger mx-auto" style="max-width: 400px;">
+                <h5>❌ Pago rechazado</h5>
+                <p>La orden ha sido rechazada.</p>
+            </div>
+        {% endif %}
+        <a href="{% url 'admin_listar_pagos' %}" class="btn mt-3" style="background-color: #0b4b85; color: white;">Volver al listado</a>
+    </div>
 </div>
-
-
 {% endblock %}

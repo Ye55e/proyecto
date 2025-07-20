@@ -5,8 +5,9 @@ urlpatterns = [
 
     path('perfil/', views.perfil_usuario, name='perfil_usuario'),
     path('cambiar_contraseña/', views.cambiar_contraseña, name='cambiar_contraseña'),
-    path('', views.inicio, name='inicio'),
-   # path('pago/', views.pago_view, name='pago'),
+    path('inicio/', views.inicio, name='inicio'),
+    path('', views.principal, name='principal'),
+    #path('pago/', views.pago_view, name='pago'),
     path('plantilla_admin/', views.plantilla_admin, name='plantilla_admin'),
     path('datosPedido/', views.pago, name='datosPedido'),
     
@@ -38,6 +39,8 @@ urlpatterns = [
     path('nuevoInventario/', views.nuevoInventario, name='nuevoInventario'),
     path('guardarInventario/', views.guardarInventario, name='guardarInventario'),
     path('listadoInventario/', views.listadoInventario, name='listadoInventario'),
+    path('eliminarInventario/<int:id_inv>/', views.eliminarInventario, name='eliminarInventario'),
+
 
     #DETALLE_CARRITO
     
@@ -92,6 +95,8 @@ urlpatterns = [
     path('editarImpuesto/<int:id_impuesto>/', views.editarImpuesto, name='editarImpuesto'),
     path('procesarEdicionImpuesto/', views.procesarEdicionImpuesto, name='procesarEdicionImpuesto'),
     path('eliminarImpuesto/<int:id_impuesto>/', views.eliminarImpuesto, name='eliminarImpuesto'),
+
+    path('dashboard/', views.dashboard, name='dashboard'),
 
 
 

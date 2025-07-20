@@ -12,37 +12,49 @@
                     <h5 class="text-center mb-3">REGISTRO</h5>
                     <form action="/guardarBanco/" method="POST" id="frm_nuevo_banco">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="nombre_banco" class="form-label"><b>NOMBRE DEL BANCO:</b></label>
-                            <input type="text" name="nombre_banco" id="nombre_banco" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="numero_cuenta" class="form-label"><b>NÚMERO DE CUENTA:</b></label>
-                            <input type="text" name="numero_cuenta" id="numero_cuenta" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="tipo_cuenta" class="form-label"><b>TIPO DE CUENTA:</b></label>
-                            <select name="tipo_cuenta" id="tipo_cuenta" class="form-select" required>
-                                <option value="Ahorros">Ahorros</option>
-                                <option value="Corriente">Corriente</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nombre_titular" class="form-label"><b>NOMBRE DEL TITULAR:</b></label>
-                            <input type="text" name="nombre_titular" id="nombre_titular" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="identificacion_titular" class="form-label"><b>CÉDULA O RUC:</b></label>
-                            <input type="text" name="identificacion_titular" id="identificacion_titular" class="form-control" required>
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input class="form-check-input" type="checkbox" id="activo" name="activo" checked>
-                            <label class="form-check-label" for="activo"><b>Activo</b></label>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button type="submit" class="btn btn-primary">Guardar</button>
-                            <button type="reset" class="btn btn-danger px-4 text-decoration-none rounded-0">Cancelar</button>
-                        </div>
+                     <div class="mb-3">
+                        <label for="nombre_banco" class="form-label"><b>NOMBRE DEL BANCO:</b></label>
+                        <input type="text" name="nombre_banco" id="nombre_banco" class="form-control" required
+                            pattern="[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+" title="Solo letras y espacios">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="numero_cuenta" class="form-label"><b>NÚMERO DE CUENTA:</b></label>
+                        <input type="text" name="numero_cuenta" id="numero_cuenta" class="form-control" required
+                            pattern="\d{1,20}" maxlength="20" title="Solo números, máximo 20 dígitos">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipo_cuenta" class="form-label"><b>TIPO DE CUENTA:</b></label>
+                        <select name="tipo_cuenta" id="tipo_cuenta" class="form-select" required>
+                            <option value="Ahorros">Ahorros</option>
+                            <option value="Corriente">Corriente</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nombre_titular" class="form-label"><b>NOMBRE DEL TITULAR:</b></label>
+                        <input type="text" name="nombre_titular" id="nombre_titular" class="form-control" required
+                            pattern="[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+" title="Solo letras y espacios">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="identificacion_titular" class="form-label"><b>CÉDULA O RUC:</b></label>
+                        <input type="text" name="identificacion_titular" id="identificacion_titular" class="form-control" required 
+                            pattern="\d{1,13}" maxlength="13"
+                            title="Solo números, máximo 13 dígitos">
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" checked>
+                        <label class="form-check-label" for="activo"><b>Activo</b></label>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="reset" class="btn btn-danger px-4 text-decoration-none rounded-0">Cancelar</button>
+                    </div>
+
                     </form>
                 </div>
             </div>

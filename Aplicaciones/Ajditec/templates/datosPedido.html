@@ -65,12 +65,20 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label">Cédula, RUC o Pasaporte</label>
-                        <input type="text" class="form-control" placeholder="Cédula, RUC o Pasaporte" name="cedula" 
-                            value="{{ datos_cliente.cedula|default:"" }}" 
-                            pattern="^([0-9]{10}|[0-9]{13}|[A-Za-z0-9]{6,15})$"
-                            title="Debe ingresar una cédula (10 dígitos), un RUC (13 dígitos) o un pasaporte alfanumérico (6-15 caracteres)"
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo de documento</label>
+                        <select id="tipo_documento" name="tipo_documento" class="form-control" required>
+                            <option value="">Seleccione</option>
+                            <option value="cedula" {% if datos_cliente.tipo_documento == "cedula" %}selected{% endif %}>Cédula</option>
+                            <option value="ruc" {% if datos_cliente.tipo_documento == "ruc" %}selected{% endif %}>RUC</option>
+                            <option value="pasaporte" {% if datos_cliente.tipo_documento == "pasaporte" %}selected{% endif %}>Pasaporte</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label">Número de documento</label>
+                        <input id="numero_documento" type="text" name="numero_documento" class="form-control"
+                            value="{{ datos_cliente.numero_documento|default:"" }}"
                             required>
                     </div>
 
@@ -97,12 +105,8 @@
                         <input type="text" class="form-control" placeholder="Teléfono" name="telefono" 
                             value="{{ datos_cliente.telefono|default:request.user.cel_user }}" pattern="^\d{10}$" 
                             title="Debe tener 10 dígitos" required>
-    
-                               
                     </div>
                 </div>
-
-              
 
                 <div class="d-flex justify-content-between">
                     <a href="{% url 'carrito' %}" class="btn btn-info text-white btn-sm-custom rounded-pill">← Atrás</a>
@@ -133,8 +137,6 @@
                     <div style="font-weight: bold; font-size: 14px;">$ {{ item.total_price|floatformat:2 }}</div>
                 </div>
                 {% endfor %}
-                
-                
 
                 <hr>
 
@@ -151,10 +153,35 @@
                     <span class="text-success fw-bold">$ {{ total_con_impuesto|floatformat:2 }}</span>
                 </div>
 
-
             </div>
         </div>
     </div>
 </div>
+
+<script>
+  const tipoSelect = document.getElementById('tipo_documento');
+  const numeroInput = document.getElementById('numero_documento');
+
+  function actualizarPatron() {
+    const tipo = tipoSelect.value;
+
+    if (tipo === 'cedula') {
+      numeroInput.pattern = '\\d{10}';
+      numeroInput.title = 'Debe ingresar una cédula válida de 10 dígitos numéricos';
+    } else if (tipo === 'ruc') {
+      numeroInput.pattern = '\\d{13}';
+      numeroInput.title = 'Debe ingresar un RUC válido de 13 dígitos numéricos';
+    } else if (tipo === 'pasaporte') {
+      numeroInput.pattern = '[A-Za-z0-9]{5,20}';
+      numeroInput.title = 'Debe ingresar un pasaporte alfanumérico entre 5 y 20 caracteres';
+    } else {
+      numeroInput.pattern = '.*';
+      numeroInput.title = '';
+    }
+  }
+
+  actualizarPatron();
+  tipoSelect.addEventListener('change', actualizarPatron);
+</script>
 
 {% endblock %}

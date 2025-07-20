@@ -1,109 +1,148 @@
 {% extends "plantilla_admin.html" %}
 {% load static %}
 {% block contenido %}
+
 <br>
 <br>
 <h3 class="text-center mb-4">REGISTRO DE ORDENES</h3>
-<div class="card shadow">
+
+<!-- FORMULARIO DE FILTROS -->
+<div class="card shadow mb-4">
     <div class="card-body">
-        <table class="table table-bordered table-striped table-hover" id="tbl_pagos">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID ORDEN</th>
-                    <th>CLIENTE</th>
-                    <th>FECHA DE PAGO</th>
-                    <th>BANCO</th>
-                    <th>COD.TRANSACCIÓN</th>
-                    <th>TOTAL</th>
-                    <th>ESTADO</th>
-                    <th>ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for pago in pagos %}
-                <tr>
-                    <td>{{ pago.orden.id_ord }}</td>
-                    <td>{{ pago.orden.nombre_cliente }}</td>
-                    <td>{{ pago.fech_crea}}</td>
-                    <td>{{ pago.orden.banco.nombre_banco }}</td>
-                    <td>{{ pago.orden.num_trans}}</td>
-                    <td>$ {{ pago.total_pago|floatformat:2 }}</td>
-                    <td>
-                        {% if pago.estado_reg == 'Pendiente' %}
-                            <span class="badge bg-warning text-dark">Pendiente</span>
-                        {% elif pago.estado_reg == 'Confirmado' %}
-                            <span class="badge bg-success">Confirmado</span>
-                        {% elif pago.estado_reg == 'Rechazado' %}
-                            <span class="badge bg-danger">Rechazado</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'admin_detalle_pago' pago.id_regpag %}" class="btn btn-info btn-sm">Ver Detalle</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No hay pagos registrados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-md-3">
+                <label for="estado" class="form-label">Estado:</label>
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="Pendiente" {% if estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="Confirmado" {% if estado == 'Confirmado' %}selected{% endif %}>Confirmado</option>
+                    <option value="Rechazado" {% if estado == 'Rechazado' %}selected{% endif %}>Rechazado</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="cliente" class="form-label">Cliente:</label>
+                <input type="text" name="cliente" id="cliente" value="{{ cliente }}" class="form-control" placeholder="Nombre del cliente">
+            </div>
+
+            <div class="col-md-3">
+                <label for="banco" class="form-label">Banco:</label>
+                <select name="banco" id="banco" class="form-select">
+                    <option value="">Todos los bancos</option>
+                    {% for banco in bancos %}
+                        <option value="{{ banco.id_banco }}" {% if banco_id|stringformat:"s" == banco.id_banco|stringformat:"s" %}selected{% endif %}>{{ banco.nombre_banco }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-funnel-fill"></i> Filtrar
+                </button>
+                <a href="{% url 'admin_listar_pagos' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+            </div>
+        </form>
     </div>
 </div>
-    {% endblock %}
+
+<!-- TABLA DE PAGOS (SOLO SI HAY DATOS) -->
+{% if pagos %}
+    <div class="card shadow">
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-striped table-hover" id="tbl_pagos">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID ORDEN</th>
+                        <th>FECHA DE PAGO</th>
+                        <th>CLIENTE</th>
+                        <th>BANCO</th>
+                        <th>COD.TRANSACCIÓN</th>
+                        <th>TOTAL</th>
+                        <th>ESTADO</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago in pagos %}
+                        <tr>
+                            <td>{{ pago.orden.id_ord|default:"-" }}</td>
+                            <td>{{ pago.fech_crea|date:"d/m/Y" }}</td>
+                            <td>{{ pago.orden.nombre_cliente|default:"-" }}</td>
+                            <td>
+                                {% if pago.orden and pago.orden.banco %}
+                                    {{ pago.orden.banco.nombre_banco }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ pago.orden.num_trans|default:"-" }}</td>
+                            <td>$ {{ pago.total_pago|floatformat:2|default:"0.00" }}</td>
+                            <td>
+                                {% if pago.estado_reg == 'Pendiente' %}
+                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                {% elif pago.estado_reg == 'Confirmado' %}
+                                    <span class="badge bg-success">Confirmado</span>
+                                {% elif pago.estado_reg == 'Rechazado' %}
+                                    <span class="badge bg-danger">Rechazado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Desconocido</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_detalle_pago' pago.id_regpag %}" class="btn btn-info btn-sm" title="Ver Detalle">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <!-- MENSAJE CUANDO NO HAY DATOS -->
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle me-2"></i> No hay pagos registrados con los filtros aplicados.
+    </div>
+{% endif %}
+
+{% endblock %}
+
 {% block scripts %}
 <script>
   $(document).ready(function() {
-    $('#tbl_pagos').DataTable({
-        scrollX:true,
-        responsive:true,
-      language: {
-        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
-      },
-      dom: 'Bfrtip',
-      buttons: [
-        { extend: 'excelHtml5',  text: 'Excel',     className: 'btn btn-success me-2' },
-        { extend: 'pdfHtml5',    text: 'PDF',       className: 'btn btn-danger me-2'  },
-        { extend: 'print',       text: 'Imprimir',  className: 'btn btn-primary' }
-      ]
-    });
+      // Solo inicializa DataTables si existe la tabla y tiene datos
+      if ($('#tbl_pagos').length && $('#tbl_pagos tbody tr').length > 0) {
+          $('#tbl_pagos').DataTable({
+              scrollX: true,
+              responsive: true,
+              language: {
+                  url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+              },
+              dom: 'Bfrtip',
+              buttons: [
+                  { extend: 'excelHtml5', text: '<i class="bi bi-file-earmark-excel"></i> Excel', className: 'btn btn-success me-2' },
+                  { extend: 'pdfHtml5', text: '<i class="bi bi-file-earmark-pdf"></i> PDF', className: 'btn btn-danger me-2' },
+                  { extend: 'print', text: '<i class="bi bi-printer"></i> Imprimir', className: 'btn btn-primary' }
+              ]
+          });
+      }
   });
 </script>
 
 <style>
-    
-        /* Asegura que la tabla use todo el ancho disponible */
     .table {
         width: 100% !important;
         table-layout: auto;
     }
-
-    /* Contenedor de la tabla, asegurando que no haya un margen que limite su tamaño */
     .card-body {
-        padding: 0;
+        padding: 0.75rem;
         overflow-x: auto;
     }
-
-    /* Ajustar para que la tabla se pueda desplazar horizontalmente si es necesario */
-    #tbl_inventario_wrapper {
-        overflow-x: auto;
-    }
-
-    /* Aseguramos que los botones de DataTables también estén bien organizados */
     div.dt-buttons {
         margin-bottom: 10px;
-    }
-
-    .dataTables_scrollHeadInner {
-        width: 100% !important;
-    }
-
-    .dataTables_scrollBody {
-        width: 100% !important;
-    }
-
-    div.dt-buttons .btn {
-        margin-right: 10px;
     }
 </style>
 {% endblock %}

@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block contenido %}
-
 <style>
     .orden-container {
         max-width: 1200px;
@@ -11,13 +10,6 @@
         background: #fff;
         border-radius: 15px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .orden-header {
-        background: rgb(249, 249, 250);
-        padding: 1.5rem;
-        border-radius: 15px 15px 0 0;
-        margin-bottom: 2rem;
     }
 
     .orden-info {
@@ -41,28 +33,10 @@
         color: #212529;
     }
 
-    .badge {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
-    }
-
-    .table {
-        margin-bottom: 2rem;
-    }
-
     .table th {
         font-weight: 600;
         color: #495057;
         background: #f8f9fa;
-    }
-
-    .table td {
-        vertical-align: middle;
-    }
-
-    .producto-item {
-        border-bottom: 1px solid #eee;
     }
 
     .producto-item:hover {
@@ -102,7 +76,6 @@
         <p><strong>Método de Entrega:</strong> {% if orden.metodo_entrega == 'envio' %}Envío a domicilio{% else %}Retiro en local{% endif %}</p>
         <p><strong>Método de Pago:</strong> {{ orden.metodo_pago }}</p>
         <p><strong>Estado:</strong> {{ orden.estado_ord }}</p>
-      
     </div>
 
     <div class="orden-info">
@@ -128,6 +101,7 @@
                         <th>Producto</th>
                         <th>Cantidad</th>
                         <th>Precio Unitario</th>
+                        <th>IVA Aplicado</th>
                         <th>Subtotal</th>
                     </tr>
                 </thead>
@@ -143,28 +117,30 @@
                             </div>
                         </td>
                         <td>{{ detalle.cantidad }}</td>
-                        <td>$ {{ detalle.producto.inventario.precunit_prod|floatformat:2 }}</td>
-                        <td>$ {{ detalle.subtotal|floatformat:2 }}</td>
+                        <td>$ {{ detalle.precio_aplicado|floatformat:2 }}</td>
+                        <td>{{ detalle.iva_aplicado }}%</td>
+                        <td>$ {{ detalle.subtotal|floatformat:2 }}</td> 
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                        <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
                         <td>$ {{ subtotal|floatformat:2 }}</td>
                     </tr>
                     <tr>
-                        <td colspan="3" class="text-end"><strong>IVA ({{ iva_valor }}%):</strong></td>
+                        <td colspan="4" class="text-end"><strong>IVA %:</strong></td>
                         <td>$ {{ impuesto_total|floatformat:2 }}</td>
+                    
                     </tr>
                     {% if orden.metodo_entrega == 'envio' %}
                     <tr>
-                        <td colspan="3" class="text-end text-danger"><strong>+ Valor adicional por envío (contraentrega)</strong></td>
+                        <td colspan="4" class="text-end text-danger"><strong>+ Valor adicional por envío (contraentrega)</strong></td>
                         <td class="text-danger">*</td>
                     </tr>
                     {% endif %}
                     <tr>
-                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                        <td colspan="4" class="text-end"><strong>Total:</strong></td>
                         <td><strong>$ {{ total_con_impuesto|floatformat:2 }}</strong></td>
                     </tr>
                 </tfoot>
@@ -176,5 +152,4 @@
         <a href="{% url 'listar_ordenes' %}" class="btn-volver">Volver a Historial</a>
     </div>
 </div>
-
 {% endblock %}

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'plantilla_cliente/css/estilos.css' %}">
     <link rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}AJ DITEC{% endblock %}</title>
+    <title>{% block title %}AJ DITEC - Inicio{% endblock %}</title>
 
     <!-- Google font -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
@@ -24,8 +24,9 @@
 
     <!-- Custom stlylesheet -->
     <link type="text/css" rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}"/>
+  
 
-    <!-- Estilos para notificaciones  -->
+    <!-- Estilos para notificaciones -->
     <style>
     .toast-notification {
         position: fixed;
@@ -55,10 +56,39 @@
     .toast-icon {
         font-size: 20px;
     }
+    
+    /* Estilos adicionales para la página principal */
+    .hero-section {
+        background-color: #f8f9fa;
+        padding: 60px 0;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .feature-box {
+        padding: 30px;
+        margin-bottom: 30px;
+        background: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .feature-icon {
+        font-size: 40px;
+        color: #0b4b85;
+        margin-bottom: 20px;
+    }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
+    <!-- HEADER (Mismo que en catalogo.html) -->
     <header>
         <!-- TOP HEADER -->
         <div id="top-header">
@@ -104,12 +134,10 @@
                                 <select name="categoria" class="input-select">
                                     <option value="">Todos</option>
                                     {% for cat in categorias %}
-                                        <option value="{{ cat.id_cat }}" {% if categoria_id == cat.id_cat|stringformat:"s" %}selected{% endif %}>
-                                        {{ cat.tipo_cat }}
-                                        </option>
+                                        <option value="{{ cat.id_cat }}">{{ cat.tipo_cat }}</option>
                                     {% endfor %}
                                 </select>
-                                <input name="buscar" class="input" placeholder="Buscar en AJ DITEC" value="{{ buscar }}">
+                                <input name="buscar" class="input" placeholder="Buscar en AJ DITEC">
                                 <button type="submit" class="search-btn">Buscar</button>
                             </form>
                         </div>
@@ -190,7 +218,6 @@
                     <li class="active"><a href="{% url 'principal' %}">Inicio</a></li>
                     <li><a href="{% url 'inicio' %}">Cátalogo</a></li>
                     <li><a href="#">Pantallas</a></li>
-            
                 </ul>
                 <!-- /NAV -->
             </div>
@@ -200,170 +227,177 @@
     </nav>
     <!-- /NAVIGATION -->
 
-    <!-- SECCION DE CATALOGO -->
-    <div class="section">
-        <div class="container">
-            <div class="row">
-                <!-- BARRA LATERAL DE CATEGORIAS -->
-                <div class="col-12 col-md-3">
-                    <div class="aside">
-                        <h3 class="aside-title">CATEGORÍAS POPULARES</h3>
-                        <div class="list-group">
-                            <!-- Opción 'Todas' -->
-                            <a href="?{% if marca %}marca={{ marca }}&{% endif %}" class="list-group-item {% if not categoria_id %}active{% endif %}" 
-                                style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if not categoria_id %}#0b4b85{% else %}transparent{% endif %}; color: {% if not categoria_id %}#FFF{% else %}#000{% endif %};">
-                                Todas
-                            </a>
-                            {% for cat in categorias %}
-                                <a href="?categoria={{ cat.id_cat }}{% if marca %}&marca={{ marca }}{% endif %}" class="list-group-item {% if categoria_id == cat.id_cat|stringformat:"s" %}active{% endif %}" 
-                                style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if categoria_id == cat.id_cat|stringformat:"s" %}#0b4b85{% else %}transparent{% endif %}; color: {% if categoria_id == cat.id_cat|stringformat:"s" %}#FFF{% else %}#000{% endif %};">
-                                {{ cat.tipo_cat }}
-                                </a>
-                            {% endfor %}
-                        </div>
-
-                        <h3 class="aside-title mt-4">MARCAS SELECCIONADAS</h3>
-                        <div class="list-group">
-                            <a href="?{% if categoria_id %}categoria={{ categoria_id }}&{% endif %}" class="list-group-item {% if not marca %}active{% endif %}" 
-                                style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if not marca %}#0b4b85{% else %}transparent{% endif %}; color: {% if not marca %}#FFF{% else %}#000{% endif %};">
-                                Todas
-                            </a>
-                            {% for m in marcas %}
-                                <a href="?marca={{ m }}{% if categoria_id %}&categoria={{ categoria_id }}{% endif %}" class="list-group-item {% if marca == m %}active{% endif %}" 
-                                style="border: 1px solid #0b4b85; border-radius: 5px; background-color: {% if marca == m %}#0b4b85{% else %}transparent{% endif %}; color: {% if marca == m %}#FFF{% else %}#000{% endif %};">
-                                {{ m }}
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
+ <!-- HOT DEAL SECTION -->
+<div id="hot-deal" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="hot-deal">
+                    <h2 class="text-uppercase mb-3">BIENVENIDO A AJ DITEC</h2>
+                    <ul class="hot-deal-countdown">
+                        <li><div><h3>✓</h3><span>Calidad</span></div></li>
+                        <li><div><h3>✓</h3><span>Garantía</span></div></li>
+                        <li><div><h3>✓</h3><span>Stock</span></div></li>
+                    </ul>
+                    <p class="mt-3">Todo para tu laptop en un solo lugar</p>
+                    <a class="primary-btn cta-btn" href="{% url 'inicio' %}">Ver catálogo</a>
                 </div>
-                <!-- /BARRA LATERAL DE CATEGORIAS -->
-
-                <!-- SECCION DE PRODUCTOS -->
-                <div class="col-12 col-md-9">
-                    <div class="store-filter clearfix">
-                        <span class="store-qty">Mostrando {{ productos|length }} productos</span>
-                    </div>
-
-                    <div class="row">
-                        {% for producto in productos %}
-                            <div class="col-md-4 col-xs-6">
-                                <div class="product" style="height: 450px; display: flex; flex-direction: column; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                    <div class="product-img" style="flex: 0 0 auto; height: 200px; position: relative; overflow: hidden;">
-                                        <div class="image-container" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
-                                            <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                                        </div>
-                                        {% if producto.inventario.stock_actual <= 0 %}
-                                            <span class="label label-danger" style="position: absolute; top: 10px; right: 10px; background: #ff6b6b; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.9em;">AGOTADO</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="product-body" style="flex: 1 1 auto; padding: 15px; position: relative;">
-                                        <p class="product-category" style="margin: 5px 0;">{{ producto.id_cat.tipo_cat }}</p>
-                                        <h3 class="product-name" style="margin: 5px 0; font-size: 16px; line-height: 1.2;">
-                                            <a href="#">{{ producto.nomb_prod }}</a>
-                                        </h3>
-                                        <h4 class="product-price" style="margin: 5px 0;">
-                                            ${{ producto.inventario.precunit_prod }}
-                                            <del class="product-old-price">${{ producto.inventario.precunit_prod|add:50 }}</del>
-                                        </h4>
-                                        {% if producto.inventario.stock_actual <= 0 %}
-                                            <p class="estado-agotado" style="margin: 5px 0; color: white; background-color: #ff6b6b;">AGOTADO</p>
-                                        {% else %}
-                                            <p class="estado-disponible" style="margin: 5px 0; color: white; background-color: #4CAF50;">DISPONIBLE</p>
-                                        {% endif %}
-
-                                        <div class="product-btns" style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
-                                            <a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn" style="background: #f1f1f1; color: #333; border: none; padding: 6px 15px; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 14px; min-width: 100px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                                <i class="fa fa-eye" style="font-size: 14px;"></i>
-                                                <span class="tooltipp">Vista rápida</span>
-                                            </a>
-                                            {% if producto.inventario.stock_actual > 0 %}
-                                                <button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}" data-product-name="{{ producto.nomb_prod }}" style="background: #0b4b85; color: white; border: none; padding: 6px 15px; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; display: flex;justify-content: space-around; align-items: center; gap: 6px; font-weight: 500; font-size: 14px; min-width: 100px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                                    <i class="fa fa-shopping-cart" style="font-size: 14px;"></i>
-                                                    <span class="tooltipp">Añadir al carrito</span>
-                                                </button>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <!-- /SECCION DE PRODUCTOS -->
             </div>
         </div>
     </div>
-    <!-- /SECCION DE CATALOGO -->
+</div>
+<!-- /HOT DEAL SECTION -->
 
-    <!-- SECTION - NUEVOS PRODUCTOS -->
-    <div class="section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="section-title">
-                        <h3 class="title"> Productos Más Vendidos</h3>
-                        <div class="section-nav">
-                            <ul class="section-tab-nav tab-nav">
-                                <li class="active"><a data-toggle="tab" href="#tab1">Laptops</a></li>
-                                <li><a data-toggle="tab" href="#tab1">Baterias</a></li>
-                                <li><a data-toggle="tab" href="#tab1">Pantallas</a></li>
-                                <li><a data-toggle="tab" href="#tab1">Cargadores</a></li>
-                            </ul>
+ 
+<!-- CHECKOUT PROCESS SECTION -->
+<div class="section" style="background-color: #f8f9fa; padding: 40px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2 style="color: #0b4b85; margin-bottom: 15px;">Proceso de Compra</h2>
+                <p style="color: #7f8c8d; font-size: 1.2rem; margin-bottom: 30px;">Rápido, Fácil y Seguro</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="process-steps" style="display: flex; justify-content: center; position: relative; margin: 0 auto; max-width: 800px;">
+                    <!-- Barra de progreso -->
+                    <div style="position: absolute; top: 20px; left: 0; right: 0; height: 3px; background-color: #e0e0e0; z-index: 1;"></div>
+                    
+                    <!-- Paso 1 -->
+                    <div class="process-step" style="position: relative; z-index: 2; text-align: center; padding: 0 15px; flex: 1;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #0b4b85; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px;">
+                            <i class="fa fa-cart-plus"></i>
                         </div>
+                        <div style="font-weight: 500; color: #0b4b85;">Agregar al carrito</div>
                     </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="row">
-                        <div class="products-tabs">
-                            <div id="tab1" class="tab-pane active">
-                                <div class="products-slick" data-nav="#slick-nav-1">
-                                    {% for producto in productos_recientes %}
-                                    <div class="product" style="height: 370px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                                        <div class="product-img" style="flex: 0 0 auto; max-height: 180px; overflow: hidden;">
-                                            <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}">
-                                        </div>
-                                        <div class="product-body" style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
-                                            <p class="product-category" style="margin: 2px 0;">{{ producto.id_cat.tipo_cat }}</p>
-                                            <h3 class="product-name" style="margin: 2px 0;"><a href="#">{{ producto.nomb_prod }}</a></h3>
-                                            <h4 class="product-price" style="margin: 2px 0;">
-                                                ${{ producto.inventario.precunit_prod }}
-                                                <del class="product-old-price">${{ producto.inventario.precunit_prod|add:50 }}</del>
-                                            </h4>
-                                            {% if producto.inventario.stock_actual <= 0 %}
-                                                <p class="estado-agotado" style=color: white; background-color: #ff6b6b;">AGOTADO</p>           
-                                            {% else %}
-                                                <p class="estado-disponible" style=color: white; background-color: #4CAF50;">DISPONIBLE</p>	
-                                            {% endif %}
-                                            <div class="product-btns" style="margin: 2px 0; min-height: 40px; display: flex; justify-content: center; gap: 10px;">
-                                                <a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn" style="background: #f1f1f1; color: #333; border: none; padding: 6px 15px; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 14px; min-width: 100px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                                    <i class="fa fa-eye" style="font-size: 14px;"></i>
-                                                    <span class="tooltipp">Vista rápida</span>
-                                                </a>
-                                                {% if producto.inventario.stock_actual > 0 %}
-                                                <button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}" data-product-name="{{ producto.nomb_prod }}" style="background: #0b4b85; color: white; border: none; padding: 6px 15px; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 14px; min-width: 100px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                                    <i class="fa fa-shopping-cart" style="font-size: 14px;"></i>
-                                                    <span class="tooltipp">Añadir al carrito</span>
-                                                </button>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <div id="slick-nav-1" class="products-slick-nav"></div>
-                            </div>
+                    
+                    <!-- Paso 2 -->
+                    <div class="process-step" style="position: relative; z-index: 2; text-align: center; padding: 0 15px; flex: 1;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #0b4b85; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px;">
+                            <i class="fa fa-user"></i>
                         </div>
+                        <div style="font-weight: 500; color: #7f8c8d;">Identificarse</div>
+                    </div>
+                    
+                    <!-- Paso 3 -->
+                    <div class="process-step" style="position: relative; z-index: 2; text-align: center; padding: 0 15px; flex: 1;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #0b4b85; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px;">
+                            <i class="fa fa-credit-card"></i>
+                        </div>
+                        <div style="font-weight: 500; color: #7f8c8d;">Pagar</div>
+                    </div>
+                    
+                    <!-- Paso 4 -->
+                    <div class="process-step" style="position: relative; z-index: 2; text-align: center; padding: 0 15px; flex: 1;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #0b4b85; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px;">
+                            <i class="fa fa-truck"></i>
+                        </div>
+                        <div style="font-weight: 500; color: #7f8c8d;">Orden Confirmada</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- /SECTION -->
+</div>
+<!-- /CHECKOUT PROCESS SECTION -->
+
+<!-- MISSION VISION SECTION -->
+<div class="section" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mission-box" style="background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-top: 5px solid #0b4b85; height: 100%;">
+                    <h2 style="color: #0b4b85; margin-bottom: 20px; border-bottom: 2px solid #0b4b85; padding-bottom: 10px;">Misión</h2>
+                    <p style="color: #555;">Fomentar el hábito de la lectura en una sociedad donde ha perdido el valor más innato que tiene, que es la curiosidad. Queremos fomentar personas interesadas en el aprendizaje del idioma Inglés que les va a permitir descubrir nuevas culturas.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="vision-box" style="background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-top: 5px solid #0b4b85; height: 100%;">
+                    <h2 style="color: #0b4b85; margin-bottom: 20px; border-bottom: 2px solid #0b4b85; padding-bottom: 10px;">Visión</h2>
+                    <p style="color: #555;">Ser una librería frutatífera, eficiente, que brinde beneficios a nuestros clientes, proveedores y colaboradores de forma honesta y confiable, buscando siempre el bien de la comunidad, con libros de calidad que ayuden a formar con excelencia a los futuros profesionales de todo el Ecuador.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /MISSION VISION SECTION -->
+
+<!-- CATALOG PREVIEW SECTION -->
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="section-title">
+                    <h3 class="title">Productos Destacados</h3>
+                    <div class="section-nav">
+                        <a href="{% url 'inicio' %}" class="section-more">Ver todo <i class="fa fa-angle-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mostrar algunos productos destacados -->
+            <div class="col-md-12">
+                <div class="row">
+                    {% for producto in productos_destacados %}
+                        <div class="col-md-3 col-xs-6">
+                            <div class="product" style="height: 370px; display: flex; flex-direction: column; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative;">
+                                <!-- Solo añadí esta estrella -->
+                                <div style="position: absolute; top: 10px; left: 10px; z-index: 2; color: #FFD700; font-size: 18px;">
+                                    <i class="fa fa-star"></i>
+                                </div>
+                                
+                                <div class="product-img" style="flex: 0 0 auto; height: 180px; position: relative; overflow: hidden;">
+                                    <div class="image-container" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                                        <img src="{{ producto.img_prod.url }}" alt="{{ producto.nomb_prod }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                    </div>
+                                    {% if producto.inventario.stock_actual <= 0 %}
+                                        <span class="label label-danger" style="position: absolute; top: 10px; right: 10px; background: #ff6b6b; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.9em;">AGOTADO</span>
+                                    {% endif %}
+                                </div>
+                                <div class="product-body" style="flex: 1 1 auto; padding: 15px; position: relative;">
+                                    <p class="product-category" style="margin: 5px 0;">{{ producto.id_cat.tipo_cat }}</p>
+                                    <h3 class="product-name" style="margin: 5px 0; font-size: 16px; line-height: 1.2;">
+                                        <a href="#">{{ producto.nomb_prod }}</a>
+                                    </h3>
+                                    <h4 class="product-price" style="margin: 5px 0;">
+                                        ${{ producto.inventario.precunit_prod }}
+                                        <del class="product-old-price">${{ producto.inventario.precunit_prod|add:50 }}</del>
+                                    </h4>
+                                    {% if producto.inventario.stock_actual <= 0 %}
+                                        <p class="estado-agotado" style="margin: 5px 0; color: white; background-color: #ff6b6b;">AGOTADO</p>
+                                    {% else %}
+                                        <p class="estado-disponible" style="margin: 5px 0; color: white; background-color: #4CAF50;">DISPONIBLE</p>
+                                    {% endif %}
+
+                                    <div class="product-btns" style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
+                                        <a href="{% url 'producto_vista_rapida' producto.id_prod %}" class="quick-view-btn" style="background: #f1f1f1; color: #333; border: none; padding: 6px 15px; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 14px; min-width: 100px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                            <i class="fa fa-eye" style="font-size: 14px;"></i>
+                                            <span class="tooltipp">Vista rápida</span>
+                                        </a>
+                                        {% if producto.inventario.stock_actual > 0 %}
+                                            <button class="add-to-cart-btn" data-product-id="{{ producto.id_prod }}" data-product-name="{{ producto.nomb_prod }}" style="background: #0b4b85; color: white; border: none; padding: 6px 15px; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; display: flex;justify-content: space-around; align-items: center; gap: 6px; font-weight: 500; font-size: 14px; min-width: 100px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                                <i class="fa fa-shopping-cart" style="font-size: 14px;"></i>
+                                                <span class="tooltipp">Añadir al carrito</span>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /CATALOG PREVIEW SECTION -->
+ 
 
 
-   <!-- NEWSLETTER -->
+     <!-- NEWSLETTER -->
     <div id="newsletter" class="section">
         <div class="container">
             <div class="row">
@@ -388,7 +422,10 @@
     </div>
     <!-- /NEWSLETTER -->
 
-    <!-- FOOTER -->
+
+
+   
+    <!-- FOOTER  -->
     <footer id="footer">
         <div class="bottom-footer">
             <div class="container">
@@ -418,7 +455,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token }}">
 
-    <!-- Script para manejar el carrito y notificaciones -->
+    <!-- Script para manejar el carrito y notificaciones (Mismo que en catalogo.html) -->
     <script>
     $(document).ready(function() {
         // Manejo del menú de cuenta

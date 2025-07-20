@@ -191,11 +191,16 @@ class Orden(models.Model):
         ('Entregado', 'Entregado'),
         ('Rechazado', 'Rechazado'),
     ]
-    
+    TIPO_DOCUMENTO_CHOICES = [
+        ('cedula', 'Cédula'),
+        ('ruc', 'RUC'),
+        ('pasaporte', 'Pasaporte'),
+    ]
 
     id_ord = models.AutoField(primary_key=True)
     nombre_cliente = models.CharField(max_length=150)
-    cedula_ruc = models.CharField(max_length=13)
+    tipo_documento = models.CharField(max_length=10, choices=TIPO_DOCUMENTO_CHOICES, default='cedula')
+    numero_documento = models.CharField(max_length=20) 
     correo_cliente = models.EmailField()
     direccion_cliente = models.CharField(max_length=255)
     ciudad_cliente = models.CharField(max_length=100)
@@ -234,12 +239,17 @@ class DetalleOrden(models.Model):
     cantidad = models.IntegerField(default=0)
     orden = models.ForeignKey(Orden, on_delete=models.CASCADE, related_name='detalles', db_column='id_ord')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, db_column='id_prod')
+    precio_aplicado = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    iva_aplicado = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
     
     @property
     def subtotal(self):
-        if hasattr(self.producto, 'inventario'):
-            return self.producto.inventario.precunit_prod * self.cantidad
-        return 0
+        return self.precio_aplicado * self.cantidad
+    
+
+    @property
+    def total_con_iva(self):
+        return self.subtotal * (1 + self.iva_aplicado / 100)
 
     class Meta:
         db_table = 'detalle_orden'

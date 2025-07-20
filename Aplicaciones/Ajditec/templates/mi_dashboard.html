@@ -1,0 +1,296 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+
+{% block contenido %}
+
+<h3 class="text-center mb-4">DASHBOARD ADMINISTRATIVO</h3>
+
+<div class="row mb-4">
+    <!-- Total Usuarios -->
+    <div class="col-md-2 mb-3">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Usuarios Registrados</h6>
+                <h3 class="text-primary">{{ total_usuarios }}</h3>
+            </div>
+        </div>
+    </div>
+    <!-- Órdenes Confirmadas -->
+    <div class="col-md-2 mb-3">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Órdenes Confirmadas</h6>
+                <h3 class="text-success">{{ total_confirmadas }}</h3>
+            </div>
+        </div>
+    </div>
+    <!-- Órdenes Pendientes -->
+    <div class="col-md-2 mb-3">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Órdenes Pendientes</h6>
+                <h3 class="text-warning">{{ total_pendientes }}</h3>
+            </div>
+        </div>
+    </div>
+    <!-- Órdenes Rechazadas -->
+    <div class="col-md-2 mb-3">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Órdenes Rechazadas</h6>
+                <h3 class="text-danger">{{ total_rechazadas }}</h3>
+            </div>
+        </div>
+    </div>
+    <!-- Bancos Activos -->
+    <div class="col-md-2 mb-3">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Bancos Activos</h6>
+                <h3 class="text-info">{{ total_bancos }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Gráfico Ventas Mensuales -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4 fw-bold">Ventas Mensuales</h5>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="ventasChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico Pedidos por Estado -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4 fw-bold">Pedidos por Estado</h5>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="pedidosChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico Top Productos -->
+<div class="card shadow mb-4 h-100">
+    <div class="card-body">
+        <h5 class="card-title text-center mb-4 fw-bold">Top Productos Más Vendidos</h5>
+        <div class="chart-container" style="height: 350px;">
+            <canvas id="topProductosChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Bajo Stock -->
+<div class="card shadow mb-4 h-100">
+    <div class="card-body">
+        <h5 class="card-title text-center mb-4 fw-bold">Productos con Bajo Stock</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th class="text-end">Stock Actual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in bajo_stock %}
+                    <tr>
+                        <td>{{ inv.producto.nomb_prod }}</td>
+                        <td class="text-end">{{ inv.stock_actual }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted">No hay productos con bajo stock.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block styles %}
+<style>
+    .card {
+        border: none;
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+    .table-light {
+        background-color: #f8f9fa;
+    }
+    .text-muted {
+        color: #6c757d;
+    }
+    .text-primary {
+        color: #0d6efd;
+    }
+    .text-success {
+        color: #198754;
+    }
+    .text-warning {
+        color: #ffc107;
+    }
+    .text-danger {
+        color: #dc3545;
+    }
+    .text-info {
+        color: #0dcaf0;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const coloresPastel = [
+        '#7eb0d5', '#b2e061', '#bd7ebe', '#ffb55a', '#ffee65', 
+        '#beb9db', '#fdcce5', '#8bd3c7', '#d5a6bd', '#a9a9a9'
+    ];
+
+    // Gráfico de Ventas Mensuales
+    new Chart(document.getElementById('ventasChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ ventas_labels|safe }},
+            datasets: [{
+                label: 'Ventas ($)',
+                data: {{ ventas_data|safe }},
+                backgroundColor: coloresPastel,
+                borderRadius: 8,
+                maxBarThickness: 30
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'top',
+                    labels: {
+                        color: '#6c757d'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => ` $${context.formattedValue}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#6c757d',
+                        callback: val => `$${val}`
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Pedidos por Estado
+    new Chart(document.getElementById('pedidosChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ pedidos_labels|safe }},
+            datasets: [{
+                data: {{ pedidos_data|safe }},
+                backgroundColor: coloresPastel,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { 
+                    position: 'bottom',
+                    labels: {
+                        color: '#6c757d'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => `${context.label}: ${context.formattedValue} pedidos`
+                    }
+                }
+            },
+            layout: {
+                padding: 20
+            }
+        }
+    });
+
+    // Gráfico Top Productos Más Vendidos
+    new Chart(document.getElementById('topProductosChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ top_prod_labels|safe }},
+            datasets: [{
+                label: 'Cantidad Vendida',
+                data: {{ top_prod_data|safe }},
+                backgroundColor: coloresPastel,
+                borderRadius: 8,
+                maxBarThickness: 30
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'top',
+                    labels: {
+                        color: '#6c757d'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => `${context.label}: ${context.formattedValue} unidades`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

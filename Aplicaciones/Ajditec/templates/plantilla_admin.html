@@ -5,13 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Panel Administrador</title>
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-danger" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 
     <link rel="icon" href="{% static 'staticadmin/assets/img/kaiadmin/favicon.ico' %}" type="image/x-icon"/>
@@ -54,7 +48,7 @@
   <div class="sidebar-logo">
     <!-- Logo Header -->
     <div class="logo-header" data-background-color="dark" style="display: flex; justify-content: center; align-items: center; padding: 15px 0;">
-      <a href="#" class="logo">
+      <a href="/dashboard/" class="logo">
         <img src="{% static 'staticadmin/assets/img/logoAjdiec.jpg' %}" alt="Logo" 
              class="avatar-img rounded-circle" 
              style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;">
@@ -78,7 +72,8 @@
       <ul class="nav nav-secondary">
         <!-- Inicio -->
         <li class="nav-item active">
-          <a href="/">
+          <a href="/dashboard/">
+
             <i class="fas fa-home"></i>
             <p>Inicio</p>
           </a>
