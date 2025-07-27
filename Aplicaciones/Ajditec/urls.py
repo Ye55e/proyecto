@@ -98,6 +98,15 @@ urlpatterns = [
 
     path('dashboard/', views.dashboard, name='dashboard'),
 
+    path('nuevoProveedor/', views.nuevoProveedor, name='nuevoProveedor'),
+    path('guardarProveedor/', views.guardarProveedor, name='guardarProveedor'),
+    path('editarProveedor/<int:id_proveedor>/', views.editarProveedor, name='editarProveedor'),
+    path('procesarEdicionProveedor/', views.procesarEdicionProveedor, name='procesarEdicionProveedor'),
+    path('eliminarProveedor/<int:id_proveedor>/', views.eliminarProveedor, name='eliminarProveedor'),
+
+    path('validar-proveedor/', views.validar_proveedor, name='validar_proveedor'),
+    path('validar-proveedor-edicion/', views.validar_proveedor_edicion, name='validar_proveedor_edicion'),
+
 
 
 

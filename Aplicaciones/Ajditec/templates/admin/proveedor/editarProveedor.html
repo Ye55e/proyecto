@@ -1,0 +1,190 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+{% block contenido %}
+<div class="container mt-4">
+    <form enctype="multipart/form-data" action="{% url 'procesarEdicionProveedor' %}" id="frm_editar_proveedor" 
+    method="post" class="p-4 border rounded bg-light">
+        <h3 class="mb-3 text-center">ACTUALIZAR PROVEEDOR:</h3>
+        {% csrf_token %}
+
+        <!-- Mensajes de alerta -->
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+
+        <!-- Campo ID (oculto y visible) -->
+        <div class="mb-3">
+            <label class="form-label"><b>ID:</b></label>
+            <input type="hidden" name="id_prov" value="{{ proveedor.id_prov }}">
+            <input type="text" class="form-control" value="{{ proveedor.id_prov }}" readonly>
+        </div>
+
+        <!-- Nombre del Proveedor -->
+        <div class="mb-3">
+            <label for="nombre_prov" class="form-label"><b>NOMBRE:</b></label>
+            <input type="text" name="nombre_prov" id="nombre_prov" class="form-control" required 
+                   value="{{ proveedor.nombre_prov }}">
+            <div id="nombreError" class="invalid-feedback d-none">Este nombre ya existe</div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="mb-3">
+            <label for="direccion_prov" class="form-label"><b>DIRECCIÓN:</b></label>
+            <input type="text" name="direccion_prov" id="direccion_prov" class="form-control"
+                   value="{{ proveedor.direccion_prov }}">
+        </div>
+
+        <!-- Teléfono -->
+        <div class="mb-3">
+            <label for="telefono_prov" class="form-label"><b>TELÉFONO:</b></label>
+            <input type="tel" name="telefono_prov" id="telefono_prov" class="form-control" 
+                   pattern="[0-9]{10}" title="Debe tener exactamente 10 dígitos"
+                   value="{{ proveedor.telefono_prov }}">
+            <div id="telefonoError" class="invalid-feedback d-none">Formato inválido (deben ser 10 dígitos)</div>
+        </div>
+
+        <!-- Correo Electrónico -->
+        <div class="mb-3">
+            <label for="correo_prov" class="form-label"><b>CORREO ELECTRÓNICO:</b></label>
+            <input type="email" name="correo_prov" id="correo_prov" class="form-control"
+                   value="{{ proveedor.correo_prov }}">
+            <div id="emailError" class="invalid-feedback d-none">Ingrese un correo válido</div>
+        </div>
+
+        <!-- Contacto -->
+        <div class="mb-3">
+            <label for="contacto_prov" class="form-label"><b>PERSONA DE CONTACTO:</b></label>
+            <input type="text" name="contacto_prov" id="contacto_prov" class="form-control"
+                   value="{{ proveedor.contacto_prov }}">
+        </div>
+
+        <!-- Estado Activo/Inactivo -->
+        <div class="mb-3 form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="activo" id="activo" 
+                   {% if proveedor.activo %}checked{% endif %}>
+            <label class="form-check-label" for="activo"><b>PROVEEDOR ACTIVO</b></label>
+        </div>
+
+        <!-- Botones -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-success me-2">Guardar</button>
+            <a href="{% url 'nuevoProveedor' %}" class="btn btn-danger">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(document).ready(function() {
+    // Validación en tiempo real del nombre
+    $('#nombre_prov').on('blur', function() {
+        const nombre = $(this).val().trim();
+        const id_prov = $('input[name="id_prov"]').val();
+        
+        if(nombre) {
+            $.get('/validar-proveedor-edicion/', { 
+                nombre_prov: nombre,
+                id_prov: id_prov
+            }, function(data) {
+                if(data.existe) {
+                    $('#nombre_prov').addClass('is-invalid');
+                    $('#nombreError').removeClass('d-none');
+                } else {
+                    $('#nombre_prov').removeClass('is-invalid');
+                    $('#nombreError').addClass('d-none');
+                }
+            });
+        }
+    });
+
+    // Validación de teléfono (10 dígitos exactos)
+    $('#telefono_prov').on('input', function() {
+        const telefono = $(this).val();
+        const regex = /^[0-9]{10}$/;  // Exactamente 10 dígitos
+        if(telefono && !regex.test(telefono)) {
+            $(this).addClass('is-invalid');
+            $('#telefonoError').removeClass('d-none');
+        } else {
+            $(this).removeClass('is-invalid');
+            $('#telefonoError').addClass('d-none');
+        }
+    });
+
+    // Validación de email
+    $('#correo_prov').on('blur', function() {
+        const email = $(this).val();
+        if(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!regex.test(email)) {
+                $(this).addClass('is-invalid');
+                $('#emailError').removeClass('d-none');
+            } else {
+                $(this).removeClass('is-invalid');
+                $('#emailError').addClass('d-none');
+            }
+        }
+    });
+
+    // Validación antes de enviar el formulario
+    $('#frm_editar_proveedor').on('submit', function(e) {
+        let valid = true;
+        
+        // Validar nombre
+        if($('#nombre_prov').val().trim() === '') {
+            $('#nombre_prov').addClass('is-invalid');
+            valid = false;
+        }
+        
+        // Validar teléfono (obligatorio y formato)
+        const telefono = $('#telefono_prov').val();
+        const telefonoRegex = /^[0-9]{10}$/;
+        if(!telefono || !telefonoRegex.test(telefono)) {
+            $('#telefono_prov').addClass('is-invalid');
+            $('#telefonoError').removeClass('d-none');
+            valid = false;
+        }
+        
+        // Validar email si tiene valor
+        const email = $('#correo_prov').val();
+        if(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!emailRegex.test(email)) {
+                $('#correo_prov').addClass('is-invalid');
+                $('#emailError').removeClass('d-none');
+                valid = false;
+            }
+        }
+        
+        if(!valid) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Por favor corrija los errores en el formulario',
+            });
+        }
+    });
+});
+</script>
+
+<style>
+    .invalid-feedback {
+        display: none;
+    }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
+    }
+    .alert {
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}

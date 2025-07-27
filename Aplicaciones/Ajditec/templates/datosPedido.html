@@ -35,6 +35,28 @@
         padding: 6px 16px;
         border-radius: 6px;
     }
+    
+    .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    
+    .counter {
+        font-size: 11px;
+        color: #6c757d;
+        text-align: right;
+        margin-top: 2px;
+    }
+    
+    .counter.invalid {
+        color: #dc3545;
+    }
 </style>
 
 <body class="bg-light">
@@ -60,7 +82,10 @@
                         <label class="form-label">Nombre del cliente</label>
                         <input type="text" class="form-control" placeholder="Nombre" name="nombre" 
                                value="{{ datos_cliente.nombre|default:"" }}" 
-                               pattern="^[A-Za-z\s]+$" title="Solo se permiten letras y espacios" required>
+                               maxlength="50"
+                               required>
+                        <div class="counter" id="nombre-counter">0/50</div>
+                        <div class="error-message" id="nombre-error">Solo se permiten letras y espacios (máx. 50 caracteres)</div>
                     </div>
                 </div>
 
@@ -80,12 +105,19 @@
                         <input id="numero_documento" type="text" name="numero_documento" class="form-control"
                             value="{{ datos_cliente.numero_documento|default:"" }}"
                             required>
+                        <div class="counter" id="documento-counter"></div>
+                        <div class="error-message" id="documento-error"></div>
                     </div>
+                </div>
 
+                <div class="row mb-3">
                     <div class="col">
                         <label class="form-label">Correo Electrónico</label>
                         <input type="email" class="form-control" placeholder="correo@ejemplo.com" 
-                               name="email" value="{{ datos_cliente.email|default:request.user.email }}" required>
+                               name="email" value="{{ datos_cliente.email|default:request.user.email }}" 
+                               maxlength="100" required>
+                        <div class="counter" id="email-counter">0/100</div>
+                        <div class="error-message" id="email-error">Ingrese un correo electrónico válido</div>
                     </div>
                 </div>
 
@@ -93,18 +125,27 @@
                     <div class="col">
                         <label class="form-label">Dirección</label>
                         <input type="text" class="form-control" placeholder="Dirección" name="direccion" 
-                               value="{{ datos_cliente.direccion|default:"" }}" required>
+                               value="{{ datos_cliente.direccion|default:"" }}" 
+                               maxlength="200" required>
+                        <div class="counter" id="direccion-counter">0/200</div>
                     </div>
                     <div class="col">
                         <label class="form-label">Ciudad</label>
                         <input type="text" class="form-control" placeholder="Ciudad" name="ciudad" 
-                               value="{{ datos_cliente.ciudad|default:"" }}" required>
+                               value="{{ datos_cliente.ciudad|default:"" }}" 
+                               maxlength="50" required>
+                        <div class="counter" id="ciudad-counter">0/50</div>
                     </div>
+                </div>
+
+                <div class="row mb-3">
                     <div class="col">
                         <label class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" placeholder="Teléfono" name="telefono" 
-                            value="{{ datos_cliente.telefono|default:request.user.cel_user }}" pattern="^\d{10}$" 
-                            title="Debe tener 10 dígitos" required>
+                        <input type="text" class="form-control" placeholder="Ej: 0987654321" name="telefono" 
+                            value="{{ datos_cliente.telefono|default:request.user.cel_user }}" 
+                            maxlength="10" required>
+                        <div class="counter" id="telefono-counter">0/10</div>
+                        <div class="error-message" id="telefono-error">Ingrese un número de teléfono ecuatoriano válido (10 dígitos)</div>
                     </div>
                 </div>
 
@@ -152,36 +193,298 @@
                     <strong>Total:</strong>
                     <span class="text-success fw-bold">$ {{ total_con_impuesto|floatformat:2 }}</span>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
 <script>
-  const tipoSelect = document.getElementById('tipo_documento');
-  const numeroInput = document.getElementById('numero_documento');
-
-  function actualizarPatron() {
-    const tipo = tipoSelect.value;
-
-    if (tipo === 'cedula') {
-      numeroInput.pattern = '\\d{10}';
-      numeroInput.title = 'Debe ingresar una cédula válida de 10 dígitos numéricos';
-    } else if (tipo === 'ruc') {
-      numeroInput.pattern = '\\d{13}';
-      numeroInput.title = 'Debe ingresar un RUC válido de 13 dígitos numéricos';
-    } else if (tipo === 'pasaporte') {
-      numeroInput.pattern = '[A-Za-z0-9]{5,20}';
-      numeroInput.title = 'Debe ingresar un pasaporte alfanumérico entre 5 y 20 caracteres';
-    } else {
-      numeroInput.pattern = '.*';
-      numeroInput.title = '';
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del formulario
+    const formulario = document.getElementById('formulario-pago');
+    const tipoDocumento = document.getElementById('tipo_documento');
+    const numeroDocumento = document.getElementById('numero_documento');
+    const nombreInput = document.querySelector('input[name="nombre"]');
+    const telefonoInput = document.querySelector('input[name="telefono"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    const direccionInput = document.querySelector('input[name="direccion"]');
+    const ciudadInput = document.querySelector('input[name="ciudad"]');
+    
+    // Inicializar contadores de caracteres
+    actualizarContador(nombreInput, 'nombre-counter');
+    actualizarContador(emailInput, 'email-counter');
+    actualizarContador(direccionInput, 'direccion-counter');
+    actualizarContador(ciudadInput, 'ciudad-counter');
+    actualizarContador(telefonoInput, 'telefono-counter');
+    
+    // Configurar eventos para contadores
+    nombreInput.addEventListener('input', () => actualizarContador(nombreInput, 'nombre-counter'));
+    emailInput.addEventListener('input', () => actualizarContador(emailInput, 'email-counter'));
+    direccionInput.addEventListener('input', () => actualizarContador(direccionInput, 'direccion-counter'));
+    ciudadInput.addEventListener('input', () => actualizarContador(ciudadInput, 'ciudad-counter'));
+    telefonoInput.addEventListener('input', () => {
+        actualizarContador(telefonoInput, 'telefono-counter');
+        validarTelefonoEnTiempoReal();
+    });
+    
+    // Función para actualizar contador de caracteres
+    function actualizarContador(input, counterId) {
+        const counter = document.getElementById(counterId);
+        const maxLength = input.getAttribute('maxlength');
+        const currentLength = input.value.length;
+        
+        counter.textContent = `${currentLength}/${maxLength}`;
+        
+        if (currentLength >= maxLength) {
+            counter.classList.add('invalid');
+        } else {
+            counter.classList.remove('invalid');
+        }
     }
-  }
-
-  actualizarPatron();
-  tipoSelect.addEventListener('change', actualizarPatron);
+    
+    // Validación de nombre en tiempo real (solo letras)
+    nombreInput.addEventListener('input', function() {
+        // Eliminar cualquier caracter que no sea letra o espacio
+        this.value = this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '');
+        
+        // Validar y mostrar error si es necesario
+        if (/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/.test(this.value)) {
+            mostrarError(nombreInput, document.getElementById('nombre-error'));
+        } else {
+            ocultarError(nombreInput, document.getElementById('nombre-error'));
+        }
+    });
+    
+    // Validación de teléfono en tiempo real (solo números, exactamente 10)
+    telefonoInput.addEventListener('input', function() {
+        // Limitar a 10 dígitos numéricos
+        this.value = this.value.replace(/\D/g, '').substring(0, 10);
+    });
+    
+    function validarTelefonoEnTiempoReal() {
+        const telefonoError = document.getElementById('telefono-error');
+        if (telefonoInput.value.length < 10 || !validarTelefonoEcuatoriano(telefonoInput.value)) {
+            mostrarError(telefonoInput, telefonoError);
+        } else {
+            ocultarError(telefonoInput, telefonoError);
+        }
+    }
+    
+    // Validación de documento según tipo
+    tipoDocumento.addEventListener('change', actualizarValidacionDocumento);
+    numeroDocumento.addEventListener('input', validarDocumentoEnTiempoReal);
+    
+    // Función para actualizar validación de documento
+    function actualizarValidacionDocumento() {
+        const tipo = tipoDocumento.value;
+        const docError = document.getElementById('documento-error');
+        const docCounter = document.getElementById('documento-counter');
+        
+        if (tipo === 'cedula') {
+            numeroDocumento.maxLength = 10;
+            numeroDocumento.pattern = '\\d{10}';
+            numeroDocumento.placeholder = 'Ej: 1712345678';
+            docError.textContent = 'Ingrese una cédula ecuatoriana válida (10 dígitos)';
+            docCounter.textContent = '0/10';
+            numeroDocumento.value = numeroDocumento.value.replace(/\D/g, '').substring(0, 10);
+        } else if (tipo === 'ruc') {
+            numeroDocumento.maxLength = 13;
+            numeroDocumento.pattern = '\\d{13}';
+            numeroDocumento.placeholder = 'Ej: 1712345678001';
+            docError.textContent = 'Ingrese un RUC ecuatoriano válido (13 dígitos)';
+            docCounter.textContent = '0/13';
+            numeroDocumento.value = numeroDocumento.value.replace(/\D/g, '').substring(0, 13);
+        } else if (tipo === 'pasaporte') {
+            numeroDocumento.maxLength = 20;
+            numeroDocumento.pattern = '[A-Za-z0-9]{5,20}';
+            numeroDocumento.placeholder = 'Ej: AB12345';
+            docError.textContent = 'Ingrese un pasaporte válido (5-20 caracteres alfanuméricos)';
+            docCounter.textContent = '0/20';
+        }
+        
+        actualizarContador(numeroDocumento, 'documento-counter');
+        validarDocumentoEnTiempoReal();
+    }
+    
+    // Validación de documento en tiempo real
+    function validarDocumentoEnTiempoReal() {
+        const tipo = tipoDocumento.value;
+        const valor = numeroDocumento.value;
+        const docError = document.getElementById('documento-error');
+        const docCounter = document.getElementById('documento-counter');
+        
+        // Actualizar contador
+        actualizarContador(numeroDocumento, 'documento-counter');
+        
+        if (tipo === 'cedula') {
+            // Solo permitir números
+            numeroDocumento.value = valor.replace(/\D/g, '').substring(0, 10);
+            
+            if (valor.length === 10 && !validarCedulaEcuatoriana(valor)) {
+                mostrarError(numeroDocumento, docError);
+            } else {
+                ocultarError(numeroDocumento, docError);
+            }
+        } else if (tipo === 'ruc') {
+            // Solo permitir números
+            numeroDocumento.value = valor.replace(/\D/g, '').substring(0, 13);
+            
+            if (valor.length === 13 && !validarRucEcuatoriano(valor)) {
+                mostrarError(numeroDocumento, docError);
+            } else {
+                ocultarError(numeroDocumento, docError);
+            }
+        } else if (tipo === 'pasaporte') {
+            // Permitir letras y números
+            numeroDocumento.value = valor.replace(/[^A-Za-z0-9]/g, '').substring(0, 20);
+            
+            if ((valor.length < 5 || valor.length > 20) || !/^[A-Za-z0-9]+$/.test(valor)) {
+                mostrarError(numeroDocumento, docError);
+            } else {
+                ocultarError(numeroDocumento, docError);
+            }
+        }
+    }
+    
+    // Validación de cédula ecuatoriana
+    function validarCedulaEcuatoriana(cedula) {
+        if (!cedula || cedula.length !== 10 || !/^\d+$/.test(cedula)) return false;
+        
+        // Validar provincia (01-24)
+        const provincia = parseInt(cedula.substring(0, 2));
+        if (provincia < 1 || provincia > 24) return false;
+        
+        // Algoritmo de validación (módulo 10)
+        const digitoVerificador = parseInt(cedula.charAt(9));
+        let suma = 0;
+        
+        for (let i = 0; i < 9; i++) {
+            let digito = parseInt(cedula.charAt(i));
+            if (i % 2 === 0) {
+                digito *= 2;
+                if (digito > 9) digito -= 9;
+            }
+            suma += digito;
+        }
+        
+        const verificadorCalculado = (suma % 10 === 0) ? 0 : 10 - (suma % 10);
+        
+        return verificadorCalculado === digitoVerificador;
+    }
+    
+    // Validación de RUC ecuatoriano
+    function validarRucEcuatoriano(ruc) {
+        if (!ruc || ruc.length !== 13 || !/^\d+$/.test(ruc)) return false;
+        
+        // Validar provincia (01-24)
+        const provincia = parseInt(ruc.substring(0, 2));
+        if (provincia < 1 || provincia > 24) return false;
+        
+        // Validar tercer dígito (0-6 para personas naturales)
+        const tercerDigito = parseInt(ruc.charAt(2));
+        if (tercerDigito < 0 || tercerDigito > 6) return false;
+        
+        // Validar cédula base (primeros 10 dígitos)
+        const cedulaBase = ruc.substring(0, 10);
+        if (!validarCedulaEcuatoriana(cedulaBase)) return false;
+        
+        // Validar últimos tres dígitos (001 para personas naturales)
+        if (tercerDigito <= 6) {
+            const ultimosTres = ruc.substring(10, 13);
+            if (ultimosTres !== '001') return false;
+        }
+        
+        return true;
+    }
+    
+    // Validación de teléfono ecuatoriano
+    function validarTelefonoEcuatoriano(telefono) {
+        if (!telefono || telefono.length !== 10) return false;
+        
+        const codigoArea = telefono.substring(0, 2);
+        const codigosAreaValidos = ['09', '02', '03', '04', '05', '06', '07'];
+        
+        if (!codigosAreaValidos.includes(codigoArea)) return false;
+        
+        // Validar rangos para móviles (09)
+        if (codigoArea === '09') {
+            const operador = telefono.substring(1, 3);
+            const operadoresValidos = ['98', '99', '96', '97', '94', '95', '93', '92'];
+            if (!operadoresValidos.includes(operador)) return false;
+        }
+        
+        return true;
+    }
+    
+    // Mostrar mensaje de error
+    function mostrarError(input, errorElement) {
+        input.classList.add('is-invalid');
+        errorElement.style.display = 'block';
+    }
+    
+    // Ocultar mensaje de error
+    function ocultarError(input, errorElement) {
+        input.classList.remove('is-invalid');
+        errorElement.style.display = 'none';
+    }
+    
+    // Validación al enviar el formulario
+    formulario.addEventListener('submit', function(e) {
+        let formularioValido = true;
+        
+        // Validar nombre (solo letras y espacios)
+        if (!/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(nombreInput.value) || nombreInput.value.length < 2) {
+            mostrarError(nombreInput, document.getElementById('nombre-error'));
+            formularioValido = false;
+        }
+        
+        // Validar documento según tipo
+        const tipo = tipoDocumento.value;
+        const docError = document.getElementById('documento-error');
+        
+        if (tipo === 'cedula') {
+            if (!validarCedulaEcuatoriana(numeroDocumento.value)) {
+                mostrarError(numeroDocumento, docError);
+                formularioValido = false;
+            }
+        } else if (tipo === 'ruc') {
+            if (!validarRucEcuatoriano(numeroDocumento.value)) {
+                mostrarError(numeroDocumento, docError);
+                formularioValido = false;
+            }
+        } else if (tipo === 'pasaporte') {
+            if (numeroDocumento.value.length < 5 || !/^[A-Za-z0-9]+$/.test(numeroDocumento.value)) {
+                mostrarError(numeroDocumento, docError);
+                formularioValido = false;
+            }
+        }
+        
+        // Validar teléfono
+        if (!validarTelefonoEcuatoriano(telefonoInput.value)) {
+            mostrarError(telefonoInput, document.getElementById('telefono-error'));
+            formularioValido = false;
+        }
+        
+        // Validar email
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+            mostrarError(emailInput, document.getElementById('email-error'));
+            formularioValido = false;
+        }
+        
+        if (!formularioValido) {
+            e.preventDefault();
+            // Desplazarse al primer error
+            const primerError = document.querySelector('.is-invalid');
+            if (primerError) {
+                primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    // Inicializar validaciones
+    actualizarValidacionDocumento();
+    validarTelefonoEnTiempoReal();
+});
 </script>
 
 {% endblock %}

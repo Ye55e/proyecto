@@ -1,97 +1,167 @@
 {% extends "plantilla_admin.html" %}
 {% load static %}
 {% block contenido %}
-<br>
-<br>
-<h3 class="text-center mb-4">LISTADO DE PRODUCTOS</h3>
-<div class="card shadow">
-    <div class="card-body">
-        <table class="table table-bordered table-striped table-hover" id="tbl_producto">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>PRODUCTO</th>
-                    <th>DESCRIPCIÓN</th>
-                    <th>IMAGEN</th>
-                    <th>CATEGORÍA</th>
-                    <th>FECHA CREACIÓN</th>
-                    <th>FECHA ACTUALIZACIÓN</th>
-                    <th>ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for prod in producto %}
-                <tr>
-                    <td>{{ prod.id_prod }}</td>
-                    <td>{{ prod.nomb_prod }}</td>
-                    <td>{{ prod.descrip_prod|truncatewords:15 }}</td>
-                    <td>
-                        {% if prod.img_prod %}
-                        <img src="{{ prod.img_prod.url }}" alt="{{ prod.nomb_prod }}" style="width: 80px; height: auto;">
-                        {% else %}
-                        Sin imagen
-                        {% endif %}
-                    </td>
-                    <td>{{ prod.id_cat.tipo_cat }}</td>
-                    <td>{{ prod.fechcreac_prod }}</td>
-                    <td>{{ prod.fechactu_prod }}</td>
-                    <td>
-                        <a href="/editarProducto/{{ prod.id_prod }}" class="btn btn-warning btn-sm me-2" title="Editar">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">LISTADO DE PRODUCTOS</h3>
+        <a href="/nuevoProducto/" class="btn btn-success">
+            <i class="bi bi-plus-circle me-2"></i>Agregar Producto
+        </a>
+    </div>
 
-                        <a onclick="return confirm('¿Está seguro de eliminar este producto?')" href="/eliminarProducto/{{ prod.id_prod }}" class="btn btn-danger btn-sm" title="Eliminar">
-                            <i class="bi bi-trash"></i>
-                        </a>
-
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endblock %}
-{% block scripts %}
-  <script>
-  $(document).ready(function() {
-    $('#tbl_producto').DataTable({
-      scrollX:true,
-      responsive:true,
-      language: {
-        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
-      },
-      dom: 'Bfrtip',
-      buttons: [
-        { extend: 'excelHtml5',  text: 'Excel',     className: 'btn btn-success me-2' },
-        { extend: 'pdfHtml5',    text: 'PDF',       className: 'btn btn-danger me-2'  },
-        { extend: 'print',       text: 'Imprimir',  className: 'btn btn-primary' }
-      ]
-    });
-  });
-</script>
-<!-- Espaciado entre botones -->
-<style>
-         /* Asegura que la tabla use todo el ancho disponible */
-    .table {
-        width: 100% !important;
-        table-layout: auto;
-    }
-
-    /* Contenedor de la tabla, asegurando que no haya un margen que limite su tamaño */
-    .card-body {
-        padding: 0;
-        overflow-x: auto;
-    }
-
-    /* Ajustar para que la tabla se pueda desplazar horizontalmente si es necesario */
-    #tbl_inventario_wrapper {
-        overflow-x: auto;
-    }
-    div.dt-buttons .btn {
-        margin-right: 10px;
-    }
-</style>
-
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-bordered table-striped table-hover" id="tbl_producto">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>PRODUCTO</th>
+                        <th>MARCA</th>
+                        <th>CATEGORÍA</th>
+                        <th>PRECIO COMPRA</th>
+                        <th>IMAGEN</th>
+                        <th>PROVEEDOR</th>
+                        <th>FECHA INGRESO</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in producto %}
+                    <tr>
+                        <td>{{ prod.id_prod }}</td>
+                        <td>{{ prod.nomb_prod }}</td>
+                        <td>{{ prod.marca|default:"-" }}</td>
+                        <td>{{ prod.id_cat.tipo_cat }}</td>
+                        <td>${{ prod.precio_compra|floatformat:2 }}</td>
+                        <td class="text-center">
+                            {% if prod.img_prod %}
+                            <img src="{{ prod.img_prod.url }}" alt="{{ prod.nomb_prod }}" class="img-thumbnail" style="width: 80px; height: auto;">
+                            {% else %}
+                            <span class="badge bg-secondary">Sin imagen</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ prod.proveedor.nombre_prov|default:"-" }}</td>
+                        <td>{{ prod.fechcreac_prod|date:"d/m/Y" }}</td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center">
+                                <a href="/editarProducto/{{ prod.id_prod }}" class="btn btn-warning btn-sm me-2" title="Editar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a onclick="return confirm('¿Está seguro de eliminar este producto?')" 
+                                   href="/eliminarProducto/{{ prod.id_prod }}" 
+                                   class="btn btn-danger btn-sm" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
 
+{% block scripts %}
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.0/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.0/js/buttons.print.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#tbl_producto').DataTable({
+        scrollX: true,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+        },
+        dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
+        buttons: [
+            { 
+                extend: 'excelHtml5', 
+                text: '<i class="bi bi-file-excel me-1"></i> Excel',
+                className: 'btn btn-success me-2',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            },
+            { 
+                extend: 'pdfHtml5', 
+                text: '<i class="bi bi-file-pdf me-1"></i> PDF',
+                className: 'btn btn-danger me-2',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            },
+            { 
+                extend: 'print', 
+                text: '<i class="bi bi-printer me-1"></i> Imprimir',
+                className: 'btn btn-primary',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            }
+        ],
+        columnDefs: [
+            { targets: [5, 8], orderable: false, searchable: false }
+        ],
+        order: [[0, 'asc']]
+    });
+});
+</script>
+
+<style>
+    /* Estilos generales */
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    /* Estilos para los botones de exportación */
+    .dt-buttons .btn {
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+    
+    /* Estilos para la tabla responsive */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Estilos para las imágenes */
+    .img-thumbnail {
+        max-width: 80px;
+        height: auto;
+        transition: transform 0.3s ease;
+    }
+    
+    .img-thumbnail:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Estilos para el botón de agregar */
+    .btn-success {
+        padding: 8px 16px;
+    }
+    
+    /* Ajustes para los botones de acción */
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Ajustes para el header */
+    .table-dark th {
+        white-space: nowrap;
+    }
+</style>
+{% endblock %}

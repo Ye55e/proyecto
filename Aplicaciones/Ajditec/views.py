@@ -581,20 +581,15 @@ def procesarEdicionCategoria(request):
     messages.success(request,"Categoria actualizada con exito")
     return redirect('/nuevoCategoria')
 #PRODUCTOS
+#PRODUCTOS
 @login_required(login_url='login')
 @admin_required
 def nuevoProducto(request):
     categorias = Categoria.objects.all()
+    proveedores = Proveedor.objects.filter(activo=True)  # Solo proveedores activos
     return render(request, 'admin/producto/nuevoProducto.html', {
-        'categoria': categorias
-    })
-
-@login_required(login_url='login')
-@admin_required
-def listadoProducto(request):
-    productos = Producto.objects.filter(borrado_prod=False)
-    return render(request, 'admin/producto/listadoProducto.html', {
-        'producto': productos
+        'categoria': categorias,
+        'proveedores': proveedores
     })
 
 @login_required(login_url='login')
@@ -606,15 +601,20 @@ def guardarProducto(request):
         marca = request.POST['marca_prod']
         img = request.FILES.get('foto_prod')
         id_categoria = request.POST['id_cat']
+        id_proveedor = request.POST.get('id_prov')  # Puede ser None
+        precio_compra = request.POST['precio_compra']
 
-        id_cat= Categoria.objects.get(id_cat=id_categoria)
+        id_cat = Categoria.objects.get(id_cat=id_categoria)
+        id_prov = Proveedor.objects.get(id_prov=id_proveedor) if id_proveedor else None
 
         Producto.objects.create(
             nomb_prod=nomb,
             descrip_prod=descr,
             marca=marca,
             img_prod=img,
-            id_cat=id_cat
+            id_cat=id_cat,
+            proveedor=id_prov,  # Asignar el proveedor
+            precio_compra=precio_compra
         )
 
         messages.success(request, "Producto guardado correctamente.")
@@ -622,21 +622,14 @@ def guardarProducto(request):
 
 @login_required(login_url='login')
 @admin_required
-def eliminarProducto(request, id_prod):
-    producto_eliminar = get_object_or_404(Producto, id_prod=id_prod)
-    producto_eliminar.borrado_prod = True  # borrado lógico
-    producto_eliminar.save()
-    messages.success(request, "Producto eliminado")
-    return redirect('/listadoProducto')
-
-@login_required(login_url='login')
-@admin_required
 def editarProducto(request, id_prod):
     producto_editar = get_object_or_404(Producto, id_prod=id_prod)
     id_cat = Categoria.objects.all()
+    proveedores = Proveedor.objects.filter(activo=True)  # Solo proveedores activos
     return render(request, 'admin/producto/editarProducto.html', {
         'producto': producto_editar,
-        'id_cat': id_cat
+        'id_cat': id_cat,
+        'proveedores': proveedores
     })
 
 @login_required(login_url='login')
@@ -649,18 +642,39 @@ def procesarEdicionProducto(request):
         producto.descrip_prod = request.POST['descrip_prod']
         producto.marca = request.POST['marca_prod']
         id_cat = request.POST['id_cat']
+        id_proveedor = request.POST.get('id_prov')  # Puede ser None
+        
         producto.id_cat = get_object_or_404(Categoria, id_cat=id_cat)
+        producto.proveedor = Proveedor.objects.get(id_prov=id_proveedor) if id_proveedor else None
+        producto.precio_compra = request.POST['precio_compra']
 
-        # Si suben una nueva imagen, actualizarla
         if 'foto_prod' in request.FILES:
             producto.img_prod = request.FILES['foto_prod']
 
         producto.save()
         messages.success(request, "Producto actualizado con éxito")
         return redirect('/listadoProducto')
-    else:
-        messages.error(request, "Error en el envío del formulario")
-        return redirect('/listadoProducto')
+
+@login_required(login_url='login')
+@admin_required
+def eliminarProducto(request, id_prod):
+    producto_eliminar = get_object_or_404(Producto, id_prod=id_prod)
+    producto_eliminar.borrado_prod = True  # borrado lógico
+    producto_eliminar.save()
+    messages.success(request, "Producto eliminado")
+    return redirect('/listadoProducto')
+
+
+
+@login_required(login_url='login')
+@admin_required
+def listadoProducto(request):
+    productos = Producto.objects.filter(borrado_prod=False)
+    return render(request, 'admin/producto/listadoProducto.html', {
+        'producto': productos
+    })
+
+
 #FILTRADO POR CATEGORIA
 def tienda(request):
     query = request.GET.get('query', '')
@@ -708,8 +722,11 @@ def guardarInventario(request):
 
         # Intentar convertir el precio y el stock a valores numéricos
         try:
-            precunit = float(precio_str)
+            precunit = round(float(precio_str), 2)  # Redondear a 2 decimales
             stock_inicial = int(stock_str)
+            
+            if precunit <= 0 or stock_inicial < 0:
+                raise ValueError
         except ValueError:
             messages.error(request, 'Precio unitario o stock inválido.')
             return redirect('nuevoInventario')
@@ -728,14 +745,13 @@ def guardarInventario(request):
 
         # Registrar el movimiento de entrada en inventario
         MovimientoInventario.objects.create(
-            tipo='Entrada',  # Tipo de movimiento: Entrada
+            tipo='Entrada',
             cantidad=stock_inicial,
             precio_uni=precunit,
             producto=producto,
             observacion='Primer ingreso al inventario'
         )
 
-        # Mensaje de éxito
         messages.success(request, f'Inventario para "{producto.nomb_prod}" creado correctamente con un stock inicial de {stock_inicial}.')
         return redirect('listadoInventario')
 
@@ -1244,16 +1260,14 @@ def producto_vista_rapida(request, id_prod):
     })
 
 ### DASHBORAD ADMIN ACEPTAR O RECHAZAR ORDEN 
-
-
-
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
-from .models import RegistroPago
+from .models import RegistroPago, MovimientoInventario
 from django.conf import settings
 
 @login_required(login_url='login')
@@ -1264,12 +1278,11 @@ def admin_confirmar_pago(request, id_regpag):
 
     if registro_pago.estado_reg == 'Pendiente':
         # Descontar stock
-        # Registrar movimiento de salida sin modificar el stock actual
         for detalle in orden.detalles.all():
             try:
                 inventario = detalle.producto.inventario
                 
-                # Registrar el movimiento de salida
+                # Registrar el movimiento de salida (MANTENIDO IGUAL)
                 MovimientoInventario.objects.create(
                     tipo='Salida',
                     cantidad=detalle.cantidad,
@@ -1283,71 +1296,99 @@ def admin_confirmar_pago(request, id_regpag):
                 messages.error(request, f"No se pudo procesar la orden: {str(e)}")
                 return redirect('admin_detalle_pago', id_regpag=registro_pago.id_regpag)
 
-        # Actualizamos el estado de la orden y el pago
+        # Actualizar estados (MANTENIDO IGUAL)
         registro_pago.estado_reg = 'Confirmado'
         registro_pago.save()
         orden.estado_ord = 'Entregado'
         orden.save()
 
-        # ✅ GENERAR PDF EN MEMORIA
+        # ✅ GENERAR PDF MEJORADO (SOLO DISEÑO)
         buffer = BytesIO()
         p = canvas.Canvas(buffer, pagesize=letter)
-        p.setTitle(f"Presupuesto #{orden.id_ord}")
-
-        # Título "COMPROBANTE"
-        p.setFont("Helvetica-Bold", 16)
+        width, height = letter
         
-        # Cabecera con márgenes ajustados
-        p.setFont("Helvetica-Bold", 14)
-        p.drawString(100, 735, "AJ DITEC DISTRIBUIDORA")
-        p.drawString(100, 780, f"Comprobante de Compra - Orden #{orden.id_ord}")
+        # --- ENCABEZADO MEJORADO ---
+        p.setFillColor(colors.HexColor('#3498db'))  # Azul corporativo
+        p.rect(0, height-100, width, 100, fill=True, stroke=False)
+        p.setFillColor(colors.white)
+        p.setFont("Helvetica-Bold", 18)
+        p.drawCentredString(width/2, height-60, "COMPROBANTE DE PAGO")
         p.setFont("Helvetica", 10)
-        p.drawString(100, 720, "RUC: 1791101030101")
-        p.drawString(100, 705, "AV. 10 de Agosto, Quito 170129")
-        p.drawString(400, 735, f"Cliente: {orden.nombre_cliente}")
-        p.drawString(400, 720, f"Identificación: {orden.tipo_documento} - {orden.numero_documento}")
-        p.drawString(400, 705, f"Dirección: {orden.direccion_cliente}")
-        p.drawString(400, 690, f"Fecha: {registro_pago.fech_crea}")
+        p.drawCentredString(width/2, height-80, f"Orden #{orden.id_ord} - {registro_pago.fech_crea.strftime('%d/%m/%Y')}")
+        
+        # Logo e info empresa (simulado)
+        p.setFillColor(colors.black)
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(50, height-120, "AJ DITEC DISTRIBUIDORA")
+        p.setFont("Helvetica", 10)
+        p.drawString(50, height-140, "RUC: 1791101030101")
+        p.drawString(50, height-155, "Av. 10 de Agosto, Quito")
+        p.drawString(50, height-170, "Tel: (02) 123-4567")
+        
+        # Info cliente
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(width-250, height-120, "DATOS DEL CLIENTE")
+        p.setFont("Helvetica", 10)
+        p.drawString(width-250, height-140, f"Nombre: {orden.nombre_cliente}")
+        p.drawString(width-250, height-155, f"Documento: {orden.tipo_documento}-{orden.numero_documento}")
+        p.drawString(width-250, height-170, f"Email: {orden.correo_cliente}")
 
-        # Separación para la tabla
+        # --- DETALLE DE PRODUCTOS MEJORADO ---
+        p.setFillColor(colors.HexColor('#f8f9fa'))  # Fondo gris claro
+        p.rect(50, height-220, width-100, 25, fill=True, stroke=False)
+        p.setFillColor(colors.black)
         p.setFont("Helvetica-Bold", 10)
-        p.drawString(100, 680, "Descripción")
-        p.drawString(300, 680, "Cantidad")
-        p.drawString(400, 680, "Precio Unitario")
-
-        # Detalle de productos con márgenes ajustados
-        y = 660
-        p.setFont("Helvetica", 9)  # Reducir tamaño de fuente para detalles
+        p.drawString(60, height-210, "DESCRIPCIÓN")
+        p.drawString(width-300, height-210, "CANTIDAD")
+        p.drawString(width-200, height-210, "PRECIO UNIT.")
+        p.drawString(width-100, height-210, "SUBTOTAL")
+        
+        # Línea divisoria
+        p.setStrokeColor(colors.HexColor('#e0e0e0'))
+        p.line(50, height-225, width-50, height-225)
+        
+        # Productos
+        y_position = height-240
+        p.setFont("Helvetica", 9)
         for det in orden.detalles.all():
-            p.drawString(100, y, det.producto.nomb_prod)
-            p.drawString(300, y, f"x{det.cantidad}")
-            p.drawString(400, y, f"${det.producto.inventario.precunit_prod:.2f}")
-            y -= 15  # Reducir el espacio entre productos para evitar desbordamiento
-
-        # Total
+            p.drawString(60, y_position, det.producto.nomb_prod)
+            p.drawString(width-300, y_position, str(det.cantidad))
+            p.drawString(width-200, y_position, f"${det.producto.inventario.precunit_prod:.2f}")
+            subtotal = det.cantidad * det.producto.inventario.precunit_prod
+            p.drawString(width-100, y_position, f"${subtotal:.2f}")
+            y_position -= 20
+        
+        # TOTAL
+        p.setFillColor(colors.HexColor('#f1f8fe'))  # Azul muy claro
+        p.rect(50, y_position-30, width-100, 25, fill=True, stroke=False)
+        p.setFillColor(colors.black)
         p.setFont("Helvetica-Bold", 10)
-        p.drawString(400, y-10, "Total")
-        p.drawString(500, y-10, f"${registro_pago.total_pago:.2f}")
-
-        # Mensaje de agradecimiento
-        p.setFont("Helvetica", 10)
-        p.drawString(100, y-40, "Gracias por tu compra. ¡Esperamos verte pronto!")
+        p.drawString(width-200, y_position-20, "TOTAL:")
+        p.drawString(width-100, y_position-20, f"${registro_pago.total_pago:.2f}")
+        
+        # --- PIE DE PÁGINA MEJORADO ---
+        p.setFillColor(colors.HexColor('#f5f5f5'))
+        p.rect(0, 0, width, 50, fill=True, stroke=False)
+        p.setFillColor(colors.HexColor('#666666'))
+        p.setFont("Helvetica", 8)
+        p.drawCentredString(width/2, 20, "Gracias por su compra - AJ DITEC DISTRIBUIDORA")
+        p.drawCentredString(width/2, 10, "Para consultas: info@ajditec.com | Tel: (02) 123-4567")
 
         p.showPage()
         p.save()
         buffer.seek(0)
 
-        # ✅ ENVIAR EMAIL CON PDF ADJUNTO
+        # ✅ ENVIAR EMAIL (MANTENIDO IGUAL)
         email = EmailMessage(
-            subject=f"Presupuesto confirmado - Orden #{orden.id_ord}",
-            body=f"Hola {orden.nombre_cliente},\n\nAdjuntamos el presupuesto de tu compra. Gracias por confiar en nosotros.",
+            subject=f"Comprobante de Pago - Orden #{orden.id_ord}",
+            body=f"Hola {orden.nombre_cliente},\n\nAdjuntamos el comprobante de tu compra. Gracias por confiar en nosotros.",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[orden.correo_cliente],
         )
-        email.attach(f"Presupuesto_Orden_{orden.id_ord}.pdf", buffer.read(), "application/pdf")
+        email.attach(f"Comprobante_Orden_{orden.id_ord}.pdf", buffer.read(), "application/pdf")
         email.send()
 
-        messages.success(request, f"Pago confirmado, stock descontado y presupuesto PDF enviado por email.")
+        messages.success(request, f"Pago confirmado y comprobante enviado al cliente.")
     else:
         messages.info(request, "Este pago ya fue procesado.")
 
@@ -1862,3 +1903,127 @@ def dashboard(request):
         'bajo_stock': bajo_stock_qs
     })
 
+#PROVEEDOR
+@login_required(login_url='login')
+@admin_required
+def nuevoProveedor(request):
+    proveedores = Proveedor.objects.all()
+    return render(request, 'admin/proveedor/nuevoProveedor.html', {
+        'proveedores': proveedores
+    })
+
+@login_required(login_url='login')
+@admin_required
+def listadoProveedor(request):
+    proveedoresBdd = Proveedor.objects.all()
+    return render(request, 'admin/proveedor/listadoProveedor.html', 
+                  {'proveedores': proveedoresBdd})
+
+@login_required(login_url='login')
+@admin_required
+def guardarProveedor(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre_prov', '').strip()
+        direccion = request.POST.get('direccion_prov', '').strip()
+        telefono = request.POST.get('telefono_prov', '').strip()
+        correo = request.POST.get('correo_prov', '').strip()
+        contacto = request.POST.get('contacto_prov', '').strip()
+        activo = request.POST.get('activo') == 'on'
+
+        # Validar que el nombre no esté vacío
+        if not nombre:
+            messages.error(request, "El nombre del proveedor es obligatorio.")
+            return redirect('nuevoProveedor')
+
+        # Verificar si el proveedor ya existe (comparación insensible a mayúsculas)
+        if Proveedor.objects.filter(nombre_prov__iexact=nombre).exists():
+            messages.error(request, f"El proveedor '{nombre}' ya existe.")
+            return redirect('nuevoProveedor')
+
+        # Crear el nuevo proveedor
+        Proveedor.objects.create(
+            nombre_prov=nombre,
+            direccion_prov=direccion,
+            telefono_prov=telefono,
+            correo_prov=correo,
+            contacto_prov=contacto,
+            activo=activo
+        )
+        messages.success(request, f"Proveedor '{nombre}' guardado exitosamente.")
+        return redirect('nuevoProveedor')
+
+@login_required(login_url='login')
+@admin_required
+def eliminarProveedor(request, id_proveedor):
+    proveedorEliminar = get_object_or_404(Proveedor, id_prov=id_proveedor)
+    nombre = proveedorEliminar.nombre_prov
+    proveedorEliminar.delete()
+    messages.success(request, f"Proveedor '{nombre}' eliminado correctamente.")
+    return redirect('nuevoProveedor')
+
+@login_required(login_url='login')
+@admin_required
+def editarProveedor(request, id_proveedor):
+    proveedorEditar = get_object_or_404(Proveedor, id_prov=id_proveedor)
+    return render(request, 'admin/proveedor/editarProveedor.html', {
+        'proveedor': proveedorEditar
+    })
+
+@login_required(login_url='login')
+@admin_required
+def procesarEdicionProveedor(request):
+    if request.method == 'POST':
+        proveedor = get_object_or_404(Proveedor, id_prov=request.POST['id_prov'])
+        
+        # Obtener datos del formulario
+        nombre = request.POST.get('nombre_prov', '').strip()
+        direccion = request.POST.get('direccion_prov', '').strip()
+        telefono = request.POST.get('telefono_prov', '').strip()
+        correo = request.POST.get('correo_prov', '').strip()
+        contacto = request.POST.get('contacto_prov', '').strip()
+        activo = request.POST.get('activo') == 'on'
+
+        # Validar que el nombre no esté vacío
+        if not nombre:
+            messages.error(request, "El nombre del proveedor es obligatorio.")
+            return redirect('editarProveedor', id_proveedor=proveedor.id_prov)
+
+        # Verificar si el nombre ya existe (excluyendo el actual)
+        if Proveedor.objects.filter(nombre_prov__iexact=nombre).exclude(id_prov=proveedor.id_prov).exists():
+            messages.error(request, f"El proveedor '{nombre}' ya existe.")
+            return redirect('editarProveedor', id_proveedor=proveedor.id_prov)
+
+        # Actualizar los datos
+        proveedor.nombre_prov = nombre
+        proveedor.direccion_prov = direccion
+        proveedor.telefono_prov = telefono
+        proveedor.correo_prov = correo
+        proveedor.contacto_prov = contacto
+        proveedor.activo = activo
+        proveedor.save()
+
+        messages.success(request, f"Proveedor '{nombre}' actualizado correctamente.")
+        return redirect('nuevoProveedor')
+    
+@login_required
+def validar_proveedor(request):
+    nombre = request.GET.get('nombre_prov', '').strip()
+    existe = False
+    if nombre:
+        existe = Proveedor.objects.filter(nombre_prov__iexact=nombre).exists()
+    return JsonResponse({'existe': existe})
+
+@login_required
+def validar_proveedor_edicion(request):
+    nombre = request.GET.get('nombre_prov', '').strip()
+    id_prov = request.GET.get('id_prov', '')
+    existe = False
+    
+    if nombre and id_prov:
+        existe = Proveedor.objects.filter(
+            nombre_prov__iexact=nombre
+        ).exclude(
+            id_prov=id_prov
+        ).exists()
+        
+    return JsonResponse({'existe': existe})

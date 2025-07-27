@@ -3,45 +3,173 @@
 {% block contenido %}
 <link rel="stylesheet" href="{% static 'plantilla_cliente/css/estilos.css' %}">
 <link rel="stylesheet" href="{% static 'plantilla_cliente/css/style.css' %}">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <!-- Contenedor con borde y fondo claro -->
             <div class="border rounded-4 p-4 shadow-sm bg-light">
                 <h3 class="text-center mb-4 fw-bold">Registrar Inventario</h3>
 
-                <form action="{% url 'guardarInventario' %}" method="POST">
+                <form action="{% url 'guardarInventario' %}" method="POST" id="inventarioForm">
                     {% csrf_token %}
+                    
+                    <!-- Mensajes de alerta -->
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
 
+                    <!-- Campo Producto -->
                     <div class="mb-3">
                         <label for="producto" class="form-label fw-semibold">Producto:</label>
                         <select name="producto" id="producto" class="form-select" required>
                             <option value="" disabled selected>Seleccione un producto</option>
                             {% for prod in productos %}
-                                <option value="{{ prod.id_prod }}">{{ prod.nomb_prod }}</option>
+                            <option value="{{ prod.id_prod }}" 
+                                    data-precio-compra="{{ prod.precio_compra|default_if_none:'0' }}">
+                                {{ prod.nomb_prod }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
 
+                    <!-- Precio de Compra -->
+                    <div class="mb-3">
+                        <label for="precio_compra" class="form-label fw-semibold">Precio de Compra:</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" id="precio_compra" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Margen de Ganancia -->
+                    <div class="mb-3">
+                        <label for="margen" class="form-label fw-semibold">Margen de Ganancia (%):</label>
+                        <div class="input-group">
+                            <input type="number" step="0.1" id="margen" class="form-control" value="30" min="0">
+                            <span class="input-group-text">%</span>
+                            <button type="button" id="calcular" class="btn btn-outline-secondary">Calcular</button>
+                        </div>
+                    </div>
+
+                    <!-- Precio de Venta con Alerta -->
                     <div class="mb-3">
                         <label for="precunit_prod" class="form-label fw-semibold">Precio de Venta:</label>
-                        <input type="number" step="0.01" name="precunit_prod" class="form-control" placeholder="Ej. 12.50" required>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" name="precunit_prod" id="precunit_prod" class="form-control" placeholder="Ej. 12.50" required min="0.01">
+                        </div>
+
                     </div>
 
+                    <!-- Stock Inicial -->
                     <div class="mb-4">
                         <label for="stock_actual" class="form-label fw-semibold">Stock Inicial:</label>
-                        <input type="number" name="stock_actual" class="form-control" placeholder="Ej. 100" required>
+                        <input type="number" name="stock_actual" id="stock_actual" class="form-control" placeholder="Ej. 100" required min="1">
+                        <div id="alertaStock" class="alert alert-danger mt-2 d-none">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            El stock debe ser mayor a 0
+                        </div>
                     </div>
 
+                    <!-- Botones -->
                     <div class="d-flex justify-content-center gap-3">
-                        <button type="submit" class="btn btn-primary px-4 text-decoration-none rounded-0">Guardar</button>
-                        <a href="{% url 'listadoInventario' %}" class="btn btn-danger px-4 text-decoration-none rounded-0">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-0">
+                            <i class="fas fa-save me-2"></i>Guardar
+                        </button>
+                        <a href="{% url 'listadoInventario' %}" class="btn btn-danger px-4 rounded-0">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del DOM
+    const productoSelect = document.getElementById('producto');
+    const precioCompraInput = document.getElementById('precio_compra');
+    const margenInput = document.getElementById('margen');
+    const precioVentaInput = document.getElementById('precunit_prod');
+    const calcularBtn = document.getElementById('calcular');
+    const alertaPrecio = document.getElementById('alertaPrecio');
+    const precioSugeridoSpan = document.getElementById('precioSugerido');
+    const stockInput = document.getElementById('stock_actual');
+    const alertaStock = document.getElementById('alertaStock');
+    const form = document.getElementById('inventarioForm');
+    
+    // Variables de estado
+    let precioSugerido = 0;
+    let precioCompraActual = 0;
+
+    // Actualizar precio de compra al seleccionar producto
+    productoSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        precioCompraActual = parseFloat(selectedOption.getAttribute('data-precio-compra')) || 0;
+        precioCompraInput.value = precioCompraActual.toFixed(2);
+        calcularPrecioVenta();
+    });
+
+    // Calcular precio de venta sugerido
+    function calcularPrecioVenta() {
+        const margen = parseFloat(margenInput.value) || 0;
+        precioSugerido = precioCompraActual * (1 + (margen / 100));
+        precioVentaInput.value = precioSugerido.toFixed(2);
+        precioSugeridoSpan.textContent = precioSugerido.toFixed(2);
+        verificarPrecio();
+    }
+
+    // Verificar si el precio es menor al sugerido (EXCLUSIVAMENTE menor)
+    function verificarPrecio() {
+        const precioIngresado = parseFloat(precioVentaInput.value) || 0;
+        const esMenor = precioIngresado > 0 && precioIngresado < precioSugerido;
+        alertaPrecio.classList.toggle('d-none', !esMenor);
+    }
+
+    // Verificar stock válido
+    function verificarStock() {
+        const stock = parseInt(stockInput.value) || 0;
+        const esInvalido = stock <= 0;
+        alertaStock.classList.toggle('d-none', !esInvalido);
+        return !esInvalido;
+    }
+
+    // Event Listeners
+    calcularBtn.addEventListener('click', calcularPrecioVenta);
+    margenInput.addEventListener('input', calcularPrecioVenta);
+    precioVentaInput.addEventListener('input', verificarPrecio);
+    stockInput.addEventListener('input', verificarStock);
+    
+    // Validar antes de enviar
+    form.addEventListener('submit', function(e) {
+        // Validar stock
+        if (!verificarStock()) {
+            e.preventDefault();
+            stockInput.focus();
+            return;
+        }
+
+        // Validar precio (solo si es MENOR)
+        const precioIngresado = parseFloat(precioVentaInput.value) || 0;
+        if (precioIngresado > 0 && precioIngresado < precioSugerido) {
+            if (!confirm('El precio ingresado es menor al recomendado. ¿Desea continuar?')) {
+                e.preventDefault();
+                precioVentaInput.focus();
+            }
+        }
+    });
+
+    // Inicializar si hay valores (en caso de error de validación)
+    if (productoSelect.value) {
+        productoSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+
 {% endblock %}

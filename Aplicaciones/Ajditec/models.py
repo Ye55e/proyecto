@@ -53,6 +53,7 @@ class Producto(models.Model):
     marca = models.CharField(max_length=100, null=True, blank=True)
     id_cat = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='productos', db_column='id_cat')
     proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, related_name='productos', db_column='id_prov', null=True)
+    precio_compra = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
 
 

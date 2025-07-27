@@ -48,21 +48,29 @@
     </div>
 
     <div class="mt-4 text-center">
-        {% if registro_pago.estado_reg == "Pendiente" %}
-            <a href="{% url 'admin_confirmar_pago' registro_pago.id_regpag %}" class="btn btn-success me-2 mb-2">Confirmar Pago</a>
-            <a href="{% url 'admin_rechazar_pago' registro_pago.id_regpag %}" class="btn btn-danger mb-2">Rechazar Pago</a>
-        {% elif registro_pago.estado_reg == "Confirmado" %}
-            <div class="alert alert-success mx-auto" style="max-width: 400px;">
+    {% if registro_pago.estado_reg == "Pendiente" %}
+        <div class="d-flex justify-content-center gap-2">
+            <a href="{% url 'admin_confirmar_pago' registro_pago.id_regpag %}" class="btn btn-success">Confirmar Pago</a>
+            <a href="{% url 'admin_rechazar_pago' registro_pago.id_regpag %}" class="btn btn-danger">Rechazar Pago</a>
+            <a href="{% url 'admin_listar_pagos' %}" class="btn" style="background-color: #0b4b85; color: white;">Volver al listado</a>
+        </div>
+    {% elif registro_pago.estado_reg == "Confirmado" %}
+        <div class="d-flex justify-content-center gap-2">
+            <div class="alert alert-success mx-2" style="max-width: 400px;">
                 <h5>✅ Pago confirmado</h5>
                 <p>La orden ha sido marcada como entregada.</p>
             </div>
-        {% elif registro_pago.estado_reg == "Rechazado" %}
-            <div class="alert alert-danger mx-auto" style="max-width: 400px;">
+            <a href="{% url 'admin_listar_pagos' %}" class="btn align-self-center" style="background-color: #0b4b85; color: white;">Volver al listado</a>
+        </div>
+    {% elif registro_pago.estado_reg == "Rechazado" %}
+        <div class="d-flex justify-content-center gap-2">
+            <div class="alert alert-danger mx-2" style="max-width: 400px;">
                 <h5>❌ Pago rechazado</h5>
                 <p>La orden ha sido rechazada.</p>
             </div>
-        {% endif %}
-        <a href="{% url 'admin_listar_pagos' %}" class="btn mt-3" style="background-color: #0b4b85; color: white;">Volver al listado</a>
-    </div>
+            <a href="{% url 'admin_listar_pagos' %}" class="btn align-self-center" style="background-color: #0b4b85; color: white;">Volver al listado</a>
+        </div>
+    {% endif %}
+</div>
 </div>
 {% endblock %}

@@ -1,363 +1,606 @@
 {% extends "./plantilla.html" %}
 {% load static %}
-{% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
 
 {% block contenido %}
 <!-- Bootstrap CSS -->
-<!-- Bootstrap JS y Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 {% include "barra_checkout.html" with paso_actual='confirmar' %}
 
 <style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --success-color: #27ae60;
+        --light-gray: #f8f9fa;
+        --border-radius: 8px;
+    }
+    
     .resumen-pedido-card {
         font-size: 14px;
         background: #fff;
-        border-radius: 10px;
-        border: 1px solid #ccc;
+        border-radius: var(--border-radius);
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
+    
     .resumen-pedido-card img {
-        border-radius: 5px;
+        border-radius: var(--border-radius);
+        object-fit: cover;
     }
+    
     .form-control, .form-select {
         font-size: 14px;
-        padding: 6px 10px;
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        border: 1px solid #ced4da;
     }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+    }
+    
     .form-label {
-        font-weight: bold;
+        font-weight: 600;
         font-size: 14px;
+        margin-bottom: 4px;
     }
+    
     .btn-sm-custom {
         font-size: 14px;
-        padding: 6px 16px;
-        border-radius: 6px;
+        padding: 8px 20px;
+        border-radius: var(--border-radius);
+        font-weight: 500;
     }
+    
     .banco-card {
         text-align: center;
-        background: #f9f9f9;
-        border: 1px solid #ddd;
-        border-radius: 10px;
+        background: var(--light-gray);
+        border: 1px solid #e0e0e0;
+        border-radius: var(--border-radius);
         padding: 15px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+        cursor: pointer;
     }
+    
+    .banco-card:hover {
+        transform: translateY(-3px);
+    }
+    
     .banco-card img {
-        max-height: 100px;
+        max-height: 60px;
         margin-bottom: 10px;
+        object-fit: contain;
     }
-    .hidden-section {
-        display: none;
+    
+    .invalid-feedback {
+        font-size: 12px;
+    }
+    
+    .terms-card {
+        border-radius: var(--border-radius);
+        border: 1px solid #e0e0e0;
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 15px;
+    }
+    
+    .bank-logo {
+        max-height: 50px;
+        max-width: 100%;
+        object-fit: contain;
+    }
+    
+    .selected-bank {
+        border: 2px solid var(--secondary-color);
+        background-color: rgba(52, 152, 219, 0.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .alert-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1100;
+        width: 350px;
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    /* Estilos para acordeón de términos */
+    .collapse-terms {
+        transition: all 0.3s ease;
+    }
+    
+    .terms-link {
+        text-decoration: none;
+        border-bottom: 1px dashed currentColor;
+        color: var(--secondary-color);
+    }
+    
+    .terms-link:hover {
+        color: var(--primary-color);
+    }
+    
+    .terms-content {
+        background-color: var(--light-gray);
+        border-radius: var(--border-radius);
+        padding: 15px;
+        margin-top: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .alert-container {
+            width: 90%;
+            left: 5%;
+            right: 5%;
+        }
+        
+        .banco-card {
+            margin-bottom: 15px;
+        }
     }
 </style>
 
-<div class="container mt-5">
-    <div class="row">
-        <!-- Formulario -->
-        <div class="col-md-7">
-            <h4 class="fw-bold mb-4">ELEGIR UN MÉTODO DE ENTREGA</h4>
-            <form method="POST" action="{% url 'procesar_pedido' %}" id="checkout-form">
-                {% csrf_token %}
-
-                <!-- Métodos de Entrega -->
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="metodo_entrega" id="retiro_local" value="local" checked>
-                    <label class="form-check-label" for="retiro_local">
-                        Retiro en local <span class="badge bg-success">Gratuito</span>
-                    </label>
-                </div>
-                <div class="form-check mb-4">
-                    <input class="form-check-input" type="radio" name="metodo_entrega" id="envio_quito" value="envio">
-                    <label class="form-check-label" for="envio_quito">
-                        Envío a domicilio desde Quito <span class="badge bg-secondary">Valor adicional Pendiente</span>
-                    </label>
-                </div>
-
-                <!-- Métodos de Pago -->
-                <h4 class="fw-bold mb-4">PAGAR CON</h4>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="radio" name="metodo_pago" id="transferencia" value="transferencia" checked>
-                    <label class="form-check-label fw-bold" for="transferencia">
-                        Transferencias Bancarias
-                    </label>
-                </div>
-
-                <!-- Campos de Transferencia -->
-                <div id="campos-transferencia">
-                    <div class="mb-3 row">
-                        <div class="col-md-6">
-                            <label class="form-label">Número de Transferencia</label>
-                            <input type="text" name="num_transferencia" class="form-control {% if error_num_transferencia %}is-invalid{% endif %}" 
-                        placeholder="Número de transferencia" 
-                        pattern="^[0-9]+$" 
-                        title="Solo se permiten números" 
-                        required
-                        value="{{ num_transferencia|default:'' }}">
-                    {% if error_num_transferencia %}
-                        <div class="invalid-feedback">
-                            {{ error_num_transferencia }}
-                        </div>
-                    {% endif %}
-
-                        </div>
-                        <div class="col-md-6">
-                            <label for="banco_id" class="form-label"><b>Banco</b></label>
-                            <select name="banco_id" id="banco_id" class="form-select" required>
-                                <option value="" disabled {% if not banco_id %}selected{% endif %}>Seleccione un banco</option>
-                                {% for banco in bancos %}
-                                    <option value="{{ banco.id_banco }}" {% if banco.id_banco == banco_id %}selected{% endif %}>
-                                        {{ banco.nombre_banco|upper }} # {{ banco.numero_cuenta }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Fecha de Transferencia</label>
-                        <input type="date" name="fecha_transferencia" class="form-control" id="fecha_transferencia" required
-                               value="{{ fecha_transferencia|default:'' }}">
-                        <div id="fecha_transferencia_error" class="text-danger small d-none mt-1">
-                            La fecha debe ser hoy o máximo 2 días después.
-                        </div>
-                    </div>
-                </div>
-
-               <!-- Sección de Aceptación de Términos -->
-<div class="form-check mb-2">
-    <input class="form-check-input" type="checkbox" name="terminos" id="terminos" required>
-    <label class="form-check-label" for="terminos">
-        <a href="#" data-bs-toggle="collapse" data-bs-target="#seccionTerminos" style="text-decoration: none; color: inherit;">
-            Sí acepto los términos y condiciones
-        </a>
-    </label>
-</div>
-
-<!-- Sección Desplegable de Términos y Condiciones -->
-<div id="seccionTerminos" class="collapse">
-    <div class="card card-body">
-        <h6 class="text-center mb-4">TÉRMINOS Y CONDICIONES</h6>
-        <p class="mb-3">
-            <strong>1. Aceptación de los Términos y Condiciones</strong><br>
-            Al hacer clic en "Aceptar" o al utilizar nuestros servicios, usted acepta estos Términos y Condiciones.
-        </p>
-        <p class="mb-3">
-            <strong>2. Productos y Precios</strong><br>
-            Los precios de los productos están sujetos a cambios sin previo aviso. Los precios mostrados incluyen IVA.
-        </p>
-        <p class="mb-3">
-            <strong>3. Proceso de Compra</strong><br>
-            El proceso de compra se realiza a través de nuestro sistema de carrito de compras. Al finalizar la compra, recibirá un correo electrónico de confirmación.
-        </p>
-        <p class="mb-3">
-            <strong>4. Entrega</strong><br>
-            Los tiempos de entrega pueden variar según la ubicación. Se enviará un correo electrónico con el estado de su pedido.
-        </p>
-        <p class="mb-3">
-            <strong>5. Pago</strong><br>
-            Aceptamos pagos mediante transferencia bancaria. El pedido se procesará una vez que se verifique el pago.
-        </p>
-        <p class="mb-3">
-            <strong>6. Devoluciones</strong><br>
-            Los productos pueden ser devueltos dentro de los 7 días hábiles desde la recepción. El producto debe estar en perfectas condiciones.
-        </p>
+<!-- Mensajes de alerta -->
+{% if messages %}
+<div class="alert-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-</div>
-
-<!-- Sección de Aceptación de Política de Protección de Datos -->
-<div class="form-check mb-4">
-    <input class="form-check-input" type="checkbox" name="proteccion_datos" id="proteccion_datos" required>
-    <label class="form-check-label" for="proteccion_datos">
-        <a href="#" data-bs-toggle="collapse" data-bs-target="#seccionProteccion" style="text-decoration: none; color: inherit;">
-            Sí acepto las políticas de protección de datos
-        </a>
-    </label>
-</div>
-
-<!-- Sección Desplegable de Política de Protección de Datos -->
-<div id="seccionProteccion" class="collapse">
-    <div class="card card-body">
-        <h6 class="text-center mb-4">POLÍTICA DE PROTECCIÓN DE DATOS</h6>
-        <p class="mb-3">
-            <strong>1. Recolección de Datos</strong><br>
-            Recopilamos datos personales necesarios para procesar su pedido y mejorar nuestros servicios.
-        </p>
-        <p class="mb-3">
-            <strong>2. Uso de Datos</strong><br>
-            Sus datos se usarán únicamente para procesar su pedido y mejorar la experiencia de compra.
-        </p>
-        <p class="mb-3">
-            <strong>3. Seguridad</strong><br>
-            Mantenemos medidas de seguridad para proteger sus datos personales contra accesos no autorizados.
-        </p>
-        <p class="mb-3">
-            <strong>4. Derechos</strong><br>
-            Tiene derecho a acceder, rectificar, cancelar y oponerse al tratamiento de sus datos personales.
-        </p>
-        <p class="mb-3">
-            <strong>5. Comunicaciones</strong><br>
-            Podemos enviarle comunicaciones relacionadas con su pedido y ofertas especiales, siempre respetando sus preferencias.
-        </p>
-    </div>
-</div>
-
-
-                <!-- Datos del cliente -->
-                <input type="hidden" name="nombre" value="{{ datos_cliente.nombre }}">
-                <input type="hidden" name="cedula" value="{{ datos_cliente.cedula }}">
-                <input type="hidden" name="email" value="{{ datos_cliente.email }}">
-                <input type="hidden" name="direccion" value="{{ datos_cliente.direccion }}">
-                <input type="hidden" name="ciudad" value="{{ datos_cliente.ciudad }}">
-                <input type="hidden" name="telefono" value="{{ datos_cliente.telefono }}">
-
-                <div class="row g-3 mb-4">
-    {% for banco in bancos %}
-        <div class="col-md-6">
-            <div class="banco-card">
-                {% if "pichincha" in banco.nombre_banco|lower %}
-                    <img src="{% static 'plantilla_cliente/img/bancopichinchalogo.png' %}" alt="{{ banco.nombre_banco }}">
-                {% elif "produ" in banco.nombre_banco|lower %}
-                    <img src="{% static 'plantilla_cliente/img/logoprodu.jpg' %}" alt="{{ banco.nombre_banco }}">
-                {% else %}
-                    <img src="{% static 'plantilla_cliente/img/defaultbank.png' %}" alt="{{ banco.nombre_banco }}">
-                {% endif %}
-                <p><strong>Banco:</strong> {{ banco.nombre_banco }}</p>
-                <p><strong>Nombre:</strong> {{ banco.nombre_titular }}</p>
-                <p><strong>Tipo de Cuenta:</strong> {{ banco.tipo_cuenta }} </p>
-                <p><strong>Número Cuenta:</strong> {{ banco.numero_cuenta }}</p>
-                <p><strong>RUC:</strong> {{ banco.identificacion_titular }}</p>
-            </div>
-        </div>
-    {% empty %}
-        <p class="text-danger">No hay bancos disponibles actualmente.</p>
     {% endfor %}
 </div>
+{% endif %}
 
+<div class="container mt-4 mb-5">
+    <div class="row g-4">
+        <!-- Formulario -->
+        <div class="col-lg-7">
+            <form method="POST" action="{% url 'procesar_pedido' %}" id="checkout-form">
+                {% csrf_token %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="section-title">Método de Entrega</h4>
+                        
+                        <div class="mb-4">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="metodo_entrega" id="retiro_local" value="local" 
+                                       {% if not request.POST.metodo_entrega or request.POST.metodo_entrega == 'local' %}checked{% endif %}>
+                                <label class="form-check-label" for="retiro_local">
+                                    <i class="fas fa-store me-2"></i> Retiro en local <span class="badge bg-success">Gratuito</span>
+                                </label>
+                            </div>
+                        </div>
 
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'carrito' %}" class="btn btn-info text-white btn-sm-custom rounded-pill">← Volver a la cesta</a>
-                    <button type="submit" class="btn btn-primary btn-sm-custom rounded-pill">Pagar ahora →</button>
+                        <h4 class="section-title">Método de Pago</h4>
+                        
+                        <div class="mb-3">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="metodo_pago" id="transferencia" value="transferencia" checked>
+                                <label class="form-check-label fw-bold" for="transferencia">
+                                    <i class="fas fa-university me-2"></i> Transferencia Bancaria
+                                </label>
+                            </div>
+
+                            <!-- Campos de Transferencia -->
+                            <div id="campos-transferencia" class="mt-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Número de Transferencia</label>
+                                        <input type="text" name="num_transferencia" class="form-control {% if error_num_transferencia %}is-invalid{% endif %}" 
+                                            placeholder="Ej: 1234567890" 
+                                            pattern="^[0-9]+$" 
+                                            title="Solo se permiten números" 
+                                            required
+                                            value="{{ request.POST.num_transferencia|default:'' }}">
+                                        {% if error_num_transferencia %}
+                                            <div class="invalid-feedback">
+                                                {{ error_num_transferencia }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="banco_id" class="form-label">Banco</label>
+                                        <select name="banco_id" id="banco_id" class="form-select {% if error_banco %}is-invalid{% endif %}" required>
+                                            <option value="" disabled {% if not request.POST.banco_id %}selected{% endif %}>Seleccione un banco</option>
+                                            {% for banco in bancos %}
+                                                <option value="{{ banco.id_banco }}" 
+                                                    {% if banco.id_banco == request.POST.banco_id|add:0 or banco.id_banco == banco_id %}selected{% endif %}>
+                                                    {{ banco.nombre_banco|upper }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if error_banco %}
+                                            <div class="invalid-feedback">
+                                                {{ error_banco }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha de Transferencia</label>
+                                    <input type="date" name="fecha_transferencia" class="form-control {% if error_fecha %}is-invalid{% endif %}" 
+                                           id="fecha_transferencia" required
+                                           value="{{ request.POST.fecha_transferencia|default:'' }}">
+                                    {% if error_fecha %}
+                                        <div class="invalid-feedback">
+                                            {{ error_fecha }}
+                                        </div>
+                                    {% else %}
+                                        <div id="fecha_transferencia_error" class="invalid-feedback d-none">
+                                            La fecha debe ser hoy o máximo 2 días después.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Bancos -->
+                        <h4 class="section-title">Cuentas Bancarias Disponibles</h4>
+                        <div class="row g-3 mb-4">
+                            {% for banco in bancos %}
+                            <div class="col-md-6">
+                                <div class="banco-card {% if banco.id_banco == request.POST.banco_id|add:0 or banco.id_banco == banco_id %}selected-bank{% endif %}" 
+                                     data-bank-id="{{ banco.id_banco }}">
+                                    <div class="bank-logo-container">
+                                        {% if "pichincha" in banco.nombre_banco|lower %}
+                                            <img src="{% static 'plantilla_cliente/img/bancopichinchalogo.png' %}" 
+                                                 alt="{{ banco.nombre_banco }}"
+                                                 class="bank-logo">
+                                        {% elif "produ" in banco.nombre_banco|lower %}
+                                            <img src="{% static 'plantilla_cliente/img/logoprodu.jpg' %}" 
+                                                 alt="{{ banco.nombre_banco }}"
+                                                 class="bank-logo">
+                                        {% else %}
+                                            <img src="{% static 'plantilla_cliente/img/defaultbank.png' %}" 
+                                                 alt="{{ banco.nombre_banco }}"
+                                                 class="bank-logo">
+                                        {% endif %}
+                                    </div>
+                                    <div class="bank-details">
+                                        <h6 class="bank-title">{{ banco.nombre_banco|upper }}</h6>
+                                        <p class="bank-detail"><strong>Cuenta:</strong> {{ banco.tipo_cuenta }}</p>
+                                        <p class="bank-detail"><strong>Número:</strong> {{ banco.numero_cuenta }}</p>
+                                        <p class="bank-detail"><strong>Titular:</strong> {{ banco.nombre_titular }}</p>
+                                        <p class="bank-detail"><strong>RUC:</strong> {{ banco.identificacion_titular }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    No hay bancos disponibles actualmente.
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Términos y condiciones con acordeón -->
+                        <h4 class="section-title">Términos y Condiciones</h4>
+                        
+                        <div class="mb-3">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input {% if error_terminos %}is-invalid{% endif %}" type="checkbox" name="terminos" id="terminos" 
+                                       {% if request.POST.terminos %}checked{% endif %} required>
+                                <label class="form-check-label" for="terminos">
+                                    He leído y acepto los <a href="#terminosContenido" class="terms-link" data-bs-toggle="collapse">términos y condiciones</a>
+                                </label>
+                                {% if error_terminos %}
+                                    <div class="invalid-feedback">
+                                        {{ error_terminos }}
+                                    </div>
+                                {% endif %}
+                                
+                                <div id="terminosContenido" class="collapse terms-content">
+                                    <h6 class="fw-bold">1. Aceptación de los Términos</h6>
+                                    <p class="mb-3">Al realizar un pedido, usted acepta automáticamente nuestros términos y condiciones de venta.</p>
+                                    
+                                    <h6 class="fw-bold">2. Proceso de Compra</h6>
+                                    <p class="mb-3">Los pedidos se procesarán una vez confirmado el pago. Recibirá un correo electrónico con los detalles de su compra.</p>
+                                    
+                                    <h6 class="fw-bold">3. Precios y Pagos</h6>
+                                    <p class="mb-3">Todos los precios incluyen IVA. Aceptamos pagos mediante transferencia bancaria.</p>
+
+                                    <h6 class="fw-bold">4. Garantía de Productos</h6>
+                                    <p class="mb-3">
+                                        Todos los productos cuentan con una garantía  de <strong>6 meses</strong> por defectos de fábrica. 
+                                        La garantía no cubre daños ocasionados por mal uso, instalación incorrecta, descargas eléctricas o manipulación indebida.
+                                    </p>
+                                    
+                                    <h6 class="fw-bold">4. Retiro en Local</h6>
+                                    <p class="mb-3">Los productos estarán disponibles para retiro en nuestro local dentro de las 24 horas posteriores a la confirmación del pago.</p>
+                                    
+                                    <h6 class="fw-bold">5. Devoluciones</h6>
+                                    <p class="mb-0">Aceptamos devoluciones dentro de los 3 días posteriores a la compra, siempre que el producto esté en su estado original.</p>
+
+                                    <h6 class="fw-bold">6. Responsabilidad del Cliente</h6>
+                                        <p class="mb-3">
+                                            Es responsabilidad del cliente verificar la compatibilidad de las piezas o repuestos con su equipo antes de la compra. 
+                                            No se aceptarán devoluciones por incompatibilidad una vez abierto el empaque original.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check">
+                                    <input class="form-check-input {% if error_proteccion_datos %}is-invalid{% endif %}" 
+                                        type="checkbox" 
+                                        name="proteccion_datos" 
+                                        id="proteccion_datos"
+                                        {% if request.POST.proteccion_datos %}checked{% endif %} 
+                                        required>
+                                    <label class="form-check-label" for="proteccion_datos">
+                                        Acepto la <a href="#privacidadContenido" class="terms-link" data-bs-toggle="collapse">política de protección de datos</a>
+                                    </label>
+                                    {% if error_proteccion_datos %}
+                                        <div class="invalid-feedback">
+                                            {{ error_proteccion_datos }}
+                                        </div>
+                                    {% endif %}
+                              
+                                
+                                <div id="privacidadContenido" class="collapse terms-content">
+                                    <h6 class="fw-bold">1. Recolección de Datos</h6>
+                                    <p class="mb-3">Recopilamos información personal necesaria para procesar su pedido, incluyendo nombre, dirección, correo electrónico y datos de contacto.</p>
+                                    
+                                    <h6 class="fw-bold">2. Uso de la Información</h6>
+                                    <p class="mb-3">Sus datos se utilizarán exclusivamente para procesar su pedido y mejorar su experiencia de compra.</p>
+                                    
+                                    <h6 class="fw-bold">3. Seguridad</h6>
+                                    <p class="mb-3">Implementamos medidas de seguridad para proteger sus datos contra accesos no autorizados.</p>
+                                    
+                                    <h6 class="fw-bold">4. Comunicaciones</h6>
+                                    <p class="mb-0">Podremos enviarle comunicaciones relacionadas con su pedido. </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Datos ocultos del cliente -->
+                        <input type="hidden" name="nombre" value="{{ datos_cliente.nombre }}">
+                        <input type="hidden" name="cedula" value="{{ datos_cliente.cedula }}">
+                        <input type="hidden" name="email" value="{{ datos_cliente.email }}">
+                        <input type="hidden" name="direccion" value="{{ datos_cliente.direccion }}">
+                        <input type="hidden" name="ciudad" value="{{ datos_cliente.ciudad }}">
+                        <input type="hidden" name="telefono" value="{{ datos_cliente.telefono }}">
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'carrito' %}" class="btn btn-outline-secondary btn-sm-custom">
+                                <i class="fas fa-arrow-left me-2"></i> Volver al carrito
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-sm-custom" id="submit-btn">
+                                Confirmar pedido <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
 
         <!-- Resumen del Pedido -->
-        <div class="col-md-5 col-lg-4 mt-4 mt-md-0">
-            <div class="resumen-pedido-card p-3 shadow-sm rounded" id="resumen-pedido">
-                <h5 class="text-center mb-3 fw-bold">Pedido</h5>
-
-                {% for detalle in carrito.detalles.all %}
-                <div class="d-flex mb-2 align-items-center">
-                    <div style="width: 45px; height: 45px;">
-                        <img src="{{ detalle.producto.img_prod.url }}" class="img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h5 class="section-title text-center">Resumen del Pedido</h5>
+                    
+                    <div class="mb-3" style="max-height: 300px; overflow-y: auto;">
+                        {% for detalle in carrito.detalles.all %}
+                        <div class="d-flex mb-3 align-items-center">
+                            <div style="width: 60px; height: 60px; flex-shrink: 0;">
+                                <img src="{{ detalle.producto.img_prod.url }}" class="img-thumbnail w-100 h-100" style="object-fit: cover;">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="fw-medium">{{ detalle.producto.nomb_prod }}</div>
+                                <div class="small text-muted">{{ detalle.cantidad }} x ${{ detalle.producto.precio_prod|floatformat:2 }}</div>
+                            </div>
+                            <div class="fw-bold">${{ detalle.subtotal|floatformat:2 }}</div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="flex-grow-1 mx-2" style="font-size: 14px;">
-                        <div>{{ detalle.producto.nomb_prod }}</div>
-                        <div><small>{{ detalle.cantidad }} x</small></div>
+                    
+                    <hr>
+                    
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Subtotal:</span>
+                            <span>${{ cart_total|floatformat:2 }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">IVA ({{ iva_valor }}%):</span>
+                            <span>${{ impuesto|floatformat:2 }}</span>
+                        </div>
                     </div>
-                    <div style="font-weight: bold; font-size: 14px;">$ {{ detalle.subtotal|floatformat:2 }}</div>
-                </div>
-                {% endfor %}
-
-                <div id="envio-adicional" class="hidden-section text-danger fw-bold small my-2">
-                    + Valor adicional por envío
-                </div>
-
-                <hr>
-                <div class="d-flex justify-content-between small mb-1">
-                    <strong>Subtotal:</strong>
-                    <span>$ {{ cart_total|floatformat:2 }}</span>
-                </div>
-                <div class="d-flex justify-content-between small mb-1">
-                    <strong>IVA ({{ iva_valor }}%):</strong>
-                    <span>$ {{ impuesto|floatformat:2 }}</span>
-                </div>
-                <div class="d-flex justify-content-between small mb-3">
-                    <strong>Total:</strong>
-                    <span class="text-success fw-bold">$ {{ total_con_impuesto|floatformat:2 }}</span>
+                    
+                    <div class="d-flex justify-content-between fw-bold mt-3 pt-2 border-top">
+                        <span>Total:</span>
+                        <span class="text-success">${{ total_con_impuesto|floatformat:2 }}</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración inicial de fecha
+    function configurarFecha() {
+        const fechaInput = document.getElementById('fecha_transferencia');
+        const hoy = new Date();
+        const manana = new Date();
+        manana.setDate(hoy.getDate() + 2);
+        
+        // Formatear fechas para input type="date" (YYYY-MM-DD)
+        const formatoFecha = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        fechaInput.min = formatoFecha(hoy);
+        fechaInput.max = formatoFecha(manana);
+        
+        // Mantener valor si existe en el POST, de lo contrario usar hoy
+        if (!fechaInput.value) {
+            fechaInput.value = formatoFecha(hoy);
+        }
+    }
+    
+    // Validación de fecha
     function validarFechaTransferencia() {
         const fechaInput = document.getElementById('fecha_transferencia');
         const errorDiv = document.getElementById('fecha_transferencia_error');
-
-        if (fechaInput.value) {
-            const fechaSeleccionada = new Date(fechaInput.value);
-            const hoy = new Date();
-            const max = new Date();
-            max.setDate(hoy.getDate() + 2);
-
-            fechaSeleccionada.setHours(0, 0, 0, 0);
-            hoy.setHours(0, 0, 0, 0);
-            max.setHours(0, 0, 0, 0);
-
-            if (fechaSeleccionada < hoy || fechaSeleccionada > max) {
-                errorDiv.classList.remove('d-none');
-                fechaInput.classList.add('is-invalid');
-                return false;
-            } else {
-                errorDiv.classList.add('d-none');
-                fechaInput.classList.remove('is-invalid');
-                return true;
-            }
+        
+        if (!fechaInput.value) {
+            mostrarErrorFecha('Debe seleccionar una fecha');
+            return false;
         }
+        
+        const fechaSeleccionada = new Date(fechaInput.value);
+        const hoy = new Date();
+        const maxFecha = new Date();
+        maxFecha.setDate(hoy.getDate() + 2);
+        
+        // Normalizar fechas (ignorar horas)
+        fechaSeleccionada.setHours(0, 0, 0, 0);
+        hoy.setHours(0, 0, 0, 0);
+        maxFecha.setHours(0, 0, 0, 0);
+        
+        if (fechaSeleccionada < hoy) {
+            mostrarErrorFecha('La fecha no puede ser anterior a hoy');
+            return false;
+        }
+        
+        if (fechaSeleccionada > maxFecha) {
+            mostrarErrorFecha('La fecha no puede ser más de 2 días después de hoy');
+            return false;
+        }
+        
+        ocultarErrorFecha();
+        return true;
+    }
+    
+    function mostrarErrorFecha(mensaje) {
+        const fechaInput = document.getElementById('fecha_transferencia');
+        const errorDiv = document.getElementById('fecha_transferencia_error');
+        
+        errorDiv.textContent = mensaje;
         errorDiv.classList.remove('d-none');
         fechaInput.classList.add('is-invalid');
-        return false;
     }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const fechaTransferencia = document.getElementById('fecha_transferencia');
-        const form = document.getElementById('checkout-form');
-
-        if (fechaTransferencia) {
-            fechaTransferencia.addEventListener('change', validarFechaTransferencia);
-        }
-
-        if (form) {
-            form.addEventListener('submit', function (event) {
-                if (!validarFechaTransferencia()) {
-                    event.preventDefault();
-                }
+    
+    function ocultarErrorFecha() {
+        const fechaInput = document.getElementById('fecha_transferencia');
+        const errorDiv = document.getElementById('fecha_transferencia_error');
+        
+        errorDiv.classList.add('d-none');
+        fechaInput.classList.remove('is-invalid');
+    }
+    
+    // Selección de banco al hacer clic en la tarjeta
+    document.querySelectorAll('.banco-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const bankId = this.getAttribute('data-bank-id');
+            document.getElementById('banco_id').value = bankId;
+            
+            // Remover selección anterior
+            document.querySelectorAll('.banco-card').forEach(c => {
+                c.classList.remove('selected-bank');
             });
-        }
-
-        const metodoEntregaInputs = document.querySelectorAll('input[name="metodo_entrega"]');
-        const metodoPagoInputs = document.querySelectorAll('input[name="metodo_pago"]');
-        const envioAdicional = document.getElementById('envio-adicional');
-        const camposTransferencia = document.getElementById('campos-transferencia');
-
-        function actualizarCamposEntrega() {
-            const selectedEntrega = document.querySelector('input[name="metodo_entrega"]:checked');
-            envioAdicional.classList.toggle('hidden-section', selectedEntrega.value !== 'envio');
-        }
-
-        function actualizarCamposPago() {
-            const selectedPago = document.querySelector('input[name="metodo_pago"]:checked');
-            camposTransferencia.style.display = selectedPago.value === 'transferencia' ? 'block' : 'none';
-        }
-
-        metodoEntregaInputs.forEach(input => input.addEventListener('change', actualizarCamposEntrega));
-        metodoPagoInputs.forEach(input => input.addEventListener('change', actualizarCamposPago));
-
-        actualizarCamposEntrega();
-        actualizarCamposPago();
+            
+            // Agregar selección actual
+            this.classList.add('selected-bank');
+        });
     });
+    
+    // Validación de número de transferencia (solo números)
+    const numTransferencia = document.querySelector('input[name="num_transferencia"]');
+    if (numTransferencia) {
+        numTransferencia.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+    }
+    
+    // Validación de formulario al enviar
+    const form = document.getElementById('checkout-form');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            const submitBtn = document.getElementById('submit-btn');
+            let formularioValido = true;
+            
+            // Validar fecha
+            if (!validarFechaTransferencia()) {
+                formularioValido = false;
+            }
+            
+            // Validar términos
+            if (!document.getElementById('terminos').checked) {
+                document.getElementById('terminos').focus();
+                mostrarErrorCheckbox('terminos', 'Debe aceptar los términos y condiciones');
+                formularioValido = false;
+            }
+            
+            // Validar política de privacidad
+            if (!document.getElementById('proteccion_datos').checked) {
+                document.getElementById('proteccion_datos').focus();
+                mostrarErrorCheckbox('proteccion_datos', 'Debe aceptar la política de protección de datos');
+                formularioValido = false;
+            }
+            
+            if (!formularioValido) {
+                event.preventDefault();
+                // Desplazarse al primer error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Procesando...';
+            }
+        });
+    }
+    
+    function mostrarErrorCheckbox(id, mensaje) {
+        const checkbox = document.getElementById(id);
+        const label = checkbox.nextElementSibling;
+        
+        // Crear elemento de error si no existe
+        let errorDiv = label.querySelector('.error-text');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback error-text';
+            label.appendChild(errorDiv);
+        }
+        
+        errorDiv.textContent = mensaje;
+        checkbox.classList.add('is-invalid');
+    }
+    
+    // Inicializar configuración
+    configurarFecha();
+    
+    // Mantener selección de método de entrega si hay error
+    const metodoEntrega = "{{ request.POST.metodo_entrega|default:'local' }}";
+    if (metodoEntrega) {
+        document.querySelector(`input[name="metodo_entrega"][value="${metodoEntrega}"]`).checked = true;
+    }
+});
 </script>
 {% endblock %}

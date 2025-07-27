@@ -3,49 +3,54 @@
 
 {% block contenido %}
 
-<h3 class="text-center mb-4">DASHBOARD ADMINISTRATIVO</h3>
+<h3 class="text-center mb-4">PANEL ADMINISTRATIVO</h3>
 
-<div class="row mb-4">
+<div class="row mb-4 justify-content-center">
     <!-- Total Usuarios -->
     <div class="col-md-2 mb-3">
-        <div class="card shadow h-100">
-            <div class="card-body">
-                <h6 class="text-muted mb-1">Usuarios Registrados</h6>
+        <div class="card shadow-sm h-100 border-start border-primary border-4">
+            <div class="card-body text-center">
+                <i class="fas fa-users fs-4 text-primary mb-2"></i>
+                <h6 class="text-muted mb-1">Usuarios Activos</h6>
                 <h3 class="text-primary">{{ total_usuarios }}</h3>
             </div>
         </div>
     </div>
     <!-- Órdenes Confirmadas -->
     <div class="col-md-2 mb-3">
-        <div class="card shadow h-100">
-            <div class="card-body">
-                <h6 class="text-muted mb-1">Órdenes Confirmadas</h6>
+        <div class="card shadow-sm h-100 border-start border-success border-4">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fs-4 text-success mb-2"></i>
+                <h6 class="text-muted mb-1">Ordenes Confirmadas</h6>
                 <h3 class="text-success">{{ total_confirmadas }}</h3>
             </div>
         </div>
     </div>
     <!-- Órdenes Pendientes -->
     <div class="col-md-2 mb-3">
-        <div class="card shadow h-100">
-            <div class="card-body">
-                <h6 class="text-muted mb-1">Órdenes Pendientes</h6>
+        <div class="card shadow-sm h-100 border-start border-warning border-4">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fs-4 text-warning mb-2"></i>
+                <h6 class="text-muted mb-1"> Ordenes Pendientes</h6>
                 <h3 class="text-warning">{{ total_pendientes }}</h3>
             </div>
         </div>
     </div>
     <!-- Órdenes Rechazadas -->
     <div class="col-md-2 mb-3">
-        <div class="card shadow h-100">
-            <div class="card-body">
-                <h6 class="text-muted mb-1">Órdenes Rechazadas</h6>
+        <div class="card shadow-sm h-100 border-start border-danger border-4">
+            <div class="card-body text-center">
+                <i class="fas fa-times-circle fs-4 text-danger mb-2"></i>
+                <h6 class="text-muted mb-1"> Ordenes Rechazadas</h6>
                 <h3 class="text-danger">{{ total_rechazadas }}</h3>
             </div>
         </div>
     </div>
     <!-- Bancos Activos -->
     <div class="col-md-2 mb-3">
-        <div class="card shadow h-100">
-            <div class="card-body">
+        <div class="card shadow-sm h-100 border-start border-info border-4">
+            <div class="card-body text-center">
+                <i class="fas fa-university fs-4 text-info mb-2"></i>
                 <h6 class="text-muted mb-1">Bancos Activos</h6>
                 <h3 class="text-info">{{ total_bancos }}</h3>
             </div>
@@ -56,10 +61,12 @@
 <div class="row">
     <!-- Gráfico Ventas Mensuales -->
     <div class="col-md-6 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-body">
-                <h5 class="card-title text-center mb-4 fw-bold">Ventas Mensuales</h5>
-                <div class="chart-container" style="height: 300px;">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="card-title mb-0 fw-bold text-center">Ventas Mensuales</h5>
+            </div>
+            <div class="card-body pt-0">
+                <div class="chart-container" style="height: 280px;">
                     <canvas id="ventasChart"></canvas>
                 </div>
             </div>
@@ -68,10 +75,12 @@
 
     <!-- Gráfico Pedidos por Estado -->
     <div class="col-md-6 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-body">
-                <h5 class="card-title text-center mb-4 fw-bold">Pedidos por Estado</h5>
-                <div class="chart-container" style="height: 300px;">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="card-title mb-0 fw-bold text-center">Pedidos por Estado</h5>
+            </div>
+            <div class="card-body pt-0">
+                <div class="chart-container" style="height: 280px;">
                     <canvas id="pedidosChart"></canvas>
                 </div>
             </div>
@@ -80,9 +89,11 @@
 </div>
 
 <!-- Gráfico Top Productos -->
-<div class="card shadow mb-4 h-100">
-    <div class="card-body">
-        <h5 class="card-title text-center mb-4 fw-bold">Top Productos Más Vendidos</h5>
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white border-0">
+        <h5 class="card-title mb-0 fw-bold text-center">Top Productos Más Vendidos</h5>
+    </div>
+    <div class="card-body pt-0">
         <div class="chart-container" style="height: 350px;">
             <canvas id="topProductosChart"></canvas>
         </div>
@@ -90,11 +101,13 @@
 </div>
 
 <!-- Bajo Stock -->
-<div class="card shadow mb-4 h-100">
-    <div class="card-body">
-        <h5 class="card-title text-center mb-4 fw-bold">Productos con Bajo Stock</h5>
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white border-0">
+        <h5 class="card-title mb-0 fw-bold text-center">Productos con Bajo Stock</h5>
+    </div>
+    <div class="card-body pt-0">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover table-borderless">
                 <thead class="table-light">
                     <tr>
                         <th>Producto</th>
@@ -103,13 +116,13 @@
                 </thead>
                 <tbody>
                     {% for inv in bajo_stock %}
-                    <tr>
+                    <tr class="{% if inv.stock_actual < 5 %}table-warning{% endif %}">
                         <td>{{ inv.producto.nomb_prod }}</td>
                         <td class="text-end">{{ inv.stock_actual }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="2" class="text-center text-muted">No hay productos con bajo stock.</td>
+                        <td colspan="2" class="text-center text-muted py-4">No hay productos con bajo stock.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -122,50 +135,131 @@
 
 {% block styles %}
 <style>
+    :root {
+        --bs-body-font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    
+    body {
+        background-color: #f8f9fa;
+    }
+    
     .card {
         border: none;
-        transition: transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-radius: 12px;
     }
+    
     .card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
+    
+    .card-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .shadow-sm {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
     .chart-container {
         position: relative;
         width: 100%;
-        height: 100%;
     }
+    
     .table-light {
         background-color: #f8f9fa;
     }
-    .text-muted {
-        color: #6c757d;
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
     }
-    .text-primary {
-        color: #0d6efd;
+    
+    .table-borderless td, .table-borderless th {
+        border: none;
     }
-    .text-success {
-        color: #198754;
+    
+    h3, h5, h6 {
+        font-weight: 600;
     }
-    .text-warning {
-        color: #ffc107;
+    
+    /* Colores mejorados */
+    .text-primary { color: #4361ee !important; }
+    .text-success { color: #2ecc71 !important; }
+    .text-warning { color: #f39c12 !important; }
+    .text-danger { color: #e74c3c !important; }
+    .text-info { color: #3498db !important; }
+    
+    /* Bordes izquierdos de las tarjetas */
+    .border-4 {
+        border-width: 4px !important;
     }
-    .text-danger {
-        color: #dc3545;
-    }
-    .text-info {
-        color: #0dcaf0;
+    
+    /* Ajustes para el título principal */
+    h3.text-center {
+        color: #2c3e50;
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 <script>
-    const coloresPastel = [
-        '#7eb0d5', '#b2e061', '#bd7ebe', '#ffb55a', '#ffee65', 
-        '#beb9db', '#fdcce5', '#8bd3c7', '#d5a6bd', '#a9a9a9'
+    const coloresVibrantes = [
+        '#4361ee', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6',
+        '#3498db', '#1abc9c', '#d35400', '#34495e', '#7f8c8d'
     ];
+
+    // Configuración común para gráficos
+    const commonChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { 
+                position: 'top',
+                labels: {
+                    color: '#6c757d',
+                    font: {
+                        weight: '500'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#2c3e50',
+                titleFont: {
+                    weight: 'bold'
+                },
+                bodyFont: {
+                    weight: '500'
+                },
+                padding: 12,
+                cornerRadius: 8
+            }
+        },
+        scales: {
+            y: {
+                grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                },
+                ticks: {
+                    color: '#6c757d'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: '#6c757d'
+                }
+            }
+        }
+    };
 
     // Gráfico de Ventas Mensuales
     new Chart(document.getElementById('ventasChart'), {
@@ -175,38 +269,21 @@
             datasets: [{
                 label: 'Ventas ($)',
                 data: {{ ventas_data|safe }},
-                backgroundColor: coloresPastel,
+                backgroundColor: coloresVibrantes[0],
                 borderRadius: 8,
-                maxBarThickness: 30
+                maxBarThickness: 40
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { 
-                    position: 'top',
-                    labels: {
-                        color: '#6c757d'
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: context => ` $${context.formattedValue}`
-                    }
-                }
-            },
+            ...commonChartOptions,
             scales: {
+                ...commonChartOptions.scales,
                 y: {
+                    ...commonChartOptions.scales.y,
                     beginAtZero: true,
                     ticks: {
-                        color: '#6c757d',
+                        ...commonChartOptions.scales.y.ticks,
                         callback: val => `$${val}`
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#6c757d'
                     }
                 }
             }
@@ -220,29 +297,23 @@
             labels: {{ pedidos_labels|safe }},
             datasets: [{
                 data: {{ pedidos_data|safe }},
-                backgroundColor: coloresPastel,
-                hoverOffset: 8
+                backgroundColor: coloresVibrantes,
+                hoverOffset: 8,
+                borderWidth: 0
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            ...commonChartOptions,
             cutout: '65%',
             plugins: {
+                ...commonChartOptions.plugins,
                 legend: { 
                     position: 'bottom',
                     labels: {
-                        color: '#6c757d'
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: context => `${context.label}: ${context.formattedValue} pedidos`
+                        ...commonChartOptions.plugins.labels,
+                        padding: 20
                     }
                 }
-            },
-            layout: {
-                padding: 20
             }
         }
     });
@@ -255,42 +326,21 @@
             datasets: [{
                 label: 'Cantidad Vendida',
                 data: {{ top_prod_data|safe }},
-                backgroundColor: coloresPastel,
+                backgroundColor: coloresVibrantes,
                 borderRadius: 8,
-                maxBarThickness: 30
+                maxBarThickness: 40
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { 
-                    position: 'top',
-                    labels: {
-                        color: '#6c757d'
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: context => `${context.label}: ${context.formattedValue} unidades`
-                    }
-                }
-            },
+            ...commonChartOptions,
             scales: {
+                ...commonChartOptions.scales,
                 y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#6c757d'
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#6c757d'
-                    }
+                    ...commonChartOptions.scales.y,
+                    beginAtZero: true
                 }
             }
         }
     });
 </script>
-
 {% endblock %}

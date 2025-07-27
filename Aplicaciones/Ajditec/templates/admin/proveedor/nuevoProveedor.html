@@ -1,0 +1,223 @@
+{% extends "plantilla_admin.html" %}
+{% load static %}
+{% block contenido %}
+
+<div class="container mt-4">
+    <h3 class="text-center mb-4">GESTIÓN DE PROVEEDORES</h3>
+    <div class="row">
+        <!-- Columna izquierda: Formulario -->
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">REGISTRO DE PROVEEDOR</h5>
+                    <form action="{% url 'guardarProveedor' %}" method="POST" id="frm_nuevo_proveedor">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombre_prov" class="form-label"><b>NOMBRE:</b></label>
+                            <input type="text" name="nombre_prov" id="nombre_prov" class="form-control" required>
+                            <div id="nombreError" class="invalid-feedback d-none">Este nombre ya existe</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="direccion_prov" class="form-label"><b>DIRECCIÓN:</b></label>
+                            <input type="text" name="direccion_prov" id="direccion_prov" class="form-control">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="telefono_prov" class="form-label"><b>TELÉFONO:</b></label>
+                            <input type="tel" name="telefono_prov" id="telefono_prov" class="form-control" pattern="[0-9]{7,15}" title="Mínimo 7 dígitos, máximo 15">
+                            <div id="telefonoError" class="invalid-feedback d-none">Formato inválido (solo números, 10 dígitos)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="correo_prov" class="form-label"><b>CORREO ELECTRÓNICO:</b></label>
+                            <input type="email" name="correo_prov" id="correo_prov" class="form-control">
+                            <div id="emailError" class="invalid-feedback d-none">Ingrese un correo válido</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="contacto_prov" class="form-label"><b>PERSONA DE CONTACTO:</b></label>
+                            <input type="text" name="contacto_prov" id="contacto_prov" class="form-control">
+                        </div>
+                        
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="activo" id="activo" checked>
+                            <label class="form-check-label" for="activo"><b>PROVEEDOR ACTIVO</b></label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="reset" class="btn btn-danger px-4 text-decoration-none rounded-0">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Tabla -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="text-center mb-3">LISTADO DE PROVEEDORES</h5>
+                    <table class="table table-bordered table-striped table-hover" id="tbl_proveedor">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>NOMBRE</th>
+                                <th>TELÉFONO</th>
+                                <th>CONTACTO</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prov in proveedores %}
+                            <tr>
+                                <td>{{ prov.id_prov }}</td>
+                                <td>{{ prov.nombre_prov }}</td>
+                                <td>{{ prov.telefono_prov }}</td>
+                                <td>{{ prov.contacto_prov }}</td>
+                                <td>
+                                    <span class="badge bg-{% if prov.activo %}success{% else %}danger{% endif %}">
+                                        {% if prov.activo %}Activo{% else %}Inactivo{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'editarProveedor' prov.id_prov %}" class="btn btn-warning btn-sm me-2" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a onclick="return confirm('¿Está seguro de eliminar este proveedor?')" 
+                                       href="{% url 'eliminarProveedor' prov.id_prov %}" 
+                                       class="btn btn-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(document).ready(function() {
+    // Configuración DataTable
+    $('#tbl_proveedor').DataTable({
+        scrollX: true,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-success' },
+            { extend: 'pdfHtml5', text: 'PDF', className: 'btn btn-danger' },
+            { extend: 'print', text: 'Imprimir', className: 'btn btn-primary' }
+        ]
+    });
+
+    // Validación en tiempo real del nombre
+    $('#nombre_prov').on('blur', function() {
+        const nombre = $(this).val().trim();
+        if(nombre) {
+            $.get('/validar-proveedor/', { nombre_prov: nombre }, function(data) {
+                if(data.existe) {
+                    $('#nombre_prov').addClass('is-invalid');
+                    $('#nombreError').removeClass('d-none');
+                } else {
+                    $('#nombre_prov').removeClass('is-invalid');
+                    $('#nombreError').addClass('d-none');
+                }
+            });
+        }
+    });
+
+    // Validación de teléfono
+    $('#telefono_prov').on('input', function() {
+        const telefono = $(this).val();
+        const regex = /^[0-9]{7,15}$/;
+        if(telefono && !regex.test(telefono)) {
+            $(this).addClass('is-invalid');
+            $('#telefonoError').removeClass('d-none');
+        } else {
+            $(this).removeClass('is-invalid');
+            $('#telefonoError').addClass('d-none');
+        }
+    });
+
+    // Validación de email
+    $('#correo_prov').on('blur', function() {
+        const email = $(this).val();
+        if(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!regex.test(email)) {
+                $(this).addClass('is-invalid');
+                $('#emailError').removeClass('d-none');
+            } else {
+                $(this).removeClass('is-invalid');
+                $('#emailError').addClass('d-none');
+            }
+        }
+    });
+
+    // Validación antes de enviar el formulario
+    $('#frm_nuevo_proveedor').on('submit', function(e) {
+        let valid = true;
+        
+        // Validar nombre
+        if($('#nombre_prov').val().trim() === '') {
+            $('#nombre_prov').addClass('is-invalid');
+            valid = false;
+        }
+        
+        // Validar teléfono si tiene valor
+        if($('#telefono_prov').val() && $('#telefono_prov').hasClass('is-invalid')) {
+            valid = false;
+        }
+        
+        // Validar email si tiene valor
+        if($('#correo_prov').val() && $('#correo_prov').hasClass('is-invalid')) {
+            valid = false;
+        }
+        
+        if(!valid) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Por favor corrija los errores en el formulario',
+            });
+        }
+    });
+});
+</script>
+
+<style>
+    div.dt-buttons .btn {
+        margin-right: 10px;
+    }
+    .table {
+        width: 100% !important;
+        table-layout: auto;
+    }
+    .card-body {
+        padding: 0;
+        overflow-x: auto;
+    }
+    #tbl_proveedor_wrapper {
+        overflow-x: auto;
+    }
+    .invalid-feedback {
+        display: none;
+    }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+</style>
+{% endblock %}
