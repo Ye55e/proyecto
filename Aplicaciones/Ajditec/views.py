@@ -261,8 +261,9 @@ def procesar_pedido(request):
             Notificacion.objects.create(
                 titulo=f"Nueva Orden #{orden.id_ord} de {orden.nombre_cliente}",
                 mensaje=f"El cliente {orden.nombre_cliente} ha realizado la orden #{orden.id_ord}.",
-                usuario_destino=admin
+                usuario_destino=admin   # 👈 este es el campo correcto según tu modelo
             )
+
 
         if 'carrito_id' in request.session:
             del request.session['carrito_id']
@@ -772,6 +773,26 @@ def listadoInventario(request):
         'inventarios': inventarios,
         'productos_bajos_stock': productos_bajos_stock,  # Para alertar sobre productos con stock bajo
     })
+    # Nueva vista para actualizar el precio
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
+from django.http import JsonResponse
+
+@login_required
+@admin_required
+def actualizar_precio_venta(request):
+    if request.method == 'POST':
+        try:
+            inv = Inventario.objects.get(pk=request.POST['id_inve'])
+            nuevo_precio = float(request.POST['precio'])
+            inv.precunit_prod = nuevo_precio
+            inv.save()
+            return JsonResponse({'status': 'ok'})
+        except Inventario.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Inventario no encontrado'})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
 
 @login_required(login_url='login')
 @admin_required
@@ -1302,7 +1323,19 @@ def admin_confirmar_pago(request, id_regpag):
         orden.estado_ord = 'Entregado'
         orden.save()
 
-        # ✅ GENERAR PDF MEJORADO (SOLO DISEÑO)
+        # --- CÁLCULO DE IVA E IMPUESTO TOTAL PARA EL PDF ---
+        subtotal = Decimal('0.00')
+        detalles = orden.detalles.all()
+        if detalles.exists():
+            iva_valor = Decimal(str(detalles[0].iva_aplicado))
+            for det in detalles:
+                subtotal += det.precio_aplicado * det.cantidad
+        else:
+            iva_valor = Decimal('0.00')
+
+        impuesto_total = subtotal * (iva_valor / Decimal('100'))
+
+        # ✅ GENERAR PDF MEJORADO 
         buffer = BytesIO()
         p = canvas.Canvas(buffer, pagesize=letter)
         width, height = letter
@@ -1321,9 +1354,9 @@ def admin_confirmar_pago(request, id_regpag):
         p.setFont("Helvetica-Bold", 12)
         p.drawString(50, height-120, "AJ DITEC DISTRIBUIDORA")
         p.setFont("Helvetica", 10)
-        p.drawString(50, height-140, "RUC: 1791101030101")
-        p.drawString(50, height-155, "Av. 10 de Agosto, Quito")
-        p.drawString(50, height-170, "Tel: (02) 123-4567")
+        p.drawString(50, height-140, "RUC: 1724637986001")
+        p.drawString(50, height-155, "Av. 10 de Agosto, Quito 170129")
+        p.drawString(50, height-170, "Tel: (02) 306-66173")
         
         # Info cliente
         p.setFont("Helvetica-Bold", 12)
@@ -1331,7 +1364,7 @@ def admin_confirmar_pago(request, id_regpag):
         p.setFont("Helvetica", 10)
         p.drawString(width-250, height-140, f"Nombre: {orden.nombre_cliente}")
         p.drawString(width-250, height-155, f"Documento: {orden.tipo_documento}-{orden.numero_documento}")
-        p.drawString(width-250, height-170, f"Email: {orden.correo_cliente}")
+        p.drawString(width-250, height-170, f"Correo: {orden.correo_cliente}")
 
         # --- DETALLE DE PRODUCTOS MEJORADO ---
         p.setFillColor(colors.HexColor('#f8f9fa'))  # Fondo gris claro
@@ -1357,6 +1390,16 @@ def admin_confirmar_pago(request, id_regpag):
             subtotal = det.cantidad * det.producto.inventario.precunit_prod
             p.drawString(width-100, y_position, f"${subtotal:.2f}")
             y_position -= 20
+
+        #IVA
+        p.setFillColor(colors.HexColor('#f1f8fe'))
+        p.rect(50, y_position-50, width-100, 25, fill=True, stroke=False)
+        p.setFillColor(colors.black)
+        p.setFont("Helvetica-Bold", 10)
+        p.drawString(width-200, y_position-40, f"IVA ({iva_valor}%):")
+        p.drawString(width-100, y_position-40, f"${impuesto_total:.2f}")
+
+        y_position -= 40  # ajustar posición para total
         
         # TOTAL
         p.setFillColor(colors.HexColor('#f1f8fe'))  # Azul muy claro
@@ -1365,6 +1408,17 @@ def admin_confirmar_pago(request, id_regpag):
         p.setFont("Helvetica-Bold", 10)
         p.drawString(width-200, y_position-20, "TOTAL:")
         p.drawString(width-100, y_position-20, f"${registro_pago.total_pago:.2f}")
+
+        # Método de entrega
+        metodo_entrega_texto = "EN LOCAL" if orden.metodo_entrega == "envio" else "EN LOCAL" 
+
+        # Nota personalizada
+        nota = f"Nota: El método de entrega es RETIRO {metodo_entrega_texto}. " \
+            "Presente este comprobante válido para retirar sus productos."
+
+        p.setFont("Helvetica-Oblique", 9)  # Texto en cursiva
+        p.setFillColor(colors.black)
+        p.drawString(60, y_position-60, nota)
         
         # --- PIE DE PÁGINA MEJORADO ---
         p.setFillColor(colors.HexColor('#f5f5f5'))
@@ -1372,7 +1426,7 @@ def admin_confirmar_pago(request, id_regpag):
         p.setFillColor(colors.HexColor('#666666'))
         p.setFont("Helvetica", 8)
         p.drawCentredString(width/2, 20, "Gracias por su compra - AJ DITEC DISTRIBUIDORA")
-        p.drawCentredString(width/2, 10, "Para consultas: info@ajditec.com | Tel: (02) 123-4567")
+        p.drawCentredString(width/2, 10, "Para consultas: info@ajditec.com | Tel: (02) 306-6173")
 
         p.showPage()
         p.save()
@@ -1565,56 +1619,73 @@ def nuevoIngresoInventario(request):
         producto_id = request.POST.get('producto')
         cantidad = request.POST.get('cantidad')
         nuevo_precio = request.POST.get('precio')
+        tipo_movimiento = request.POST.get('tipo_movimiento', 'Entrada')  # Nuevo campo
 
         producto = get_object_or_404(Producto, id_prod=producto_id)
 
-        # Verificar inventario existente
         try:
             inventario = producto.inventario
         except Inventario.DoesNotExist:
             messages.error(request, "El producto no tiene inventario asociado.")
             return redirect('nuevoIngreso')
 
-        # Validación
         try:
             cantidad = int(cantidad)
-            nuevo_precio = float(nuevo_precio)
+            if nuevo_precio:  # Solo validar precio si es entrada
+                nuevo_precio = float(nuevo_precio)
         except ValueError:
             messages.error(request, "Cantidad o precio inválido.")
             return redirect('nuevoIngreso')
 
-        if cantidad <= 0 or nuevo_precio <= 0:
-            messages.error(request, "Cantidad y precio deben ser mayores a cero.")
+        if cantidad <= 0:
+            messages.error(request, "La cantidad debe ser mayor a cero.")
             return redirect('nuevoIngreso')
 
-        # Precio anterior
         precio_anterior = inventario.precunit_prod
 
-        # Determinar el nuevo precio de venta (mayor entre el anterior y el nuevo)
-        precio_venta = max(precio_anterior, nuevo_precio)
+        if tipo_movimiento == 'Entrada':
+            if nuevo_precio <= 0:
+                messages.error(request, "El precio debe ser mayor a cero.")
+                return redirect('nuevoIngreso')
+                
+            precio_venta = max(precio_anterior, nuevo_precio)
+            observacion = 'Ingreso por reposición manual'
+        else:  # Salida
+            if cantidad > inventario.stock_actual:
+                messages.error(request, f"No hay suficiente stock. Stock actual: {inventario.stock_actual}")
+                return redirect('nuevoIngreso')
+            precio_venta = precio_anterior  # Mantener el mismo precio
+            observacion = 'Salida por venta/ajuste'
+            nuevo_precio = None  # No aplica para salidas
 
-        # Registrar movimiento
         MovimientoInventario.objects.create(
-            tipo='Entrada',
+            tipo=tipo_movimiento,
             cantidad=cantidad,
-            precio_uni=nuevo_precio,
+            precio_uni=nuevo_precio if tipo_movimiento == 'Entrada' else None,
             precio_anterior=precio_anterior,
             producto=producto,
-            observacion='Ingreso por reposición manual'
+            observacion=observacion
         )
 
         # Actualizar inventario
-        inventario.precunit_prod = precio_venta
-        inventario.stock_actual += cantidad
+        if tipo_movimiento == 'Entrada':
+            inventario.precunit_prod = precio_venta
+            inventario.stock_actual += cantidad
+        else:
+            inventario.stock_actual -= cantidad
+            
         inventario.save()
 
-        messages.success(request, f'Ingreso exitoso. {cantidad} unidades agregadas. Nuevo precio de venta: ${precio_venta}')
+        msg = f"{tipo_movimiento} exitoso. {cantidad} unidades {'agregadas' if tipo_movimiento == 'Entrada' else 'retiradas'}."
+        if tipo_movimiento == 'Entrada':
+            msg += f" Nuevo precio de venta: ${precio_venta}"
+        messages.success(request, msg)
         return redirect('listadoInventario')
 
-    # Mostrar formulario
     productos = Producto.objects.filter(borrado_prod=False).select_related('inventario')
     return render(request, 'admin/inventario/nuevoIngreso.html', {
-        'productos': productos
+        'productos': productos,
+        'tipo_movimiento': request.GET.get('tipo', 'entrada') 
     })
 
 #LISTADO DE MOVIMIENTOS

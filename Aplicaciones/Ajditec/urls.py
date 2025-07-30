@@ -40,6 +40,8 @@ urlpatterns = [
     path('guardarInventario/', views.guardarInventario, name='guardarInventario'),
     path('listadoInventario/', views.listadoInventario, name='listadoInventario'),
     path('eliminarInventario/<int:id_inv>/', views.eliminarInventario, name='eliminarInventario'),
+    path('actualizar_precio_venta/', views.actualizar_precio_venta, name='actualizar_precio_venta'),
+
 
 
     #DETALLE_CARRITO

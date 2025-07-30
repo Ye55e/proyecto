@@ -9,99 +9,129 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="border rounded-4 p-4 shadow-sm bg-light">
-                <h3 class="text-center mb-4 fw-bold">Registrar Movimiento de Inventario</h3>
-
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-
-                <form action="{% url 'nuevoIngreso' %}" method="POST">
-                    {% csrf_token %}
-
-                    <!-- Campo para seleccionar tipo de movimiento -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tipo de Movimiento:</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="tipo_movimiento" id="entrada" value="entrada" checked>
-                            <label class="form-check-label" for="entrada">
-                                <i class="bi bi-box-arrow-in-down"></i> Entrada
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="tipo_movimiento" id="salida" value="salida">
-                            <label class="form-check-label" for="salida">
-                                <i class="bi bi-box-arrow-up"></i> Salida
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="producto" class="form-label fw-semibold">Producto:</label>
-                        <select name="producto" id="producto" class="form-select" required>
-                            <option value="" disabled selected>Seleccione un producto</option>
-                            {% for prod in productos %}
-                                {% if prod.inventario %}
-                                    <option value="{{ prod.id_prod }}" data-precio="{{ prod.precio_prod }}">
-                                        {{ prod.nomb_prod }} (Stock: {{ prod.inventario.cantidad_disponible }})
-                                    </option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Campo para proveedor (solo visible en entradas) -->
-                    <div class="mb-3" id="proveedor-container">
-                        <label for="proveedor" class="form-label fw-semibold">Proveedor:</label>
-                        <select name="proveedor" id="proveedor" class="form-select">
-                            <option value="" disabled selected>Seleccione un proveedor</option>
-                            {% for prov in proveedores %}
-                                <option value="{{ prov.id_prov }}">{{ prov.nombre_prov }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Campo para número de lote (solo visible en entradas) -->
-                    <div class="mb-3" id="lote-container">
-                        <label for="numero_lote" class="form-label fw-semibold">Número de Lote:</label>
-                        <input type="text" name="numero_lote" id="numero_lote" class="form-control" placeholder="Ej. LOTE-2023-001">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="cantidad" class="form-label fw-semibold">Cantidad:</label>
-                        <input type="number" name="cantidad" id="cantidad" min="1" class="form-control" placeholder="Ej. 50" required>
-                        <div class="form-text text-muted" id="stock-info"></div>
-                    </div>
-
-                    <!-- Campo para precio (solo visible en entradas) -->
-                    <div class="mb-4" id="precio-container">
-                        <label for="precio" class="form-label fw-semibold">Precio Unitario:</label>
-                        <input type="number" step="0.01" name="precio" id="precio" min="0" class="form-control" placeholder="Ej. 15.00">
-                        <div class="form-text text-muted">Se aplicará el mayor entre el precio anterior y este como precio de venta.</div>
-                    </div>
-
-                    <!-- Campo para motivo (solo visible en salidas) -->
-                    <div class="mb-4 d-none" id="motivo-container">
-                        <label for="motivo" class="form-label fw-semibold">Motivo de Salida:</label>
-                        <select name="motivo" id="motivo" class="form-select">
-                            <option value="venta">Venta</option>
-                            <option value="daño">Daño/Desperfecto</option>
-                            <option value="devolucion">Devolución a Proveedor</option>
-                            <option value="ajuste">Ajuste de Inventario</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="d-flex justify-content-center gap-3">
-                        <button type="submit" class="btn btn-success px-4 rounded-0">
-                            <i class="bi bi-check-circle"></i> Registrar Movimiento
-                        </button>
-                        <a href="{% url 'listadoInventario' %}" class="btn btn-danger px-4 rounded-0">
-                            <i class="bi bi-x-circle"></i> Cancelar
+                <!-- Paso 1: Selección de tipo de movimiento -->
+                <div id="paso1" {% if not request.GET.tipo %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                    <h3 class="text-center mb-4 fw-bold">Tipo de Movimiento</h3>
+                    
+                    <div class="d-flex justify-content-center gap-4">
+                        <a href="?tipo=entrada" class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-box-arrow-in-down"></i> Entrada
+                        </a>
+                        <a href="?tipo=salida" class="btn btn-warning btn-lg px-4">
+                            <i class="bi bi-box-arrow-up"></i> Salida
                         </a>
                     </div>
-                </form>
+                </div>
+
+                <!-- Formulario de Entrada -->
+                <div id="form-entrada" {% if request.GET.tipo == 'entrada' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">Registrar Entrada</h3>
+                        <a href="?tipo=" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cambiar tipo
+                        </a>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form action="{% url 'nuevoIngreso' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="tipo_movimiento" value="Entrada">
+
+                        <div class="mb-3">
+                            <label for="producto" class="form-label fw-semibold">Producto:</label>
+                            <select name="producto" class="form-select" required>
+                                <option value="" disabled selected>Seleccione un producto</option>
+                                {% for prod in productos %}
+                                    {% if prod.inventario %}
+                                        <option value="{{ prod.id_prod }}">
+                                            {{ prod.nomb_prod }} - Stock: {{ prod.inventario.stock_actual }} - ${{ prod.inventario.precunit_prod }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cantidad" class="form-label fw-semibold">Cantidad:</label>
+                            <input type="number" name="cantidad" min="1" class="form-control" placeholder="Ej. 50" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="precio" class="form-label fw-semibold">Nuevo Precio Venta:</label>
+                            <input type="number" step="0.01" name="precio" min="0" class="form-control" placeholder="Ej. 15.00" required>
+                            <div class="form-text">Se aplicará el mayor entre el precio anterior y este.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-check-circle"></i> Registrar Entrada
+                            </button>
+                            <a href="{% url 'listadoInventario' %}" class="btn btn-danger px-4">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Formulario de Salida -->
+                <div id="form-salida" {% if request.GET.tipo == 'salida' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">Registrar Salida</h3>
+                        <a href="?tipo=" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cambiar tipo
+                        </a>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form action="{% url 'nuevoIngreso' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="tipo_movimiento" value="Salida">
+
+                        <div class="mb-3">
+                            <label for="producto" class="form-label fw-semibold">Producto:</label>
+                            <select name="producto" id="producto-salida" class="form-select" required>
+                                <option value="" disabled selected>Seleccione un producto</option>
+                                {% for prod in productos %}
+                                    {% if prod.inventario %}
+                                        <option value="{{ prod.id_prod }}" data-stock="{{ prod.inventario.stock_actual }}">
+                                            {{ prod.nomb_prod }} - Stock: {{ prod.inventario.stock_actual }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cantidad" class="form-label fw-semibold">Cantidad:</label>
+                            <input type="number" name="cantidad" min="1" class="form-control" placeholder="Ej. 5" required>
+                            <small class="text-muted" id="max-stock">Stock disponible: <span id="stock-disponible">0</span></small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="observacion" class="form-label fw-semibold">Motivo de Salida:</label>
+                            <textarea name="observacion" class="form-control" placeholder="Ej. Venta a cliente, dañado, etc." required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-warning px-4">
+                                <i class="bi bi-check-circle"></i> Registrar Salida
+                            </button>
+                            <a href="{% url 'listadoInventario' %}" class="btn btn-danger px-4">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -110,61 +140,23 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tipoMovimiento = document.querySelectorAll('input[name="tipo_movimiento"]');
-    const proveedorContainer = document.getElementById('proveedor-container');
-    const loteContainer = document.getElementById('lote-container');
-    const precioContainer = document.getElementById('precio-container');
-    const motivoContainer = document.getElementById('motivo-container');
-    const productoSelect = document.getElementById('producto');
-    const cantidadInput = document.getElementById('cantidad');
-    const stockInfo = document.getElementById('stock-info');
-
-    // Mostrar/ocultar campos según tipo de movimiento
-    function toggleFields() {
-        const isEntrada = document.getElementById('entrada').checked;
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar stock disponible para salidas
+    const productoSelect = document.getElementById('producto-salida');
+    if (productoSelect) {
+        productoSelect.addEventListener('change', function() {
+            const stock = this.selectedOptions[0]?.dataset.stock || 0;
+            document.getElementById('stock-disponible').textContent = stock;
+            const cantidadInput = document.querySelector('#form-salida input[name="cantidad"]');
+            cantidadInput.max = stock;
+            cantidadInput.placeholder = 'Máximo: ' + stock;
+        });
         
-        proveedorContainer.style.display = isEntrada ? 'block' : 'none';
-        loteContainer.style.display = isEntrada ? 'block' : 'none';
-        precioContainer.style.display = isEntrada ? 'block' : 'none';
-        motivoContainer.style.display = isEntrada ? 'none' : 'block';
-        
-        // Cambiar clases de Bootstrap para manejar el espacio
-        motivoContainer.classList.toggle('d-none', isEntrada);
-        motivoContainer.classList.toggle('d-block', !isEntrada);
-        
-        // Hacer campos obligatorios según corresponda
-        document.getElementById('proveedor').required = isEntrada;
-        document.getElementById('numero_lote').required = isEntrada;
-        document.getElementById('precio').required = isEntrada;
-        document.getElementById('motivo').required = !isEntrada;
-    }
-
-    // Actualizar información de stock cuando se selecciona un producto
-    function updateStockInfo() {
-        const selectedOption = productoSelect.options[productoSelect.selectedIndex];
-        const stockText = selectedOption.text.match(/Stock: (\d+)/);
-        const currentStock = stockText ? parseInt(stockText[1]) : 0;
-        
-        if (!document.getElementById('entrada').checked) {
-            stockInfo.textContent = `Stock actual: ${currentStock}`;
-            cantidadInput.max = currentStock;
-        } else {
-            stockInfo.textContent = '';
-            cantidadInput.removeAttribute('max');
+        // Inicializar con el primer producto
+        if (productoSelect.options.length > 1) {
+            productoSelect.dispatchEvent(new Event('change'));
         }
     }
-
-    // Event listeners
-    tipoMovimiento.forEach(radio => {
-        radio.addEventListener('change', toggleFields);
-    });
-
-    productoSelect.addEventListener('change', updateStockInfo);
-    
-    // Inicializar campos al cargar la página
-    toggleFields();
-    updateStockInfo();
 });
 </script>
 {% endblock %}

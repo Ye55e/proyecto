@@ -88,7 +88,7 @@
         
         <!-- Tienda Virtual -->
         <li class="nav-item">
-          <a href="/">
+          <a href="/inicio">
             <i class="fas fa-shopping-cart"></i>
             <p>Tienda Virtual</p>
           </a>
@@ -238,46 +238,42 @@
                   </ul>
                 </li>
                 <!-- notificaciones -->
-                <li class="nav-item topbar-icon dropdown hidden-caret">
-                  <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-bell"></i>
-                    {% if total_notif > 0 %}
-                    <span class="notification">{{ total_notif }}</span>
-                    {% endif %}
-                  </a>
-                  <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
-                    <li>
-                      <div class="dropdown-title">Tienes {{ total_notif }} notificación(es) nueva(s)</div>
-                    </li>
-                    <li>
-                      <div class="notif-scroll scrollbar-outer">
-                        <div class="notif-center">
-                          {% for notif in notificaciones %}
-                          <a href="#">
-                            <div class="notif-icon notif-primary">
-                              <i class="fa fa-info-circle"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block">{{ notif.titulo }}</span>
-                              <small>{{ notif.mensaje }}</small><br>
-                              <span class="time">{{ notif.fecha_noti|timesince }} atrás</span>
-                            </div>
-                          </a>
-                          {% empty %}
-                          <a href="#">
-                            <div class="notif-content">
-                              <span class="block">Sin notificaciones nuevas</span>
-                            </div>
-                          </a>
-                          {% endfor %}
+                <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-bell"></i>
+        {% if total_notif > 0 %}
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ total_notif }}
+            <span class="visually-hidden">notificaciones no leídas</span>
+        </span>
+        {% endif %}
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end notif-box" aria-labelledby="notifDropdown">
+        <li><h6 class="dropdown-header">Tienes {{ total_notif }} notificación(es)</h6></li>
+        {% if notificaciones %}
+            {% for notif in notificaciones %}
+            <li>
+                <a class="dropdown-item" href="#">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-info-circle text-primary"></i>
                         </div>
-                      </div>
-                    </li>
-                    <li>
-                      <a class="see-all" href="{% url 'verNotificaciones' %}">Ver todas <i class="fa fa-angle-right"></i></a>
-                    </li>
-                  </ul>
-                </li>
+                        <div>
+                            <div class="fw-bold">{{ notif.titulo }}</div>
+                            <small class="text-muted">{{ notif.mensaje }}</small>
+                            <div class="text-muted small">{{ notif.fecha_noti|timesince }} atrás</div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        {% else %}
+            <li><a class="dropdown-item text-muted" href="#">No hay notificaciones nuevas</a></li>
+        {% endif %}
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-center" href="{% url 'verNotificaciones' %}">Ver todas</a></li>
+    </ul>
+</li>
                 <!--LOGIN-->
                 <li class="nav-item topbar-user dropdown hidden-caret">
                     <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">

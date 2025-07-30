@@ -335,3 +335,9 @@ class Impuesto(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.valor}%)"
+
+    def save(self, *args, **kwargs):
+        if self.estado:
+            # Desactivar otros impuestos activos (excluyendo este)
+            Impuesto.objects.filter(estado=True).exclude(pk=self.pk).update(estado=False)
+        super().save(*args, **kwargs)

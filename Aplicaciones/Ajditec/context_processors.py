@@ -22,3 +22,19 @@ def carrito_total_items(request):
         carrito_sesion = request.session.get('carrito', {})
         total = sum(carrito_sesion.values())
     return {'carrito_total_items': total}
+
+
+from .models import Notificacion
+
+def notificaciones_context(request):
+    if request.user.is_authenticated:
+        notificaciones = Notificacion.objects.filter(usuario_destino=request.user, leido=False)
+        total_notif = notificaciones.count()
+    else:
+        notificaciones = []
+        total_notif = 0
+
+    return {
+        'notificaciones': notificaciones[:5],  # últimas 5
+        'total_notif': total_notif
+    }
